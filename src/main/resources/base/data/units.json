@@ -12,7 +12,7 @@
         "label" : "input_ec",
         "rangeLow" :0,
         "rangeHigh" :10000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "Calcium":{
@@ -20,7 +20,7 @@
         "label" : "input_calcium",
         "rangeLow" :0,
         "rangeHigh" :1000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "Alkalinity":{
@@ -28,7 +28,7 @@
         "label" : "input_alkalinity",
         "rangeLow" : 0,
         "rangeHigh" :1000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "P Alkalinity":{
@@ -36,7 +36,7 @@
         "label" : "input_palkalinity",
         "rangeLow" : 0,
         "rangeHigh" :1000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "TDS":{
@@ -44,7 +44,7 @@
         "rangeLow" :0,
         "label" : "input_tds",
         "rangeHigh" :1000000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "Temperature":{
@@ -60,7 +60,7 @@
         "label" : "input_flouride",
         "rangeLow" :0,
         "rangeHigh" :1000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "Chloride":{
@@ -68,7 +68,7 @@
         "label" : "input_chloride",
         "rangeLow" :0,
         "rangeHigh" :1000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "Silica in steam":{
@@ -76,7 +76,7 @@
         "label" : "input_silica_concentration",
         "rangeLow" :1,
         "rangeHigh" :100,
-        "decimals":1,
+        "decimals":2,
         "input_type": "number"
     },
     "Magnesium":{
@@ -84,7 +84,7 @@
         "label" : "input_magnesium",
         "rangeLow" :0,
         "rangeHigh" :1000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "Silica":{
@@ -92,7 +92,7 @@
         "label" : "input_silica",
         "rangeLow" :0,
         "rangeHigh" :1000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "Sulphate" :{
@@ -100,7 +100,7 @@
         "label" : "input_sulphate",
         "rangeLow" :0,
         "rangeHigh" :10000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "Suspended Solids":{
@@ -108,7 +108,7 @@
         "label" : "input_suspended",
         "rangeLow" : 0,
         "rangeHigh" : 10000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "Dissolved Oxygen":{
@@ -116,7 +116,7 @@
         "rangeLow" :0,
         "label" : "input_oxygen",
         "rangeHigh" :10000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "Days of Exposure":{
@@ -132,7 +132,7 @@
         "label" : "input_silt",
         "rangeLow" :0,
         "rangeHigh" :1000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
     "Particle Size":{
@@ -140,37 +140,37 @@
         "label" : "input_particle",
         "rangeLow" :0,
         "rangeHigh" :100000,
-        "decimals":0,
+        "decimals":2,
         "input_type": "number"
     },
-    "Conrete Reinforced?":{
+    "Is conrete reinforced?":{
         "unit" : "n/a",
         "label" : "input_conc_reinforced",
         "options": ["No, Not Reinforced","Yes, Reinforced"],
-        "input_type": "list"
+        "input_type": "checkbox"
     },
     "Does Material contain Lead?":{
         "unit" : "n/a",
         "label" : "input_cont_lead",
         "options": ["No,does not contain Lead","Yes, contains Lead"],
-        "input_type": "list"
+        "input_type": "checkbox"
     },
-    "Reticulation System":{
+    "Open reticulation system?":{
         "unit" : "n/a",
         "label" : "input_reticulation",
         "options": ["Closed","Open"],
-        "input_type": "list"
+        "input_type": "checkbox"
     },
     "Does Material contain Copper?":{
         "unit" : "n/a",
         "label" : "input_cont_copper",
         "options": ["No,does not contain Copper","Yes, contains Copper"],
-        "input_type": "list"
+        "input_type": "checkbox"
     },
-    "Water Treatment(Antiscalants)":{
+    "Contains water Treatment(Antiscalants)?":{
         "unit" : "n/a",
         "label" : "input_water_treat",
         "options": ["No water treatment required","Water treatment required"],
-        "input_type": "list"
+        "input_type": "checkbox"
     }
 }

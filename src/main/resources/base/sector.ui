@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>796</width>
-    <height>653</height>
+    <width>913</width>
+    <height>714</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>800</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -59,7 +65,7 @@
       <property name="title">
        <string>User Information</string>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="7,0,4,0,1">
+      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="7,0,4,1">
        <item>
         <layout class="QFormLayout" name="formLayout">
          <property name="horizontalSpacing">
@@ -82,7 +88,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QLabel" name="userFullName">
+          <widget class="QLabel" name="fullName">
            <property name="font">
             <font>
              <weight>50</weight>
@@ -94,7 +100,7 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
+         <item row="2" column="0">
           <widget class="QLabel" name="companyLabel">
            <property name="font">
             <font>
@@ -107,7 +113,7 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
+         <item row="3" column="0">
           <widget class="QLabel" name="emailLabel">
            <property name="font">
             <font>
@@ -117,6 +123,40 @@
            </property>
            <property name="text">
             <string>Email:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="roleLabel">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Role</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QLabel" name="role">
+           <property name="text">
+            <string>Manager</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLabel" name="company">
+           <property name="text">
+            <string>Water Ltd</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLabel" name="email">
+           <property name="text">
+            <string>john@example.com</string>
            </property>
           </widget>
          </item>
@@ -145,6 +185,22 @@
           </widget>
          </item>
          <item>
+          <widget class="QLabel" name="description">
+           <property name="maximumSize">
+            <size>
+             <width>256</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="verticalSpacer">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
@@ -152,25 +208,12 @@
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>40</height>
+             <height>10</height>
             </size>
            </property>
           </spacer>
          </item>
         </layout>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -188,13 +231,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>1</horstretch>
-             <verstretch>1</verstretch>
-            </sizepolicy>
-           </property>
+          <widget class="QPushButton" name="buttonUserInfoEdit">
            <property name="maximumSize">
             <size>
              <width>16777215</width>
@@ -208,7 +245,7 @@
             <string notr="true">background-color:#ccc;</string>
            </property>
            <property name="text">
-            <string>Edit</string>
+            <string>Edit User Info</string>
            </property>
           </widget>
          </item>
@@ -635,7 +672,7 @@
            </font>
           </property>
           <property name="title">
-           <string>Select the type of assesment(s) required:</string>
+           <string>Select the type of assessment(s) required:</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
@@ -952,7 +989,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>796</width>
+     <width>913</width>
      <height>26</height>
     </rect>
    </property>
@@ -968,12 +1005,12 @@ p, li { white-space: pre-wrap; }
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>340</x>
-     <y>464</y>
+     <x>366</x>
+     <y>547</y>
     </hint>
     <hint type="destinationlabel">
-     <x>341</x>
-     <y>496</y>
+     <x>366</x>
+     <y>581</y>
     </hint>
    </hints>
   </connection>
@@ -984,12 +1021,12 @@ p, li { white-space: pre-wrap; }
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>365</x>
-     <y>461</y>
+     <x>366</x>
+     <y>547</y>
     </hint>
     <hint type="destinationlabel">
-     <x>255</x>
-     <y>498</y>
+     <x>269</x>
+     <y>581</y>
     </hint>
    </hints>
   </connection>
@@ -1000,12 +1037,12 @@ p, li { white-space: pre-wrap; }
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>325</x>
-     <y>469</y>
+     <x>366</x>
+     <y>547</y>
     </hint>
     <hint type="destinationlabel">
-     <x>183</x>
-     <y>499</y>
+     <x>172</x>
+     <y>581</y>
     </hint>
    </hints>
   </connection>

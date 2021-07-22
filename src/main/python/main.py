@@ -1,5 +1,5 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext,cached_property
-from PyQt5.QtWidgets import QComboBox, QDialog, QMainWindow, QTableWidget, QWidget
+from PyQt5.QtWidgets import QComboBox, QDialog, QMainWindow, QTableWidget, QWidget, QDesktopWidget
 
 import sys
 import pandas as pd
@@ -65,6 +65,9 @@ class AppContext(ApplicationContext):
         self.validationWindow = ValidationDialog(self,data)
         return self.validationWindow   
 
+    def user_info_setter(self,data):
+        return UserInfo(self,data)
+
     @cached_property
     def get_report(self):
         return self.get_resource("reports.ui")
@@ -80,6 +83,10 @@ class AppContext(ApplicationContext):
     @cached_property
     def get_validation(self):
         return self.get_resource("validation.ui")
+    
+    @cached_property
+    def get_userInfo(self):
+        return self.get_resource("userInfo.ui")
 
     @cached_property
     def homePic(self):
@@ -126,6 +133,13 @@ class AppContext(ApplicationContext):
             file.seek(0)
             # convert back to json.
             json.dump(file_data, file)
+            file.truncate()
+    def delete_json(self,new_data):
+        fileName = self.get_param_filename
+        with open(fileName,'r+') as file:
+            file.seek(0)
+            # convert back to json.
+            json.dump(new_data, file)
             file.truncate()
 #--------------------------------------------------------------------------------------------------------Calculations----------------------------------------------------------
 def Bicarbonate(pAlkalinity, tAlkalinity):
@@ -174,14 +188,20 @@ def Aggressive(inputs):
     aggressive = inputs["pH"] + math.log(temp, 10)
     return aggressive
 def Langelier(inputs):
-    CalciumHardness = inputs['Calcium'] / (40.08/2)
+    CalciumHardness = inputs['Calcium'] / 0.401
     A = (math.log((inputs['TDS']),10) -1) / 10
     B = (-13.12) *math.log((inputs["Temperature"] +273.2), 10) + 34.55
     C = math.log(CalciumHardness,10) - 0.4
     D = math.log(inputs['Alkalinity'],10)  #needs to be investigated
-
+    
+    print(f"Langlier A:{A}")
+    print(f"Langlier B:{B}")
+    print(f"Langlier C:{C}")
+    print(f"Langlier D:{D}")
     phs = (9.3 + A + B) - (C + D) 
+    print(f"Langlier phs{phs}")
     langelier = inputs["pH"] - phs
+    print(f"Langlier : {langelier}")
     return langelier    
 def rsiAtTemp(temp, inputs):
     CalciumHardness = inputs['Calcium'] / (40.08/2)
@@ -237,6 +257,7 @@ def Pisigan(inputs):
     b2 =(k1_b*h)+(2*k1_b*k2_b)
     b3 =(h/k2_b)+(k1_b/h)+4
     bi =2.303*((b1*b3/b2)+oh+h)*50045
+
     js =(inputs["Chloride"]**0.509)*(inputs["Sulphate"]**0.0249)*(inputs["Alkalinity"]**0.423)*(inputs["Dissolved Oxygen"]**0.799)
     rp = ((0.4*CalciumHardness)**0.676)*(bi**0.0304)*((10**langlier)**0.107)*(inputs['Days of Exposure']**0.382)
 
@@ -268,17 +289,24 @@ def Ryzner(inputs):
     return ryzner
 def Analyze(material,assesments,inputs):
     data = {}
+    print(f"Inputs : {inputs}")
     if(material == "Stainless steel 304/304L" or material == "Stainless steel 316/316L" or 
         material == "Stainless steel Alloy 20" or material == "Stainless steel 904L" or material == "Duplex Stainless Steel" ):
-        for assesment in assesments:
+
+        
+        for assessment in assesments:
             try:
-                if(assesment == "Corrosion" or assesment == "Scaling"):
+                if(assessment == "Corrosion" or assessment == "Scaling"):
                 #calculate Ryzner
                     data['ryzner'] = Ryzner(inputs)
                     print("Ryzner Index: {}".format(data['ryzner']))
-                if(assesment == "Corrosion"):
+                if(assessment == "Corrosion"):
                     #Calclulate Flouride
                     data["Flouride"] = inputs["Flouride"]
+                    #Calclualte Chloride
+                    data["Chloride"] = inputs["Chloride"]
+                    #Calculate Temperature
+                    data["Temperature"] = inputs["Temperature"]
                     print(data["Flouride"])
                     if(material == "Stainless steel 316/316L"):
                         data["Critical Pitting Temp"] = 18
@@ -295,19 +323,22 @@ def Analyze(material,assesments,inputs):
                     elif(material == "Duplex Stainless Steel"):
                         data["Critical Pitting Temp"] = 65
                         data["PREN"] = 46    
-                elif(assesment == "Scaling"):
+                elif(assessment == "Scaling"):
                     #Calculate Silica in steam
-                    data["Silica Concentration in steam"] = inputs["Silica in steam"]
+                    if(inputs["Silica in steam"] > 1):
+                        data["Silica Concentration in steam"] = inputs["Silica in steam"]
                     #Calculate pH, Magnesium and Silica 
                     data["pH"] = inputs["pH"]
-                    data["SilicaMagnesium"] = inputs["Silica"] * inputs["Magnesium"]
+                    if(inputs["Silica"]):
+                        data["SilicaMagnesium"] = inputs["Silica"] * inputs["Magnesium"]
                     #Water Treatment, Ca * S0$
                     ##data["WaterTreatment"] = inputs["WaterTreatment"]
-                    data['WaterTreatment'] = True if inputs["Water Treatment(Antiscalants)"] == 1 else False
+                    data['WaterTreatment'] = inputs["Contains water Treatment(Antiscalants)?"]
+                    
                     data["CalciumSulphate"] = inputs["Calcium"] * inputs["Sulphate"]
 
                     print(" Calcium Sulpahate: {}...".format(data["CalciumSulphate"]))
-                elif(assesment == "Fouling"):
+                elif(assessment == "Fouling"):
                     #Calculate Suspended solids
                     data["Suspended Solids"] = inputs["Suspended Solids"]
                     print( data["Suspended Solids"])
@@ -315,33 +346,36 @@ def Analyze(material,assesments,inputs):
                 print(f"Stainless Steal Calculation Error: {e}")
                 continue
     elif(material == "Carbon Steel"):
-        for assesment in assesments:
+        for assessment in assesments:
             try:
-                if(assesment == "Corrosion" or assesment == "Scaling"):
+                if(assessment == "Corrosion" or assessment == "Scaling"):
                     #calculate Ryzner
                     data['ryzner'] = Ryzner(inputs)
                     print("Ryzner Index: {}".format(data['ryzner']))
-                if(assesment == "Corrosion"):
+                if(assessment == "Corrosion"):
                     #Larson Scold Index
                     data['larson'] = Larson(inputs)
                     print(f'Larson Index: {data["larson"]}')
                     #pisigan and Shingley Index & Corrosion Rate
                     data["pisigan corrosion"] = Pisigan(inputs) 
                     #If Open or Closed Reticulation
-                    data["reticulation"] = True if inputs["Reticulation System"] == 1 else False
+                    data["reticulation"] = inputs["Open reticulation system?"]
+
                     print(f'Pisigan Index:{ data["pisigan corrosion"]}')
-                elif(assesment == "Scaling"):
+                elif(assessment == "Scaling"):
                     #Calculate Silica in steam
-                    data["Silica Concentration in steam"] = inputs["Silica in steam"]
+                    if(inputs["Silica in steam"] > 1):
+                        data["Silica Concentration in steam"] = inputs["Silica in steam"]
                     data["pH"] = inputs["pH"]
-                    data["SilicaMagnesium"] = inputs["Silica"] * inputs["Magnesium"]
+                    if(inputs["Silica"]):
+                        data["SilicaMagnesium"] = inputs["Silica"] * inputs["Magnesium"]
                     #Water Treatment, Ca * S0$
                     #data["WaterTreatment"] = inputs["WaterTreatment"]
-                    data['WaterTreatment'] = True if inputs["Water Treatment(Antiscalants)"] == 1 else False
+                    data['WaterTreatment'] = inputs["Contains water Treatment(Antiscalants)?"]
                     data["CalciumSulphate"] = inputs["Calcium"] * inputs["Sulphate"]
 
                     print(" Calcium Sulpahate: {}...".format(data["CalciumSulphate"]))
-                elif(assesment == "Fouling"):
+                elif(assessment == "Fouling"):
                     #Calculate Suspended solids
                     data["Suspended Solids"] = inputs["Suspended Solids"]
                     print( data["Suspended Solids"])
@@ -349,24 +383,24 @@ def Analyze(material,assesments,inputs):
                 print(f'Carbon Steel Calculation error: {e}')
                 continue
     elif(material == "Concrete"):
-        for assesment in assesments:
+        for assessment in assesments:
             try:
-                if(assesment == "Corrosion" or assesment == "Scaling"):
+                if(assessment == "Corrosion" or assessment == "Scaling"):
                     #calculate Ryzner
                     data['ryzner'] = Ryzner(inputs)
                     print("Ryzner Index: {}".format(data['ryzner']))
-                if(assesment == "Corrosion"):
+                if(assessment == "Corrosion"):
                     #Calculate Aggressive Index
                     data["Aggressive"] = Aggressive(inputs)
                     #IsConcrete Reinforced
-                    data["Concrete Reinforced"] = True if inputs['Conrete Reinforced?'] else False
+                    data["Concrete Reinforced"] = inputs['Is conrete reinforced?']
                     print(data["Aggressive"])
-                elif(assesment == "Scaling"):
+                elif(assessment == "Scaling"):
                     
                     #Calculate The Sulphate
                     data["Sulphate"] = inputs["Sulphate"]
                     print("Sulpahate Conc: {}...".format( data["Sulphate"]))
-                elif(assesment == "Fouling"):
+                elif(assessment == "Fouling"):
                     #Calculate Suspended solids
                     data["Suspended Solids"] = inputs["Suspended Solids"]
                     print( data["Suspended Solids"])
@@ -374,13 +408,13 @@ def Analyze(material,assesments,inputs):
                 print(f"Concrete calculation error: {e}")
                 continue
     elif(material == "Monel-Lead/Copper Alloys"):
-        for assesment in assesments:
+        for assessment in assesments:
             try:
-                if(assesment == "Corrosion" or assesment == "Scaling"):
+                if(assessment == "Corrosion" or assessment == "Scaling"):
                     #calculate Ryzner
                     data['ryzner'] = Ryzner(inputs)
                     print("Ryzner Index: {}".format(data['ryzner']))
-                if(assesment == "Corrosion"):
+                if(assessment == "Corrosion"):
                     #Larson Skold Index
                     data['larson'] = Larson(inputs)
                     print(data["larson"])
@@ -391,20 +425,22 @@ def Analyze(material,assesments,inputs):
                     data["Lead or Copper"] = True if (inputs["Does Material contain Lead?"] or inputs["Does Material contain Copper?"]) else False
 
                     print(data["csmr"])
-                elif(assesment == "Scaling"):
+                elif(assessment == "Scaling"):
                     #Calculate Silica in boiler steam
-                    data["Silica Concentration in steam"] = inputs["Silica in steam"]
+                    if(inputs["Silica in steam"] > 1):
+                        data["Silica Concentration in steam"] = inputs["Silica in steam"]
                     #Calculate pH, Magnesium and Silica 
                     
                     data["pH"] = inputs["pH"]
-                    data["SilicaMagnesium"] = inputs["Silica"] * inputs["Magnesium"]
+                    if(inputs["Silica"]):
+                        data["SilicaMagnesium"] = inputs["Silica"] * inputs["Magnesium"]
                     #Water Treatment, Ca * S0$
                     #data["WaterTreatment"] = inputs["WaterTreatment"]
-                    data['WaterTreatment'] = True if inputs["Water Treatment(Antiscalants)"] == 1 else False
+                    data['WaterTreatment'] = inputs["Contains water Treatment(Antiscalants)?"]
                     data["CalciumSulphate"] = inputs["Calcium"] * inputs["Sulphate"]
 
                     print(" Calcium Sulpahate: {}...".format(data["CalciumSulphate"]))
-                elif(assesment == "Fouling"):
+                elif(assessment == "Fouling"):
                     #Calculate Suspended solids
                     data["Suspended Solids"] = inputs["Suspended Solids"]
                     print( data["Suspended Solids"])
@@ -412,50 +448,76 @@ def Analyze(material,assesments,inputs):
                 print(f"Alloy calculation error: {e}")
                 continue
     elif(material == "Plastic"):
-        for assesment in assesments:
+        for assessment in assesments:
             try:
-                if(assesment == "Scaling"):
+                if(assessment == "Scaling"):
                     #Calculate Ryzner Index
                     data['ryzner'] = Ryzner(inputs)
                     print("Ryzner Index: {}".format(data['ryzner']))
-                elif(assesment == "Fouling"):
+                elif(assessment == "Fouling"):
                     #Suspended Solids
                     data["Suspended Solids"] = inputs["Suspended Solids"]
                     print( data["Suspended Solids"])
             except Exception as e:
                 print(f"Plastic Caclution error: {e}")
 
-    elif(material == "Membrane"):
-        for assesment in assesments:
+    elif(material == "Membranes"):
+        for assessment in assesments:
             try:
-                if(assesment == "Fouling"):
+                if(assessment == "Fouling"):
                     #Silt Index Sensity
                     try:
-                        data["Silt Density Index"] = inputs["Silt Density Index"]
+                        if(inputs["Silt Density Index"] > 0):
+                            data["Silt Density Index"] = inputs["Silt Density Index"]
                     except KeyError as k:
                         print("Error Silt Density")
-                        continue
+                        
                     #Particle Size
                     try:
-                        data["Particle Size"] = inputs["Particle Size"]
+                        if(inputs["Particle Size"] > 0):
+                            data["Particle Size"] = inputs["Particle Size"]
                     except KeyError as k:
                         print("Particle Size key error")
-                        continue
+                        
                     #Suspended Solids
                     data["Suspended Solids"] = inputs["Suspended Solids"]
                     print( data["Suspended Solids"])
             except Exception as e:
-                print(f"Error Membrane Calculation: {e}")
+                print(f"Error Membranes Calculation: {e}")
                 continue
     print(data)
     return data
+
+#--------------------------------------------------------------------------------------------------------User Information---------------------------------------------------------
+class UserInfo(QDialog,qtw.QWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.ctx = args[0]
+        uic.loadUi(self.ctx.get_userInfo,self)
+
+        self.data = args[1]
+
+        self.fullNameLineEdit.setText(self.data["fullName"])
+        self.emailLineEdit.setText(self.data["email"])
+        self.roleLineEdit.setText(self.data["role"])
+        self.companyLineEdit.setText(self.data["company"])
+        self.descriptionLineEdit.appendPlainText(self.data["description"])
+        
+        self.buttonInfo.accepted.connect(self.saveData)
+
+    def saveData(self):
+        self.data["fullName"] = self.fullNameLineEdit.text()
+        self.data["email"] = self.emailLineEdit.text()
+        self.data["role"] = self.roleLineEdit.text()
+        self.data["company"] = self.companyLineEdit.text()
+        self.data["description"] = self.descriptionLineEdit.toPlainText()
 #--------------------------------------------------------------------------------------------------------Reports Window-----------------------------------------------------------
 class ReportsWindow(QMainWindow, qtw.QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_report,self)
-
+        self.center()
         self.analysis = args[1]
         self.material = args[2]
         self.assessments = args[3]
@@ -473,7 +535,12 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
             self.resultTab.addTab(self.tab1, f'{key}')
             self.tab1UI(key,self.report_data,tabNumber)
             tabNumber = tabNumber + 1
-
+    def center(self):
+        frameGm = self.frameGeometry()
+        screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
+        centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
     def tab1UI(self,key,data,tabNumber):
         styleSheet = "QHeaderView::section{Background-color:#404040;color:#fff;text-align:center;font-weight:900}"
 
@@ -491,11 +558,13 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
         table.horizontalHeader().setSectionResizeMode(1, qtw.QHeaderView.ResizeToContents)
         table.horizontalHeader().setSectionResizeMode(2, qtw.QHeaderView.ResizeToContents)
         table.horizontalHeader().setSectionResizeMode(3, qtw.QHeaderView.ResizeToContents)
-        table.horizontalHeader().setSectionResizeMode(4, qtw.QHeaderView.Stretch)
+        table.horizontalHeader().setSectionResizeMode(4, qtw.QHeaderView.ResizeToContents)
 
 
         table.horizontalHeader().setStretchLastSection(True)
         table.verticalHeader().hide()
+        
+        
         table.setStyleSheet(styleSheet)
         table.setVerticalScrollBarPolicy(qtc.Qt.ScrollBarAlwaysOff)
         table.setHorizontalScrollBarPolicy(qtc.Qt.ScrollBarAlwaysOff)
@@ -525,10 +594,11 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
             rowCount = rowCount + 1
 
         table.setMinimumSize(self.getQTableWidgetSize(table))
-        table.setMaximumSize(self.getQTableWidgetSize(table))
         
         table.resizeColumnsToContents()
-
+        table.setWordWrap(True)
+        #table.setTextElideMode()
+        table.resizeRowsToContents()
 
         layout.addWidget(table,2,alignment=qtc.Qt.AlignTop)
         layout.setStretch(0,0) 
@@ -556,8 +626,8 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
         }
         if(self.material == "Stainless steel 304/304L" or self.material == "Stainless steel 316/316L" or 
         self.material == "Stainless steel Alloy 20" or self.material == "Stainless steel 904L" or self.material == "Duplex Stainless Steel" ):
-            for assesment in self.assessments:
-                if(assesment == "Corrosion"):
+            for assessment in self.assessments:
+                if(assessment == "Corrosion"):
                     Corrosion = {}
                     RyznerRes = {}
                     FlourideRes = {}
@@ -612,183 +682,202 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                         Corrosion["Flouride"] = FlourideRes
                     except Exception as e:
                         print(f"Flouride Concentration Error- Report: {e}")
-                        continue
-                    #-------------------------------------------Pitting Corrosion----------------------------------------------------
-                    if(self.material == "Stainless steel 304/304L"):
-                        prenRes["Index"] = 20
-                        prenRes["Description"] = ""
-                        prenRes["Risk"] = "No sea water resistance"
-                        prenRes["Treatment"] = ""
                         
-                        #Chloride Concentration
-                        try:
-                            limit = 50 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 200
-                            if(analysis["Chloride"] < limit):
-                                chlorideRes["Risk"] = "Acceptable"
-                            else:
+                    #-------------------------------------------Pitting Corrosion----------------------------------------------------
+                    try:
+                        if(self.material == "Stainless steel 304/304L"):
+                            prenRes["Index"] = 20
+                            prenRes["Description"] = ""
+                            prenRes["Risk"] = "No sea water resistance"
+                            prenRes["Treatment"] = ""
+                            
+                            #Chloride Concentration
+                            try:
+                                limit = 50 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 200
+                                if(analysis["Chloride"] < limit):
+                                    chlorideRes["Risk"] = "Acceptable"
+                                else:
+                                    
+                                    chlorideRes["Risk"] = "Unacceptable"
+                                chlorideRes['Index'] = round(analysis["Chloride"], 2)
+                                chlorideRes["Description"] = "-"
+                                chlorideRes["Treatment"] = "-"
+                                Corrosion["Chloride Concentration"] = chlorideRes
+                            except Exception as e:
+                                print(f"Error Chloride Corrosion 304 {e}")
                                 
-                                chlorideRes["Risk"] = "Unacceptable"
-                            chlorideRes['Index'] = round(analysis["Chloride"], 2)
-                            chlorideRes["Description"] = ""
-                            Corrosion["Chloride Concentration"] = chlorideRes
-                        except Exception as e:
-                            print(f"Error Chloride Corrosion 304 {e}")
-                            continue 
-                        #Pitting Temperature
-                        try:
-                            if(analysis["Temperature"] < 18):
-                                PittingRes["Index"] = analysis["Temperature"]
-                                PittingRes["Description"] = "No risk of pitting corrosion"
-                                PittingRes["Risk"] = "Acceptable"
-                            else:
-                                PittingRes["Index"] = analysis["Temperature"]
-                                PittingRes["Description"] = "Risk of pitting corrosion"
-                                PittingRes["Risk"] = "Tolerable" 
-                            Corrosion["Pitting Temperature"] = PittingRes  
-                        except Exception as e:
-                            print(f'Error Pitting Temperature 304 {e}')
-                            continue
-                    elif(self.material == "Stainless steel 316/316L" ):
-                        prenRes["Index"] = 25
-                        prenRes["Description"] = ""
-                        prenRes["Risk"] = "No sea water resistance"
-                        prenRes["Treatment"] = ""
+                            
+                            #Pitting Temperature
+                            try:
+                                if(analysis["Temperature"] < 18):
+                                    PittingRes["Index"] = analysis["Temperature"]
+                                    PittingRes["Description"] = "No risk of pitting corrosion"
+                                    PittingRes["Risk"] = "Acceptable"
+                                    PittingRes["Treatment"] = "-"
+                                else:
+                                    PittingRes["Index"] = analysis["Temperature"]
+                                    PittingRes["Description"] = "Risk of pitting corrosion"
+                                    PittingRes["Risk"] = "Tolerable"  
+                                    PittingRes["Treatment"] = "-"
+                                Corrosion["Pitting Temperature"] = PittingRes  
+                            except Exception as e:
+                                print(f'Error Pitting Temperature 304 {e}')
+                                
+                        elif(self.material == "Stainless steel 316/316L" ):
+                            prenRes["Index"] = 25
+                            prenRes["Description"] = ""
+                            prenRes["Risk"] = "No sea water resistance"
+                            prenRes["Treatment"] = ""
 
-                        #Chloride Concentration
-                        try:
-                            limit = 100 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 300
-                            if(analysis["Chloride"] < limit):
-                                chlorideRes["Risk"] = "Acceptable"
-                            else:
+                            #Chloride Concentration
+                            try:
+                                limit = 100 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 300
+                                if(analysis["Chloride"] < limit):
+                                    chlorideRes["Risk"] = "Acceptable"
+                                else:
+                                    
+                                    chlorideRes["Risk"] = "Unacceptable"
+                                chlorideRes['Index'] = round(analysis["Chloride"], 2)
+                                chlorideRes["Description"] = "-"
+                                chlorideRes["Treatment"] = "-"
+                                Corrosion["Chloride Concentration"] = chlorideRes
+                            except Exception as e:
+                                print(f"Error Chloride Corrosion 316 {e}")
                                 
-                                chlorideRes["Risk"] = "Unacceptable"
-                            chlorideRes['Index'] = round(analysis["Chloride"], 2)
-                            chlorideRes["Description"] = ""
-                            Corrosion["Chloride Concentration"] = chlorideRes
-                        except Exception as e:
-                            print(f"Error Chloride Corrosion 304 {e}")
-                            continue 
-                        #Pitting Temperature
-                        try:
-                            if(analysis["Temperature"] < 20):
-                                PittingRes["Index"] = analysis["Temperature"]
-                                PittingRes["Description"] = "No risk of pitting corrosion"
-                                PittingRes["Risk"] = "Acceptable"
-                            else:
-                                PittingRes["Index"] = analysis["Temperature"]
-                                PittingRes["Description"] = "Risk of pitting corrosion"
-                                PittingRes["Risk"] = "Tolerable" 
-                            Corrosion["Pitting Temperature"] = PittingRes  
-                        except Exception as e:
-                            print(f'Error Pitting Temperature 304 {e}')
-                            continue
-                    elif(self.material == "Stainless steel Alloy 20"):
-                        prenRes["Index"] = 30
-                        prenRes["Description"] = ""
-                        prenRes["Risk"] = "No sea water resistance"
-                        prenRes["Treatment"] = ""
+                            #Pitting Temperature
+                            try:
+                                if(analysis["Temperature"] < 20):
+                                    PittingRes["Index"] = analysis["Temperature"]
+                                    PittingRes["Description"] = "No risk of pitting corrosion"
+                                    PittingRes["Risk"] = "Acceptable"
+                                    PittingRes["Treatment"] = "-"
+                                else:
+                                    PittingRes["Index"] = analysis["Temperature"]
+                                    PittingRes["Description"] = "Risk of pitting corrosion"
+                                    PittingRes["Risk"] = "Tolerable"  
+                                    PittingRes["Treatment"] = "-"
+                                Corrosion["Pitting Temperature"] = PittingRes  
+                            except Exception as e:
+                                print(f'Error Pitting Temperature 304 {e}')
+                                
+                        elif(self.material == "Stainless steel Alloy 20"):
+                            prenRes["Index"] = 30
+                            prenRes["Description"] = ""
+                            prenRes["Risk"] = "No sea water resistance"
+                            prenRes["Treatment"] = ""
 
-                        #Chloride Concentration
-                        try:
-                            limit = 150 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 400
-                            if(analysis["Chloride"] < limit):
-                                chlorideRes["Risk"] = "Acceptable"
-                            else:
+                            #Chloride Concentration
+                            try:
+                                limit = 150 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 400
+                                if(analysis["Chloride"] < limit):
+                                    chlorideRes["Risk"] = "Acceptable"
+                                else:
+                                    
+                                    chlorideRes["Risk"] = "Unacceptable"
+                                chlorideRes['Index'] = round(analysis["Chloride"], 2)
+                                chlorideRes["Description"] = "-"
+                                chlorideRes["Treatment"] = "-"
+                                Corrosion["Chloride Concentration"] = chlorideRes
+                            except Exception as e:
+                                print(f"Error Chloride Corrosion Aloy 20 {e}")
                                 
-                                chlorideRes["Risk"] = "Unacceptable"
-                            chlorideRes['Index'] = round(analysis["Chloride"], 2)
-                            chlorideRes["Description"] = ""
-                            Corrosion["Chloride Concentration"] = chlorideRes
-                        except Exception as e:
-                            print(f"Error Chloride Corrosion 304 {e}")
-                            continue 
-                        #Pitting Temperature
-                        try:
-                            if(analysis["Temperature"] < 90):
-                                PittingRes["Index"] = analysis["Temperature"]
-                                PittingRes["Description"] = "No risk of pitting corrosion"
-                                PittingRes["Risk"] = "Acceptable"
-                            else:
-                                PittingRes["Index"] = analysis["Temperature"]
-                                PittingRes["Description"] = "Risk of pitting corrosion"
-                                PittingRes["Risk"] = "Tolerable" 
-                            Corrosion["Pitting Temperature"] = PittingRes  
-                        except Exception as e:
-                            print(f'Error Pitting Temperature 304 {e}')
-                            continue
-                    elif(self.material == "Stainless steel 904L"):
-                        prenRes["Index"] = 36
-                        prenRes["Description"] = "Sea water resistance"
-                        prenRes["Risk"] = "Acceptable"
-                        prenRes["Treatment"] = ""
+                            #Pitting Temperature
+                            try:
+                                if(analysis["Temperature"] < 90):
+                                    PittingRes["Index"] = analysis["Temperature"]
+                                    PittingRes["Description"] = "No risk of pitting corrosion"
+                                    PittingRes["Risk"] = "Acceptable"
+                                    PittingRes["Treatment"] = "-"
+                                else:
+                                    PittingRes["Index"] = analysis["Temperature"]
+                                    PittingRes["Description"] = "Risk of pitting corrosion"
+                                    PittingRes["Risk"] = "Tolerable"  
+                                    PittingRes["Treatment"] = "-"
+                                Corrosion["Pitting Temperature"] = PittingRes  
+                            except Exception as e:
+                                print(f'Error Pitting Temperature 304 {e}')
+                                
+                        elif(self.material == "Stainless steel 904L"):
+                            prenRes["Index"] = 36
+                            prenRes["Description"] = "Sea water resistance"
+                            prenRes["Risk"] = "Acceptable"
+                            prenRes["Treatment"] = ""
 
-                        #Chloride Concentration
-                        try:
-                            limit = 2000 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 3000
-                            if(analysis["Chloride"] < limit):
-                                chlorideRes["Risk"] = "Acceptable"
-                            else:
+                            #Chloride Concentration
+                            try:
+                                limit = 2000 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 3000
+                                if(analysis["Chloride"] < limit):
+                                    chlorideRes["Risk"] = "Acceptable"
+                                else:
+                                    
+                                    chlorideRes["Risk"] = "Unacceptable"
+                                chlorideRes['Index'] = round(analysis["Chloride"], 2)
+                                chlorideRes["Description"] = "-"
+                                chlorideRes["Treatment"] = "-"
+                                Corrosion["Chloride Concentration"] = chlorideRes
+                            except Exception as e:
+                                print(f"Error Chloride Corrosion 904 {e}")
                                 
-                                chlorideRes["Risk"] = "Unacceptable"
-                            chlorideRes['Index'] = round(analysis["Chloride"], 2)
-                            chlorideRes["Description"] = ""
-                            Corrosion["Chloride Concentration"] = chlorideRes
-                        except Exception as e:
-                            print(f"Error Chloride Corrosion 304 {e}")
-                            continue 
-                        #Pitting Temperature
-                        try:
-                            if(analysis["Temperature"] < 40):
-                                PittingRes["Index"] = analysis["Temperature"]
-                                PittingRes["Description"] = "No risk of pitting corrosion"
-                                PittingRes["Risk"] = "Acceptable"
-                            else:
-                                PittingRes["Index"] = analysis["Temperature"]
-                                PittingRes["Description"] = "Risk of pitting corrosion"
-                                PittingRes["Risk"] = "Tolerable" 
-                            Corrosion["Pitting Temperature"] = PittingRes  
-                        except Exception as e:
-                            print(f'Error Pitting Temperature 304 {e}')
-                            continue
-                    elif(self.material == "Duplex Stainless Steel"):
-                        prenRes["Index"] = 46
-                        prenRes["Description"] = "Sea water resistance with temp > 30degC"
-                        prenRes["Risk"] = "Acceptable"
-                        prenRes["Treatment"] = ""
+                            #Pitting Temperature
+                            try:
+                                if(analysis["Temperature"] < 40):
+                                    PittingRes["Index"] = analysis["Temperature"]
+                                    PittingRes["Description"] = "No risk of pitting corrosion"
+                                    PittingRes["Risk"] = "Acceptable"
+                                    PittingRes["Treatment"] = "-"
+                                else:
+                                    PittingRes["Index"] = analysis["Temperature"]
+                                    PittingRes["Description"] = "Risk of pitting corrosion"
+                                    PittingRes["Risk"] = "Tolerable" 
+                                    PittingRes["Treatment"] = "-"
+                                Corrosion["Pitting Temperature"] = PittingRes  
+                            except Exception as e:
+                                print(f'Error Pitting Temperature 304 {e}')
+                                
+                        elif(self.material == "Duplex Stainless Steel"):
+                            prenRes["Index"] = 46
+                            prenRes["Description"] = "Sea water resistance with temp > 30degC"
+                            prenRes["Risk"] = "Acceptable"
+                            prenRes["Treatment"] = ""
 
-                        #Chloride Concentration
-                        try:
-                            limit = 3000 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 3600
-                            if(analysis["Chloride"] < limit):
-                                chlorideRes["Risk"] = "Acceptable"
-                            else:
+                            #Chloride Concentration
+                            try:
+                                limit = 3000 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 3600
+                                if(analysis["Chloride"] < limit):
+                                    chlorideRes["Risk"] = "Acceptable"
+                                else:
+                                    
+                                    chlorideRes["Risk"] = "Unacceptable"
+                                chlorideRes['Index'] = round(analysis["Chloride"], 2)
+                                chlorideRes["Description"] = "-"
+                                chlorideRes["Treatment"] = "-"
+                                Corrosion["Chloride Concentration"] = chlorideRes
+                            except Exception as e:
+                                print(f"Error Chloride Corrosion duplex {e}")
                                 
-                                chlorideRes["Risk"] = "Unacceptable"
-                            chlorideRes['Index'] = round(analysis["Chloride"], 2)
-                            chlorideRes["Description"] = ""
-                            Corrosion["Chloride Concentration"] = chlorideRes
-                        except Exception as e:
-                            print(f"Error Chloride Corrosion 304 {e}")
-                            continue 
-                        #Pitting Temperature
-                        try:
-                            if(analysis["Temperature"] < 65):
-                                PittingRes["Index"] = analysis["Temperature"]
-                                PittingRes["Description"] = "No risk of pitting corrosion"
-                                PittingRes["Risk"] = "Acceptable"
-                            else:
-                                PittingRes["Index"] = analysis["Temperature"]
-                                PittingRes["Description"] = "Risk of pitting corrosion"
-                                PittingRes["Risk"] = "Tolerable" 
-                            Corrosion["Pitting Temperature"] = PittingRes  
-                        except Exception as e:
-                            print(f'Error Pitting Temperature 304 {e}')
-                            continue
-                    
+                            #Pitting Temperature
+                            try:
+                                if(analysis["Temperature"] < 65):
+                                    PittingRes["Index"] = analysis["Temperature"]
+                                    PittingRes["Description"] = "No risk of pitting corrosion"
+                                    PittingRes["Risk"] = "Acceptable"
+                                    PittingRes["Treatment"] = "-"
+                                else:
+                                    PittingRes["Index"] = analysis["Temperature"]
+                                    PittingRes["Description"] = "Risk of pitting corrosion"
+                                    PittingRes["Risk"] = "Tolerable" 
+                                    PittingRes["Treatment"] = "-"
+                                Corrosion["Pitting Temperature"] = PittingRes  
+                            except Exception as e:
+                                print(f'Error Pitting Temperature 304 {e}')
+                                 
+                    except Exception as e:
+                        print("Error Pitting Corrosion: {e}")
+                        
                     Corrosion["PREN of Alloy"] = prenRes
                     #-------------------------------End of Corrosion-------------------------------------------------------------------------------------------------------------------
                     results["Corrosion"] = Corrosion
-                elif(assesment == "Scaling"):
+                elif(assessment == "Scaling"):
                     Scaling = {}
                     RyznerRes = {}
                     silicaSteamRes = {}
@@ -859,7 +948,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                         print(f'Error magnesium * silica SS : {e}')
                     #-------------------------------------------------------Calcium Sulphate------------------------------------------------
                     try:
-                        calSulLimit = 50000 if(analysis['WaterTreatment'] == False) else 10000000
+                        calSulLimit = 1000000 if(analysis['WaterTreatment'] == False) else 50000
                         if(analysis["SilicaMagnesium"] < calSulLimit):
                             calciumSulphateRes["Description"] = "Acceptable Calcium Sulphate Scaling"
                             calciumSulphateRes["Risk"] = "Acceptable"
@@ -873,7 +962,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     except Exception as e:
                         print(f"Error Calcium Sulphate SS: {e}")    
                     results["Scaling"] = Scaling
-                elif(assesment == "Fouling"):
+                elif(assessment == "Fouling"):
                     Fouling = {}
                     ssFoulRes = {}
                     if(analysis['Suspended Solids'] > 30):
@@ -897,8 +986,8 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     Fouling["Suspended Solids Fouling"] = ssFoulRes
                     results["Fouling"] = Fouling
         elif(self.material == "Carbon Steel"):
-            for assesment in self.assessments:
-                if(assesment == "Corrosion"):
+            for assessment in self.assessments:
+                if(assessment == "Corrosion"):
                     Corrosion = {}
                     RyznerRes = {}
                     LarsonRes = {}
@@ -985,7 +1074,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     Corrosion["Corrosion Rate due to the Pisigan and Shingley Correlation"] = PisiganRes
                     #-------------------------------End of Corrosion-------------------------------------------------------------------------------------------------------------------
                     results["Corrosion"] = Corrosion
-                elif(assesment == "Scaling"):
+                elif(assessment == "Scaling"):
                     Scaling = {}
                     RyznerRes = {}
                     silicaSteamRes = {}
@@ -1056,7 +1145,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                         print(f'Error magnesium * silica SS : {e}')
                     #-------------------------------------------------------Calcium Sulphate------------------------------------------------
                     try:
-                        calSulLimit = 50000 if(analysis['WaterTreatment'] == False) else 10000000
+                        calSulLimit = 1000000 if(analysis['WaterTreatment'] == False) else 50000
                         if(analysis["CalciumSulphate"] < calSulLimit):
                             calciumSulphateRes["Description"] = "Acceptable Calcium Sulphate Scaling"
                             calciumSulphateRes["Risk"] = "Acceptable"
@@ -1070,7 +1159,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     except Exception as e:
                         print(f"Error Calcium Sulphate SS: {e}")    
                     results["Scaling"] = Scaling
-                elif(assesment == "Fouling"):
+                elif(assessment == "Fouling"):
                     Fouling = {}
                     ssFoulRes = {}
                     if(analysis['Suspended Solids'] > 30):
@@ -1094,8 +1183,8 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     Fouling["Suspended Solids Fouling"] = ssFoulRes
                     results["Fouling"] = Fouling   
         elif(self.material == "Concrete"):
-            for assesment in self.assessments:
-                if(assesment == "Corrosion"):
+            for assessment in self.assessments:
+                if(assessment == "Corrosion"):
                     Corrosion = {}
                     RyznerRes = {}
                     AggressiveRes = {}
@@ -1141,12 +1230,14 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                                 AggressiveRes["Description"] = "Very aggressive, Severe pitting corrosion of the concrete reinforced bars"
                                 AggressiveRes["Risk"] = "Unacceptable"
                                 AggressiveRes["Treatment"] = "Treatment recommended"
+                            AggressiveRes["Index"] = round(analysis["Aggressive"],2)
                             Corrosion["Aggressive Index"] = AggressiveRes
                     except Exception as e:
                         print(f"Error Aggressive in Concrete: {e}")
+                    
                     #-------------------------------End of Corrosion-------------------------------------------------------------------------------------------------------------------
                     results["Corrosion"] = Corrosion
-                elif(assesment == "Scaling"):
+                elif(assessment == "Scaling"):
                     Scaling = {}
                     RyznerRes = {}
                     sulphateAttackRez = {}
@@ -1194,7 +1285,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     sulphateAttackRez["Index"] = analysis["Sulphate"]
                     Scaling["Sulphate attack on concrete"] = sulphateAttackRez
                     results["Scaling"] = Scaling
-                elif(assesment == "Fouling"):
+                elif(assessment == "Fouling"):
                     Fouling = {}
                     ssFoulRes = {}
                     if(analysis['Suspended Solids'] > 30):
@@ -1218,8 +1309,8 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     Fouling["Suspended Solids Fouling"] = ssFoulRes
                     results["Fouling"] = Fouling
         elif(self.material == "Monel-Lead/Copper Alloys"):
-            for assesment in self.assessments:
-                if(assesment == "Corrosion"):
+            for assessment in self.assessments:
+                if(assessment == "Corrosion"):
                     Corrosion = {}
                     RyznerRes = {}
                     LarsonRes = {}
@@ -1287,7 +1378,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
 
                     #End Corosion-------------------------------------------------------------------------
                     results["Corrosion"] = Corrosion
-                elif(assesment == "Scaling"):
+                elif(assessment == "Scaling"):
                     Scaling = {}
                     RyznerRes = {}
                     silicaSteamRes = {}
@@ -1358,7 +1449,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                         print(f'Error magnesium * silica SS : {e}')
                     #-------------------------------------------------------Calcium Sulphate------------------------------------------------
                     try:
-                        calSulLimit = 50000 if(analysis['WaterTreatment'] == False) else 10000000
+                        calSulLimit = 1000000 if(analysis['WaterTreatment'] == False) else 50000
                         if(analysis["CalciumSulphate"] < calSulLimit):
                             calciumSulphateRes["Description"] = "Acceptable Calcium Sulphate Scaling"
                             calciumSulphateRes["Risk"] = "Acceptable"
@@ -1372,7 +1463,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     except Exception as e:
                         print(f"Error Calcium Sulphate SS: {e}")    
                     results["Scaling"] = Scaling
-                elif(assesment == "Fouling"):
+                elif(assessment == "Fouling"):
                     Fouling = {}
                     ssFoulRes = {}
                     if(analysis['Suspended Solids'] > 30):
@@ -1396,8 +1487,8 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     Fouling["Suspended Solids Fouling"] = ssFoulRes
                     results["Fouling"] = Fouling   
         elif(self.material == "Plastic"):
-            for assesment in self.assessments:
-                if(assesment == "Scaling"):
+            for assessment in self.assessments:
+                if(assessment == "Scaling"):
                     Scaling = {}
                     RyznerRes = {}
                     #------------------------------------------------------Ryzner for Scaling---------------------------
@@ -1423,7 +1514,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                         RyznerRes["Treatment"] = "Treatment may be needed"
                     Scaling["Ryzner Index"] = RyznerRes
                     results["Scaling"] = Scaling
-                elif(assesment == "Fouling"):
+                elif(assessment == "Fouling"):
                     Fouling = {}
                     ssFoulRes = {}
                     if(analysis['Suspended Solids'] > 30):
@@ -1446,9 +1537,9 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     ssFoulRes['Index'] = analysis["Suspended Solids"]
                     Fouling["Suspended Solids Fouling"] = ssFoulRes
                     results["Fouling"] = Fouling 
-        elif(self.material == "Membrane"):
-            for assesment in self.assessments:
-                if(assesment == "Fouling"):
+        elif(self.material == "Membranes"):
+            for assessment in self.assessments:
+                if(assessment == "Fouling"):
                     Fouling = {}
                     ssFoulRes = {}
                     psRes = {}
@@ -1504,7 +1595,7 @@ class ValidationDialog(QDialog,QWidget):
         super().__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_validation,self)
-        
+        self.center()
 
         self.requiredFrame.hide()
         self.optionalFrame.hide()
@@ -1541,7 +1632,12 @@ class ValidationDialog(QDialog,QWidget):
                     self.verticalOptional.addWidget(labelWidget)
                     self.verticalOptional.addWidget(labelWidget2)
                 self.optionalFrame.show()
-                        
+    def center(self):
+        frameGm = self.frameGeometry()
+        screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
+        centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())            
 #-------------------------------------------------------------------------------------------------------Inputs Window-------------------------------------------------------------
 
 class InputsWindow(QMainWindow, qtw.QWidget):
@@ -1549,7 +1645,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         super().__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_inputs,self)
-
+        self.center()
         self.level = args[1]['level']
         #print(args[0])
         # Opening JSON file
@@ -1562,7 +1658,8 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         self.buttonBack.clicked.connect(self.showBack)
         self.buttonSaveDefaults.clicked.connect(self.saveDefaults)
         self.buttonNext.clicked.connect(self.Validate)
-        
+        self.buttonDeleteDefaults.clicked.connect(self.deleteParams)
+        self.buttonDeleteDefaults.setEnabled(False)
 
         #List Widget
         for item in self.parameters_list.keys():
@@ -1619,9 +1716,12 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                     
                     spin_input.setMaximumWidth(80)
                     spin_input.setMinimumWidth(70)
-                else:
+                elif(self.units_data[input]['input_type'] == "list"):
                     spin_input = qtw.QComboBox()
                     spin_input.addItems(self.units_data[input]['options'])
+                else:
+                    spin_input = qtw.QCheckBox()
+                    spin_input.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
                                    
 
                 
@@ -1639,12 +1739,15 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                     unit_box.setFont(qtg.QFont('Times', 8))
 
                 verticalSpacer = qtw.QSpacerItem(5, 5, qtw.QSizePolicy.Minimum, qtw.QSizePolicy.Expanding)
+                self.gridInputsLeft.setSpacing(8)
                 self.gridInputsLeft.addWidget(label,i +1,0,alignment=qtc.Qt.AlignTop)
                 if(self.units_data[input]['input_type'] == "number"):
                     self.gridInputsLeft.addWidget(spin_input,i +1,1,alignment=qtc.Qt.AlignTop)
                     self.gridInputsLeft.addWidget(unit_box, i+1,2,alignment=qtc.Qt.AlignTop)
-                else:
+                elif(self.units_data[input]['input_type'] == "list"):
                     self.gridInputsLeft.addWidget(spin_input,i +1,1,1,2,alignment=qtc.Qt.AlignTop)
+                else:
+                    self.gridInputsLeft.addWidget(spin_input,i +1,1,alignment=qtc.Qt.AlignTop)
                 self.gridInputsLeft.addItem(verticalSpacer)
 
             #Right Hand Inputs----------------------------------------------------------------------------
@@ -1669,10 +1772,13 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                     spin_input.valueChanged.connect(self.valueChanged)
                     spin_input.setMaximumWidth(80)
                     spin_input.setMinimumWidth(70)
-                else:
+                elif(self.units_data[input]['input_type'] == "list"):
                     spin_input = qtw.QComboBox()
                     spin_input.addItems(self.units_data[input]['options'])
                     spin_input.setMaximumWidth(180)
+                else:
+                    spin_input = qtw.QCheckBox()
+                    spin_input.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
 
                 spin_input.setObjectName(f'{self.units_data[input]["label"]}')
                 if(self.units_data[input]['unit'] == "n/a"):
@@ -1687,16 +1793,25 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                     unit_box.setFont(qtg.QFont('Times', 8))
                 
                 verticalSpacer = qtw.QSpacerItem(5, 5, qtw.QSizePolicy.Minimum, qtw.QSizePolicy.Expanding)
+                self.gridInputsRight.setSpacing(8)
                 self.gridInputsRight.addWidget(label,i +1,0,alignment=qtc.Qt.AlignTop)
                 if(self.units_data[input]["input_type"] == "number"): 
                     self.gridInputsRight.addWidget(spin_input,i +1,1,alignment=qtc.Qt.AlignTop)
                     self.gridInputsRight.addWidget(unit_box, i+1,2,alignment=qtc.Qt.AlignTop)
-                else :
+                elif(self.units_data[input]['input_type'] == "list"):
                     self.gridInputsRight.addWidget(spin_input,i +1,1,1,2,alignment=qtc.Qt.AlignTop)
+                else:
+                    self.gridInputsRight.addWidget(spin_input,i +1,1,alignment=qtc.Qt.AlignTop)
                 self.gridInputsRight.addItem(verticalSpacer)
         except Exception as e:
             print(f'Error: {e}')    
-        
+    def center(self):
+        frameGm = self.frameGeometry()
+        screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
+        centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())    
+
     def showNext(self,analysis,material,assesments,inputs):
         self.ui_reports = self.ctx.report_window_setter(analysis,material,assesments,inputs)
         self.ui_reports.show()
@@ -1778,23 +1893,51 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         store_data[text] = params
         self.ctx.write_json(store_data)
         self.statusBar.setStyleSheet("color: green")
-        self.statusBar.showMessage(f'Successfully Saved default parameters fot {text}',3000) 
+        self.statusBar.showMessage(f'Successfully Saved default parameters for {text}',3000) 
         self.parameters_list = self.ctx.import_param_data()       
+    def deleteParams(self):
 
+        deleteValue = self.listDefaults.currentRow()
+        deleteKey  = self.listDefaults.currentItem().text()
+
+        try:
+            deletedItem = self.listDefaults.takeItem(deleteValue)
+            self.listDefaults.setCurrentRow(0)
+            data = self.parameters_list
+            del data[deleteKey]
+
+            print(data)
+            self.ctx.delete_json(data)
+
+            self.statusBar.setStyleSheet("color: green")
+            self.statusBar.showMessage(f'Successfully removed {deletedItem.text()} defualts',3000)
+            self.parameters_list = self.ctx.import_param_data()
+        except Exception as e:
+            print(f"Delete Error: {e}")
+
+        
     def rowChange(self):
-        self.defaultsSaveInput.setText(self.listDefaults.currentItem().text())
+        rowText = self.listDefaults.currentItem().text()
+        self.defaultsSaveInput.setText(rowText)
+        self.buttonDeleteDefaults.setEnabled(False)
+
+        try:
+            if(self.parameters_list[rowText]["isEditable"] == True):
+                self.buttonDeleteDefaults.setEnabled(True)
+        except Exception as e:
+            print(f"Delete Param Error: {e}")
 
     def calculate(self):
         inputs = {}
         for input_key,input_item in self.units_data.items():
            
-            inputWidget = self.findChild(qtw.QSpinBox, input_item["label"]) or self.findChild(qtw.QDoubleSpinBox, input_item["label"]) or self.findChild(qtw.QComboBox, input_item["label"])
+            inputWidget = self.findChild(qtw.QSpinBox, input_item["label"]) or self.findChild(qtw.QDoubleSpinBox, input_item["label"]) or self.findChild(qtw.QCheckBox, input_item["label"])
             if(inputWidget):
                 try:
                     value = inputWidget.value() 
                     
                 except AttributeError as e:
-                    value = inputWidget.currentIndex()
+                    value = inputWidget.isChecked()
                 inputs[input_key] = value
                 #print("{}:{}".format(input_key,value))
         analysis = (Analyze(self.material,self.assesments,inputs))
@@ -2053,7 +2196,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                             errorSheet["Optional"].append({"Fouling":["Suspended Solids"]})
                     except Exception as e:
                         print(f'Error: {e}')
-        elif(self.material == "Membrane"):
+        elif(self.material == "Membranes"):
             for assement in self.assesments:
                 if(assement == "Fouling"):
                     try:
@@ -2079,13 +2222,14 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         #     print(f'keys -> {error_keys}')
         #     print("----------")
         #     print(f"Items: -> {error_items}")
- 
+    
 #-------------------------------------------------------------------------------------------------------Sector Window -------------------------------------------------------------
 class SectorWindow(QMainWindow, qtw.QWidget):
     def __init__(self, *args, **kwargs):
         super(SectorWindow,self).__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_sector,self)
+        self.center()
         self.setWindowTitle("Sector Inputs")
         self.sector_data = self.ctx.import_data
         self.sector_keys = self.sector_data.iloc[:,0]
@@ -2108,13 +2252,36 @@ class SectorWindow(QMainWindow, qtw.QWidget):
         self.unitComboBox.setCurrentIndex(0)
         self.materialComboBox.currentTextChanged.connect(self.validate_type)
         self.unitComboBox.currentTextChanged.connect(self.unit_selectionChange)
-
+        self.materialComboBox.currentTextChanged.connect(self.material_selectionChange)
         #Text
         self.liningFrame.hide()
 
         #Buttons
-        self.buttonProceed.clicked.connect(self.showNext)
+        self.buttonProceed.clicked.connect(self.SectorValidate)
         self.buttonBack.clicked.connect(self.showBack)
+        self.buttonUserInfoEdit.clicked.connect(self.editUserInfo)
+
+    def editUserInfo(self):
+        data = {
+            "fullName" : self.fullName.text(),
+            "role": self.role.text(),
+            "company": self.company.text(),
+            "email":self.email.text(),
+            "description":self.description.text()
+        }
+        self.user_info = self.ctx.user_info_setter(data)
+        self.user_info.show()
+        
+        if(self.user_info.exec() == 1):
+            updated_data = self.user_info.data
+            print(updated_data)
+            self.fullName.setText(updated_data["fullName"])
+            self.role.setText(updated_data["role"])
+            self.company.setText(updated_data["company"])
+            self.email.setText(updated_data["email"])
+            self.description.setText(updated_data["description"])
+
+
     def validate_type(self):
         self.checkBoxCorrosion.setEnabled(True)
         self.checkBoxFouling.setEnabled(True)
@@ -2136,8 +2303,14 @@ class SectorWindow(QMainWindow, qtw.QWidget):
             self.checkBoxFouling.setEnabled(True)
             self.checkBoxScaling.setEnabled(True)
 
-        
+    def center(self):
+        frameGm = self.frameGeometry()
+        screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
+        centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
     def sector_selectionchange(self):
+        self.sectorComboBox.setStyleSheet("border-color:#303030; background-color:#f7f7f7;")
         tempSelect = self.sectorComboBox.currentText()
         sector_unitList = self.sector_data.loc[self.sector_keys == tempSelect].iloc[:,1:].dropna(axis='columns')
         sector_materials = ['Carbon Steel','Concrete','Membranes'
@@ -2161,14 +2334,54 @@ class SectorWindow(QMainWindow, qtw.QWidget):
         #self.unitComboBox.currentIndexChanged.connect(self.unit_selectionChange)
 
     def unit_selectionChange(self):
-        
+        self.unitComboBox.setStyleSheet("border-color:#303030; background-color:#f7f7f7")
         text = self.unitComboBox.currentText()
-
+        
         if(text == "Dams" or text == "Reactor" or text == "Tanks"):
             self.liningFrame.show()
         else:
             self.liningFrame.hide()
-        
+    def material_selectionChange(self):
+        self.materialComboBox.setStyleSheet("border-color:#303030; background-color:#f7f7f7")
+
+    def SectorValidate(self):
+        if(self.sectorComboBox.currentIndex() == 0):
+            msg = qtw.QMessageBox()
+            msg.setText("Please specifiy the Sector")
+            msg.setWindowTitle("Missing Input Information")
+            msg.setStyleSheet("QmessageBox QLabel{min-width: "+str(300)+"px;}")
+            msg.exec_()
+            if(msg.result() == 1024):
+                self.sectorComboBox.setFocus()
+                self.sectorComboBox.setStyleSheet("border:1px solid #ff4500; background-color:#ffcccb")
+        elif(self.unitComboBox.currentIndex() == 0):
+                msg = qtw.QMessageBox()
+                msg.setText("Please specifiy the Unit")
+                msg.setWindowTitle("Missing Input Information")
+                msg.setStyleSheet("QmessageBox QLabel{min-width: "+str(300)+"px;}")
+                msg.exec_()
+                if(msg.result() == 1024):
+                    self.unitComboBox.setFocus()
+                    self.unitComboBox.setStyleSheet("border:1px solid #ff4500; background-color:#ffcccb")
+        elif(self.materialComboBox.currentIndex() == 0):
+                msg = qtw.QMessageBox()
+                msg.setText("Please specifiy the material of construction")
+                msg.setWindowTitle("Missing Input Information")
+                msg.setStyleSheet("QmessageBox QLabel{min-width: "+str(300)+"px;}")
+                msg.exec_()
+                if(msg.result() == 1024):
+                    self.materialComboBox.setFocus()
+                    self.materialComboBox.setStyleSheet("border:1px solid #ffcccb;")
+
+        elif(self.checkBoxCorrosion.isChecked() == True or self.checkBoxScaling.isChecked() == True or self.checkBoxFouling.isChecked() == True):
+            self.showNext()
+        else:
+            errorMessage = qtw.QMessageBox()
+            errorMessage.setIcon(qtw.QMessageBox.Critical)
+            errorMessage.setText("Please select at least one assessment type!")
+            errorMessage.setStyleSheet("QmessageBox QLabel{min-width: "+str(100)+"px;}")
+            errorMessage.setWindowTitle("Missing Input Information")
+            errorMessage.exec_()
     def showNext(self):
         assesmentDetails = {
             "level" : self.level,
@@ -2225,6 +2438,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.ctx = ctx
         uic.loadUi(self.ctx.get_main, self)
+        self.center()
         self.labelHome.setPixmap(qtg.QPixmap.fromImage(self.ctx.homePic))
         self.labelHome.setMaximumWidth(370)
         self.labelHome.setMaximumHeight(170)
@@ -2233,7 +2447,12 @@ class MainWindow(QMainWindow):
         self.buttonAdvancedAssess.clicked.connect(self.showNext)
         #Show Window
         self.show()
-
+    def center(self):
+        frameGm = self.frameGeometry()
+        screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
+        centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
     def showNext(self):
         self.ui_sector = self.ctx.sector_setter(level="Advanced")
         self.ui_sector.show()
