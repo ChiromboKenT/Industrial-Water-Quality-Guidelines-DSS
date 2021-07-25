@@ -884,7 +884,7 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_3">
+       <widget class="QPushButton" name="buttonAbout">
         <property name="text">
          <string>About</string>
         </property>
@@ -993,8 +993,50 @@ p, li { white-space: pre-wrap; }
      <height>26</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionHome"/>
+    <addaction name="actionClose"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionBackground_Info"/>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionHome">
+   <property name="text">
+    <string>Home</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>Close</string>
+   </property>
+  </action>
+  <action name="actionBackground_Info">
+   <property name="text">
+    <string>Background Info</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>
@@ -1005,12 +1047,12 @@ p, li { white-space: pre-wrap; }
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>366</x>
-     <y>547</y>
+     <x>425</x>
+     <y>575</y>
     </hint>
     <hint type="destinationlabel">
-     <x>366</x>
-     <y>581</y>
+     <x>425</x>
+     <y>609</y>
     </hint>
    </hints>
   </connection>
@@ -1021,12 +1063,12 @@ p, li { white-space: pre-wrap; }
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>366</x>
-     <y>547</y>
+     <x>425</x>
+     <y>575</y>
     </hint>
     <hint type="destinationlabel">
-     <x>269</x>
-     <y>581</y>
+     <x>328</x>
+     <y>609</y>
     </hint>
    </hints>
   </connection>
@@ -1037,12 +1079,28 @@ p, li { white-space: pre-wrap; }
    <slot>click()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>366</x>
-     <y>547</y>
+     <x>425</x>
+     <y>575</y>
     </hint>
     <hint type="destinationlabel">
-     <x>172</x>
-     <y>581</y>
+     <x>231</x>
+     <y>609</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAbout</sender>
+   <signal>triggered()</signal>
+   <receiver>buttonAbout</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>80</x>
+     <y>658</y>
     </hint>
    </hints>
   </connection>

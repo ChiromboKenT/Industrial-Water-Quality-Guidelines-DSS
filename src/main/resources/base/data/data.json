@@ -45,7 +45,7 @@
       "Fouling": ["Suspended Solids"]
     },
     "Monel-Lead/Copper Alloys": {
-      "Corrosion": ["pH","Electrical Conductivity","Alkalinity","Temperature","TDS","Chloride","P Alkalinity","Sulphate","Does Material contain Lead?","Does Material contain Copper?"],
+      "Corrosion": ["pH","Electrical Conductivity","Alkalinity","Calcium","Temperature","TDS","Chloride","P Alkalinity","Sulphate","Does Material contain Lead?","Does Material contain Copper?"],
       "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","TDS","Contains water Treatment(Antiscalants)?","Temperature","Silica in steam","Magnesium","Silica","Sulphate"],
       "Fouling": ["Suspended Solids"]
     },

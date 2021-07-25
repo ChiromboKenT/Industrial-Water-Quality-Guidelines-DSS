@@ -845,7 +845,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButton_3">
+          <widget class="QPushButton" name="buttonAbout">
            <property name="font">
             <font>
              <pointsize>9</pointsize>
@@ -986,6 +986,7 @@
      <string>Help</string>
     </property>
     <addaction name="actionBackground_info"/>
+    <addaction name="actionAbout"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -1033,6 +1034,11 @@
     <string>Background info</string>
    </property>
   </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>
@@ -1065,6 +1071,22 @@
     <hint type="destinationlabel">
      <x>383</x>
      <y>332</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionAbout</sender>
+   <signal>triggered()</signal>
+   <receiver>buttonAbout</receiver>
+   <slot>click()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>84</x>
+     <y>403</y>
     </hint>
    </hints>
   </connection>

@@ -1,5 +1,5 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext,cached_property
-from PyQt5.QtWidgets import QComboBox, QDialog, QMainWindow, QTableWidget, QWidget, QDesktopWidget
+from PyQt5.QtWidgets import QComboBox, QDialog, QLabel, QMainWindow, QTableWidget, QWidget, QDesktopWidget
 
 import sys
 import pandas as pd
@@ -41,6 +41,14 @@ class AppContext(ApplicationContext):
     def main_window(self):
         return MainWindow(self)
 
+    @cached_property
+    def about_window(self):
+        return AboutWindow(self)
+
+    @cached_property
+    def license_window(self):
+        return LicenseWindow(self)
+
     @cached_property 
     def sector_window(self):
         return SectorWindow(self,self.App_data)
@@ -48,9 +56,9 @@ class AppContext(ApplicationContext):
         self.App_data["level"] = level
         return self.sector_window
 
-    def report_window_setter(self,analysis,material,assesments,inputs):
-        self.report_window = ReportsWindow(self,analysis,material,assesments,inputs)
-        return self.report_window
+    def report_window_setter(self,analysis,material,assesments,inputs,user,info):
+        return ReportsWindow(self,analysis,material,assesments,inputs,user,info)
+        
 
     
     def input_window(self):
@@ -69,6 +77,9 @@ class AppContext(ApplicationContext):
         return UserInfo(self,data)
 
     @cached_property
+    def get_about(self):
+        return self.get_resource("about.ui")
+    @cached_property
     def get_report(self):
         return self.get_resource("reports.ui")
     @cached_property
@@ -83,7 +94,9 @@ class AppContext(ApplicationContext):
     @cached_property
     def get_validation(self):
         return self.get_resource("validation.ui")
-    
+    @cached_property
+    def get_license(self):
+        return self.get_resource("license.ui")
     @cached_property
     def get_userInfo(self):
         return self.get_resource("userInfo.ui")
@@ -432,14 +445,21 @@ def Analyze(material,assesments,inputs):
                     #Calculate pH, Magnesium and Silica 
                     
                     data["pH"] = inputs["pH"]
-                    if(inputs["Silica"]):
+                    try:
                         data["SilicaMagnesium"] = inputs["Silica"] * inputs["Magnesium"]
+                    except Exception as e:
+                        print(f'Alloy Error Silica Magnesium: {e}')
                     #Water Treatment, Ca * S0$
                     #data["WaterTreatment"] = inputs["WaterTreatment"]
                     data['WaterTreatment'] = inputs["Contains water Treatment(Antiscalants)?"]
-                    data["CalciumSulphate"] = inputs["Calcium"] * inputs["Sulphate"]
+                    try:
+                        
+                        data["CalciumSulphate"] = inputs["Calcium"] * inputs["Sulphate"]
+                    except Exception as e:
+                        print("Alloy Error Calcium: {e}")
 
-                    print(" Calcium Sulpahate: {}...".format(data["CalciumSulphate"]))
+
+
                 elif(assessment == "Fouling"):
                     #Calculate Suspended solids
                     data["Suspended Solids"] = inputs["Suspended Solids"]
@@ -487,6 +507,26 @@ def Analyze(material,assesments,inputs):
                 continue
     print(data)
     return data
+#--------------------------------------------------------------------------------------------------------License Window--------------------------------------------------------
+class LicenseWindow(QDialog):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.ctx = args[0]
+        uic.loadUi(self.ctx.get_license,self)
+
+#--------------------------------------------------------------------------------------------------------About Page-------------------------------------------------------------
+class AboutWindow(QDialog,qtw.QWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.ctx = args[0]
+        uic.loadUi(self.ctx.get_about,self)
+
+        #buttons
+        self.buttonViewLicense.clicked.connect(self.view_license)
+    
+    def view_license(self):
+        self.license_window = self.ctx.license_window
+        self.license_window.show()
 
 #--------------------------------------------------------------------------------------------------------User Information---------------------------------------------------------
 class UserInfo(QDialog,qtw.QWidget):
@@ -517,15 +557,108 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
         super().__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_report,self)
-        self.center()
+        ##self.center()
         self.analysis = args[1]
         self.material = args[2]
         self.assessments = args[3]
-        self.inputs = args[4] 
+        self.inputs = list(args[4].items())
+        self.user = args[5]
+        self.info = args[6]
+        self.units = self.ctx.import_units_data
+
+       
+        
         self.setWindowTitle("Fitness-of-use Report")
         print(args[1])
         self.report_data = self.parseTable()
+       
+        #Report User Info
+        self.reportFullName.setText(self.user['fullName'])
+        self.reportJobTitle.setText(self.user['role'])
+        self.reportCompany.setText(self.user['company'])
+        self.reportEmail.setText(self.user['email'])
+        self.reportDescription.setPlainText(self.user['description'])
 
+        #Basic Info Tab
+        typeText = ""
+        for word in self.assessments:
+            typeText += (" " + word)
+        self.labelLevelAsses.setText(self.info['level'])
+        self.labelTypeAssess.setText(typeText)
+        self.labelSector.setText(self.info['sector'])
+        self.labelUnit.setText(self.info['unit'])
+        self.labelMaterial.setText(self.material)
+
+        #Specific Inputs Tab
+        inputsSize = len(self.inputs)
+        if(inputsSize %2 == 0):
+            inputListLeft  =  self.inputs[0:int(inputsSize/2)]
+            inputListRight = self.inputs[int(inputsSize/2):]
+        else:
+            inputListLeft = self.inputs[0:int((inputsSize+1)/2)]
+            inputListRight = self.inputs[int((inputsSize+1)/2):]
+
+        
+        for i, item in enumerate(inputListLeft):
+            paramLabel = QLabel()
+            paramValue = QLabel()
+            paramUnits = QLabel()
+
+            paramLabel.setText(item[0])
+            try:
+                if(type(item[1]) == bool):
+                    strVal = "YES" if item[1] == True else "NO"
+                    paramValue.setText(strVal)
+                else:
+                    paramValue.setText(f'{round(item[1],2)}')
+            except Exception as e:
+                print(f"Error setting TRUE FALSE VALUE left: {e}")
+                paramValue.setText(f'{item[1]}')
+            try:
+                paramUnits.setText(self.units[item[0]]['unit'])
+            except Exception as e:
+                paramUnits.setText(self.units[item[0]]['unit'][0])
+                print(f"Report Grid units: {e}")
+
+            
+            self.gridReportLeft.addWidget(paramLabel,i+1,0,alignment=qtc.Qt.AlignTop)
+            self.gridReportLeft.addWidget(paramValue,i+1,1,alignment=qtc.Qt.AlignTop)
+            self.gridReportLeft.addWidget(paramUnits,i+1,2,alignment=qtc.Qt.AlignTop)
+        self.gridReportLeft.addItem(qtw.QSpacerItem(20, 10, qtw.QSizePolicy.Fixed,qtw.QSizePolicy.Expanding))
+        print("grid left done")
+
+
+        for i, item in enumerate(inputListRight):
+            paramLabel = QLabel()
+            paramValue = QLabel()
+            paramUnits = QLabel()
+
+            paramLabel.setText(item[0])
+            try:
+                if(type(item[1]) == bool):
+                    strVal = "YES" if item[1] == True else "NO"
+                    paramValue.setText(strVal)
+                else:
+                    paramValue.setText(f'{round(item[1],2)}')
+            except Exception as e:
+                print(f"Error setting TRUE FALSE VALUE right: {e}")
+                paramValue.setText(f'{item[1]}')
+            try:
+                paramUnits.setText(self.units[item[0]]['unit'])
+            except Exception as e:
+                paramUnits.setText(self.units[item[0]]['unit'][0])
+                print(f"Report Grid units {i}: {e}")
+
+            self.gridReportRight.addWidget(paramLabel,i+1,0,alignment=qtc.Qt.AlignTop)
+            self.gridReportRight.addWidget(paramValue,i+1,1,alignment=qtc.Qt.AlignTop)
+            self.gridReportRight.addWidget(paramUnits,i+1,2,alignment=qtc.Qt.AlignTop)
+        try:
+            
+            self.gridReportRight.addItem(qtw.QSpacerItem(20, 10, qtw.QSizePolicy.Fixed,qtw.QSizePolicy.Expanding))
+        except Exception as e:
+            print("Error adding Spacer: {e}") 
+
+        print("grid right done")
         self.buttonBack.clicked.connect(self.showBack)
 
         assesment_keys = list(self.report_data.keys())
@@ -607,6 +740,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
         self.tab1.setLayout(layout)  
 
     def showBack(self):
+        print("Back pressef")
         self.inputs_window = self.ctx.input_window()
         self.inputs_window.show()
         self.close()    
@@ -927,11 +1061,11 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     try:
                         mgLimit = 0
                         if(analysis['pH'] > 8.5):
-                            mgLimit = 17000
+                            mgLimit = 6000
                         elif(analysis['pH'] <= 8.5 and analysis['pH'] >= 7.5):
                             mgLimit = 12000
                         elif(analysis['pH'] < 7.5):
-                            mgLimit = 6000
+                            mgLimit = 17000
                         
                         if(analysis['SilicaMagnesium'] < mgLimit):
                             magnesiumSilicaRes['Description'] = "Acceptable Magnesium Silicate Scaling"
@@ -948,7 +1082,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                         print(f'Error magnesium * silica SS : {e}')
                     #-------------------------------------------------------Calcium Sulphate------------------------------------------------
                     try:
-                        calSulLimit = 1000000 if(analysis['WaterTreatment'] == False) else 50000
+                        calSulLimit = 10000000 if(analysis['WaterTreatment'] == True) else 50000
                         if(analysis["SilicaMagnesium"] < calSulLimit):
                             calciumSulphateRes["Description"] = "Acceptable Calcium Sulphate Scaling"
                             calciumSulphateRes["Risk"] = "Acceptable"
@@ -1124,11 +1258,11 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     try:
                         mgLimit = 0
                         if(analysis['pH'] > 8.5):
-                            mgLimit = 17000
+                            mgLimit = 6000
                         elif(analysis['pH'] <= 8.5 and analysis['pH'] >= 7.5):
                             mgLimit = 12000
                         elif(analysis['pH'] < 7.5):
-                            mgLimit = 6000
+                            mgLimit = 17000
                         
                         if(analysis['SilicaMagnesium'] < mgLimit):
                             magnesiumSilicaRes['Description'] = "Acceptable Magnesium Silicate Scaling"
@@ -1145,7 +1279,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                         print(f'Error magnesium * silica SS : {e}')
                     #-------------------------------------------------------Calcium Sulphate------------------------------------------------
                     try:
-                        calSulLimit = 1000000 if(analysis['WaterTreatment'] == False) else 50000
+                        calSulLimit = 10000000 if(analysis['WaterTreatment'] == True) else 50000
                         if(analysis["CalciumSulphate"] < calSulLimit):
                             calciumSulphateRes["Description"] = "Acceptable Calcium Sulphate Scaling"
                             calciumSulphateRes["Risk"] = "Acceptable"
@@ -1428,11 +1562,11 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     try:
                         mgLimit = 0
                         if(analysis['pH'] > 8.5):
-                            mgLimit = 17000
+                            mgLimit = 6000
                         elif(analysis['pH'] <= 8.5 and analysis['pH'] >= 7.5):
                             mgLimit = 12000
                         elif(analysis['pH'] < 7.5):
-                            mgLimit = 6000
+                            mgLimit = 17000
                         
                         if(analysis['SilicaMagnesium'] < mgLimit):
                             magnesiumSilicaRes['Description'] = "Acceptable Magnesium Silicate Scaling"
@@ -1449,7 +1583,8 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                         print(f'Error magnesium * silica SS : {e}')
                     #-------------------------------------------------------Calcium Sulphate------------------------------------------------
                     try:
-                        calSulLimit = 1000000 if(analysis['WaterTreatment'] == False) else 50000
+                        calSulLimit = 10000000 if(analysis['WaterTreatment'] == True) else 50000
+                        
                         if(analysis["CalciumSulphate"] < calSulLimit):
                             calciumSulphateRes["Description"] = "Acceptable Calcium Sulphate Scaling"
                             calciumSulphateRes["Risk"] = "Acceptable"
@@ -1595,7 +1730,7 @@ class ValidationDialog(QDialog,QWidget):
         super().__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_validation,self)
-        self.center()
+        #self.center()
 
         self.requiredFrame.hide()
         self.optionalFrame.hide()
@@ -1645,7 +1780,8 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         super().__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_inputs,self)
-        self.center()
+        #self.center()
+        
         self.level = args[1]['level']
         #print(args[0])
         # Opening JSON file
@@ -1660,7 +1796,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         self.buttonNext.clicked.connect(self.Validate)
         self.buttonDeleteDefaults.clicked.connect(self.deleteParams)
         self.buttonDeleteDefaults.setEnabled(False)
-
+        self.buttonAbout.clicked.connect(self.showAbout)
         #List Widget
         for item in self.parameters_list.keys():
             self.listDefaults.addItem(f'{item}')
@@ -1680,6 +1816,10 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         self.parameter_inputs = args[1]['inputs']
         self.material = args[1]["material"]
         self.assesments = args[1]['type']
+        self.user = args[1]['user']
+        self.sector = args[1]['sector']
+        self.unit = args[1]['unit']
+        
         #Load Error
         self.errors = {}
         for item_key in self.parameter_inputs:
@@ -1804,7 +1944,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                     self.gridInputsRight.addWidget(spin_input,i +1,1,alignment=qtc.Qt.AlignTop)
                 self.gridInputsRight.addItem(verticalSpacer)
         except Exception as e:
-            print(f'Error: {e}')    
+            print(f'Error inputting into grid: {e}')    
     def center(self):
         frameGm = self.frameGeometry()
         screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
@@ -1813,12 +1953,17 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         self.move(frameGm.topLeft())    
 
     def showNext(self,analysis,material,assesments,inputs):
-        self.ui_reports = self.ctx.report_window_setter(analysis,material,assesments,inputs)
-        self.ui_reports.show()
-        self.close()
+        info = {
+            "sector" : self.sector,
+            "level" : self.level,
+            "unit": self.unit
+        }
+        user = self.user
+        self.ui_reports_window = self.ctx.report_window_setter(analysis,material,assesments,inputs,user,info)
+        self.ui_reports_window.show()
 
         
-        self.close()
+        
     def showBack(self):
         self.ui_sector = self.ctx.sector_window
         self.ui_sector.show()
@@ -1840,7 +1985,9 @@ class InputsWindow(QMainWindow, qtw.QWidget):
             if(increment == 0):
                 self.statusBar.setStyleSheet("color: red")
                 self.statusBar.showMessage(f'No defaults for these parameters found',3000)
-                
+    def showAbout(self):
+        self.about_window = self.ctx.about_window
+        self.about_window.show()
     def saveDefaults(self):
         saveText = self.defaultsSaveInput.text()
         
@@ -1856,7 +2003,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                     self.storeParams(saveText)
                     self.listDefaults.addItem(saveText)
                 except Exception as e:
-                    print(f'Error: {e}')
+                    print(f'Error Add item to Defaults List: {e}')
                     self.statusBar.setStyleSheet("color: red")
                     self.statusBar.showMessage(f'Error! Could not save the parameters',3000) 
         else :
@@ -1968,7 +2115,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                             if(self.errors[r_input] == "Not Entered"):
                                 ryzner.append(r_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error validation ryzner: {e}')
                             continue
                     if(len(ryzner) > 0) : errorSheet["Required"].append({"Ryzner":ryzner})
                 if(assement == "Corrosion"):
@@ -1976,7 +2123,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         if(self.errors["Flouride"] == "Not Entered"):
                             errorSheet["Optional"].append({"Pitting Corrosion":["Flouride"]})
                     except Exception as e:
-                        print(f'Error: {e}')        
+                        print(f'Error validation pitting corrosion: {e}')        
                 elif(assement == "Scaling"):
                     optional_sil = ["Silica", "Magnesium"]
                     optional_cal =["Calcium", "Sulphate"]
@@ -1986,14 +2133,14 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         if(self.errors["Silica in steam"] == "Not Entered"):
                             errorSheet["Optional"].append({"Silica Film Formation":["Silica in steam"]})
                     except Exception as e: 
-                        print(f'Error: {e}')
+                        print(f'Error validation silica in steam: {e}')
                     #--------------------------------Silica & Magnesium
                     for s_input in optional_sil:
                         try:
                             if(self.errors[s_input] == "Not Entered"):
                                 smagn.append(s_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error validation Silica magnesium: {e}')
                             continue
                     if(len(smagn)> 0) : errorSheet["Optional"].append({"Magnesium Silica Scaling":smagn})
                     
@@ -2003,7 +2150,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                             if(self.errors[c_input] == "Not Entered"):
                                 casu.append(c_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error validation calcium: {e}')
                             continue
                     if(len(casu) > 0): errorSheet["Optional"].append({"Calcium Sulphate Scaling":casu})
                 elif(assement == "Fouling"):
@@ -2011,7 +2158,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         if(self.errors["Suspended Solids"] == "Not Entered"):
                             errorSheet["Optional"].append({"Fouling":["Suspended Solids"]})
                     except Exception as e:
-                        print(f'Error: {e}')
+                        print(f'Error validation Suspended solids: {e}')
         elif(self.material == "Carbon Steel"):
             for assement in self.assesments:
                 if(assement == "Corrosion" or assement == "Scaling"):
@@ -2021,7 +2168,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                             if(self.errors[r_input] == "Not Entered"):
                                 ryzner.append(r_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error validation ryzner: {e}')
                             continue
                     if(len(ryzner) > 0) : errorSheet["Required"].append({"Ryzner":ryzner})
                 if(assement == "Corrosion"):
@@ -2034,7 +2181,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                             if(self.errors[corr_input] == "Not Entered"):
                                 corrRate.append(corr_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error validation Coorsion rate: {e}')
                             continue
                     if(len(corrRate)>0):errorSheet["Required"].append({"Corrosion Rate":corrRate})
                 elif(assement == "Scaling"):
@@ -2046,14 +2193,14 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         if(self.errors["Silica in steam"] == "Not Entered"):
                             errorSheet["Optional"].append({"Silica Film Formation":["Silica in steam"]})
                     except Exception as e: 
-                        print(f'Error: {e}')
+                        print(f'Error validation Silica in: {e}')
                     #--------------------------------Silica & Magnesium
                     for s_input in optional_sil:
                         try:
                             if(self.errors[s_input] == "Not Entered"):
                                 smagn.append(s_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error validation silica magnesium: {e}')
                             continue
                     if(len(smagn)> 0) : errorSheet["Optional"].append({"Magnesium Silica Scaling":smagn})
                     
@@ -2063,7 +2210,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                             if(self.errors[c_input] == "Not Entered"):
                                 casu.append(c_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error validation calcium and sulphate: {e}')
                             continue
                     if(len(casu) > 0): errorSheet["Optional"].append({"Calcium Sulphate Scaling":casu})
 
@@ -2072,7 +2219,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         if(self.errors["Suspended Solids"] == "Not Entered"):
                             errorSheet["Optional"].append({"Fouling":["Suspended Solids"]})
                     except Exception as e:
-                        print(f'Error: {e}')
+                        print(f'Error validation suspended solids: {e}')
         elif(self.material == "Concrete"):
             for assement in self.assesments:
                 if(assement == "Corrosion" or assement == "Scaling"):
@@ -2082,7 +2229,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                             if(self.errors[r_input] == "Not Entered"):
                                 ryzner.append(r_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error validation concrete: {e}')
                             continue
                     if(len(ryzner) > 0) : errorSheet["Required"].append({"Ryzner":ryzner})
                 if(assement == "Corrosion"):
@@ -2093,7 +2240,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                             if(self.errors[a_input] == "Not Entered"):
                                 agg.append(a_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error validation aggressive: {e}')
                             continue
                     if(len(agg)>0):errorSheet["Required"].append({"Corrosion Rate":agg})
                 elif(assement == "Scaling"):
@@ -2101,13 +2248,13 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         if(self.errors["Sulphate"] == "Not Entered"):
                             errorSheet["Optional"].append({"Sulphate Attack":["Sulphate"]})
                     except Exception as e:
-                        print(f'Error: {e}')
+                        print(f'Error validation suspended solids: {e}')
                 elif(assement == "Fouling"):
                     try:
                         if(self.errors["Suspended Solids"] == "Not Entered"):
                             errorSheet["Optional"].append({"Fouling":["Suspended Solids"]})
                     except Exception as e:
-                        print(f'Error: {e}')
+                        print(f'Error validation suspended solids: {e}')
         elif(self.material == "Monel-Lead/Copper Alloys"):
             for assement in self.assesments:
                 if(assement == "Corrosion" or assement == "Scaling"):
@@ -2117,7 +2264,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                             if(self.errors[r_input] == "Not Entered"):
                                 ryzner.append(r_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error validation required ryzner: {e}')
                             continue
                     if(len(ryzner) > 0) : errorSheet["Required"].append({"Ryzner":ryzner})
                 if(assement == "Corrosion"):
@@ -2130,16 +2277,16 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                             if(self.errors[csm_input] == "Not Entered"):
                                 csmr.append(csm_input)
                         except Exception as e:
-                            print(f'Error: {e}')
-                            continue
+                            print(f'Error csmr validation: {e}')
+                            
                     if(len(csmr)>0): errorSheet["Optional"].append({"Chloride to Sulphate Mass Ration":csmr})
-                    for csm_input in larsReq:
+                    for lars_input in larsReq:
                         try:
-                            if(self.errors[larsReq] == "Not Entered"):
-                                lars.append(larsReq)
+                            if(self.errors[lars_input] == "Not Entered"):
+                                lars.append(lars_input)
                         except Exception as e:
-                            print(f'Error: {e}')
-                            continue
+                            print(f'Erro validation larson:  {e}')
+                            
                     if(len(lars)>0) : errorSheet["Optional"].append({"Larson Index":lars})
 
                 elif(assement == "Scaling"):
@@ -2151,14 +2298,14 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         if(self.errors["Silica in steam"] == "Not Entered"):
                             errorSheet["Optional"].append({"Silica Film Formation":["Silica in steam"]})
                     except Exception as e: 
-                        print(f'Error: {e}')
+                        print(f'Error Silica Validation Scaling: {e}')
                     #--------------------------------Silica & Magnesium
                     for s_input in optional_sil:
                         try:
                             if(self.errors[s_input] == "Not Entered"):
                                 smagn.append(s_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error Silic magnesium validation: {e}')
                             continue
                     if(len(smagn)> 0) : errorSheet["Optional"].append({"Magnesium Silica Scaling":smagn})
                     
@@ -2168,7 +2315,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                             if(self.errors[c_input] == "Not Entered"):
                                 casu.append(c_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error Calcium Validation: {e}')
                             continue
                     if(len(casu) > 0): errorSheet["Optional"].append({"Calcium Sulphate Scaling":casu})
 
@@ -2177,7 +2324,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         if(self.errors["Suspended Solids"] == "Not Entered"):
                             errorSheet["Optional"].append({"Fouling":["Suspended Solids"]})
                     except Exception as e:
-                        print(f'Error: {e}')
+                        print(f'Error Validation Suspended solids: {e}')
         elif(self.material == "Plastic"):
             for assement in self.assesments:
                 if(assement == "Scaling"):
@@ -2187,7 +2334,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                             if(self.errors[r_input] == "Not Entered"):
                                 ryzner.append(r_input)
                         except Exception as e:
-                            print(f'Error: {e}')
+                            print(f'Error Validation Ryzner: {e}')
                             continue
                     if(len(ryzner) > 0) : errorSheet["Required"].append({"Ryzner":ryzner})
                 elif(assement == "Fouling"):
@@ -2195,7 +2342,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         if(self.errors["Suspended Solids"] == "Not Entered"):
                             errorSheet["Optional"].append({"Fouling":["Suspended Solids"]})
                     except Exception as e:
-                        print(f'Error: {e}')
+                        print(f'Error Suspended Solids Fouling: {e}')
         elif(self.material == "Membranes"):
             for assement in self.assesments:
                 if(assement == "Fouling"):
@@ -2203,7 +2350,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         if(self.errors["Suspended Solids"] == "Not Entered"):
                             errorSheet["Optional"].append({"Fouling":["Suspended Solids"]})
                     except Exception as e:
-                        print(f'Error: {e}')
+                        print(f'Error Suspended Solids Validation Fouling: {e}')
 
         
         if(len(errorSheet["Required"]) > 0 or len(errorSheet["Optional"]) > 0):
@@ -2229,7 +2376,7 @@ class SectorWindow(QMainWindow, qtw.QWidget):
         super(SectorWindow,self).__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_sector,self)
-        self.center()
+        #self.center()
         self.setWindowTitle("Sector Inputs")
         self.sector_data = self.ctx.import_data
         self.sector_keys = self.sector_data.iloc[:,0]
@@ -2260,6 +2407,7 @@ class SectorWindow(QMainWindow, qtw.QWidget):
         self.buttonProceed.clicked.connect(self.SectorValidate)
         self.buttonBack.clicked.connect(self.showBack)
         self.buttonUserInfoEdit.clicked.connect(self.editUserInfo)
+        self.buttonAbout.clicked.connect(self.showAbout)
 
     def editUserInfo(self):
         data = {
@@ -2281,7 +2429,9 @@ class SectorWindow(QMainWindow, qtw.QWidget):
             self.email.setText(updated_data["email"])
             self.description.setText(updated_data["description"])
 
-
+    def showAbout(self):
+        self.about_window = self.ctx.about_window
+        self.about_window.show()
     def validate_type(self):
         self.checkBoxCorrosion.setEnabled(True)
         self.checkBoxFouling.setEnabled(True)
@@ -2383,11 +2533,19 @@ class SectorWindow(QMainWindow, qtw.QWidget):
             errorMessage.setWindowTitle("Missing Input Information")
             errorMessage.exec_()
     def showNext(self):
+        data = {
+            "fullName" : self.fullName.text(),
+            "role": self.role.text(),
+            "company": self.company.text(),
+            "email":self.email.text(),
+            "description":self.description.text()
+        }
         assesmentDetails = {
             "level" : self.level,
             "sector": self.sectorComboBox.currentText(),
             "unit": self.unitComboBox.currentText(),
-            "material" : self.materialComboBox.currentText()
+            "material" : self.materialComboBox.currentText(),
+            "user": data
         }
 
         #Store Selections
@@ -2438,7 +2596,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
         self.ctx = ctx
         uic.loadUi(self.ctx.get_main, self)
-        self.center()
+        #self.center()
         self.labelHome.setPixmap(qtg.QPixmap.fromImage(self.ctx.homePic))
         self.labelHome.setMaximumWidth(370)
         self.labelHome.setMaximumHeight(170)

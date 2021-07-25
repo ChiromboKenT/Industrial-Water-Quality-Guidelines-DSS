@@ -153,12 +153,12 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLabel" name="label_4">
+              <widget class="QLabel" name="reportFullName">
                <property name="enabled">
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>John Doe</string>
+                <string/>
                </property>
               </widget>
              </item>
@@ -173,12 +173,12 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QLabel" name="label_6">
+              <widget class="QLabel" name="reportJobTitle">
                <property name="enabled">
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Water Quality</string>
+                <string/>
                </property>
               </widget>
              </item>
@@ -213,27 +213,17 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QLabel" name="label_10">
+              <widget class="QLabel" name="reportCompany">
                <property name="enabled">
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Sea</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="1">
-              <widget class="QLabel" name="label_11">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>jd@example.com</string>
+                <string/>
                </property>
               </widget>
              </item>
              <item row="4" column="1">
-              <widget class="QTextBrowser" name="textBrowser">
+              <widget class="QTextBrowser" name="reportDescription">
                <property name="enabled">
                 <bool>false</bool>
                </property>
@@ -275,14 +265,23 @@
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8.25pt;&quot;&gt;The Lorem of dogs can buy sweets of ten mega tons of water&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8.25pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="textInteractionFlags">
                 <set>Qt::NoTextInteraction</set>
                </property>
                <property name="openLinks">
                 <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QLabel" name="reportEmail">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string/>
                </property>
               </widget>
              </item>
@@ -515,7 +514,7 @@ p, li { white-space: pre-wrap; }
                 <enum>QTabWidget::North</enum>
                </property>
                <property name="currentIndex">
-                <number>1</number>
+                <number>0</number>
                </property>
                <widget class="QWidget" name="tab">
                 <attribute name="title">
@@ -552,12 +551,12 @@ p, li { white-space: pre-wrap; }
                        <bool>false</bool>
                       </property>
                       <property name="text">
-                       <string>Level of assesment:</string>
+                       <string>Level of assessment:</string>
                       </property>
                      </widget>
                     </item>
                     <item row="0" column="1">
-                     <widget class="QLabel" name="label_13">
+                     <widget class="QLabel" name="labelLevelAsses">
                       <property name="enabled">
                        <bool>false</bool>
                       </property>
@@ -575,12 +574,12 @@ p, li { white-space: pre-wrap; }
                        <bool>false</bool>
                       </property>
                       <property name="text">
-                       <string>Type of Assesment(s)</string>
+                       <string>Type of Assessment(s)</string>
                       </property>
                      </widget>
                     </item>
                     <item row="1" column="1">
-                     <widget class="QLabel" name="label_15">
+                     <widget class="QLabel" name="labelTypeAssess">
                       <property name="enabled">
                        <bool>false</bool>
                       </property>
@@ -603,7 +602,7 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item row="2" column="1">
-                     <widget class="QLabel" name="label_17">
+                     <widget class="QLabel" name="labelSector">
                       <property name="enabled">
                        <bool>false</bool>
                       </property>
@@ -621,12 +620,12 @@ p, li { white-space: pre-wrap; }
                        <bool>false</bool>
                       </property>
                       <property name="text">
-                       <string>Unit under assesment</string>
+                       <string>Unit under assessment</string>
                       </property>
                      </widget>
                     </item>
                     <item row="3" column="1">
-                     <widget class="QLabel" name="label_19">
+                     <widget class="QLabel" name="labelUnit">
                       <property name="enabled">
                        <bool>false</bool>
                       </property>
@@ -649,7 +648,7 @@ p, li { white-space: pre-wrap; }
                      </widget>
                     </item>
                     <item row="4" column="1">
-                     <widget class="QLabel" name="label_21">
+                     <widget class="QLabel" name="labelMaterial">
                       <property name="enabled">
                        <bool>false</bool>
                       </property>
@@ -685,7 +684,7 @@ p, li { white-space: pre-wrap; }
                 </attribute>
                 <layout class="QHBoxLayout" name="horizontalLayout_4">
                  <item>
-                  <layout class="QGridLayout" name="gridLayout_3">
+                  <layout class="QGridLayout" name="gridReportLeft">
                    <property name="horizontalSpacing">
                     <number>15</number>
                    </property>
@@ -761,13 +760,6 @@ p, li { white-space: pre-wrap; }
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="label_41">
-                     <property name="text">
-                      <string>TextLabel</string>
-                     </property>
-                    </widget>
-                   </item>
                   </layout>
                  </item>
                  <item>
@@ -778,7 +770,7 @@ p, li { white-space: pre-wrap; }
                   </widget>
                  </item>
                  <item>
-                  <layout class="QGridLayout" name="gridLayout_4">
+                  <layout class="QGridLayout" name="gridReportRight">
                    <property name="horizontalSpacing">
                     <number>15</number>
                    </property>
@@ -851,13 +843,6 @@ p, li { white-space: pre-wrap; }
                      </property>
                      <property name="text">
                       <string>Parameters</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="label_42">
-                     <property name="text">
-                      <string>TextLabel</string>
                      </property>
                     </widget>
                    </item>
