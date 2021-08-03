@@ -4,7 +4,7 @@
         "label" : "input_ph",
         "rangeLow" : 1,
         "rangeHigh" :14,
-        "decimals":1,
+        "decimals":2,
         "input_type": "number"
     },
     "Electrical Conductivity":{
@@ -19,7 +19,7 @@
         "unit" : ["mg/L"],
         "label" : "input_calcium",
         "rangeLow" :0,
-        "rangeHigh" :1000,
+        "rangeHigh" :2000000,
         "decimals":2,
         "input_type": "number"
     },
@@ -27,7 +27,7 @@
         "unit" : ["mg/L CaCO\u2083"],
         "label" : "input_alkalinity",
         "rangeLow" : 0,
-        "rangeHigh" :1000,
+        "rangeHigh" :2000000,
         "decimals":2,
         "input_type": "number"
     },
@@ -35,7 +35,7 @@
         "unit" : ["mg/L CaCO\u2083"],
         "label" : "input_palkalinity",
         "rangeLow" : 0,
-        "rangeHigh" :1000,
+        "rangeHigh" :2000000,
         "decimals":2,
         "input_type": "number"
     },
@@ -52,14 +52,14 @@
         "label" : "input_temperature",
         "rangeLow" : -65535,
         "rangeHigh" :65535,
-        "decimals":1,
+        "decimals":2,
         "input_type": "number"
     },
     "Flouride":{
         "unit" : ["mg/L"],
         "label" : "input_flouride",
         "rangeLow" :0,
-        "rangeHigh" :1000,
+        "rangeHigh" :2000000,
         "decimals":2,
         "input_type": "number"
     },
@@ -67,7 +67,7 @@
         "unit" : ["mg/L"],
         "label" : "input_chloride",
         "rangeLow" :0,
-        "rangeHigh" :1000,
+        "rangeHigh" :2000000,
         "decimals":2,
         "input_type": "number"
     },
@@ -83,7 +83,7 @@
         "unit" : ["mg/L"],
         "label" : "input_magnesium",
         "rangeLow" :0,
-        "rangeHigh" :1000,
+        "rangeHigh" :2000000,
         "decimals":2,
         "input_type": "number"
     },
@@ -99,7 +99,7 @@
         "unit" : ["mg/L"],
         "label" : "input_sulphate",
         "rangeLow" :0,
-        "rangeHigh" :10000,
+        "rangeHigh" :2000000,
         "decimals":2,
         "input_type": "number"
     },
@@ -107,7 +107,7 @@
         "unit" : ["mg/L"],
         "label" : "input_suspended",
         "rangeLow" : 0,
-        "rangeHigh" : 10000,
+        "rangeHigh" : 2000000,
         "decimals":2,
         "input_type": "number"
     },
@@ -172,5 +172,11 @@
         "label" : "input_water_treat",
         "options": ["No water treatment required","Water treatment required"],
         "input_type": "checkbox"
+    },
+    "Technology Type":{
+        "unit" : "n/a",
+        "label" : "input_tech_type",
+        "options": ["Grit Removal", "Microfiltration", "Ultrafiltration","Nanofiltration","Reverse Osmosis"],
+        "input_type": "list"
     }
 }

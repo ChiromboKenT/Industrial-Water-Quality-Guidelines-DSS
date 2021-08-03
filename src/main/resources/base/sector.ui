@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>913</width>
-    <height>714</height>
+    <width>800</width>
+    <height>818</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="minimumSize">
    <size>
@@ -16,25 +22,49 @@
     <height>0</height>
    </size>
   </property>
+  <property name="maximumSize">
+   <size>
+    <width>16777215</width>
+    <height>818</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,8,16,1,0">
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>768</height>
+    </size>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>16777215</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,1,1,0">
     <property name="leftMargin">
-     <number>20</number>
+     <number>15</number>
     </property>
     <property name="topMargin">
-     <number>20</number>
+     <number>15</number>
     </property>
     <property name="rightMargin">
-     <number>20</number>
+     <number>15</number>
     </property>
     <property name="bottomMargin">
-     <number>15</number>
+     <number>11</number>
     </property>
     <item>
      <widget class="QLabel" name="labelInputTitle">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="font">
        <font>
         <family>Arial Narrow</family>
@@ -59,6 +89,12 @@
     </item>
     <item>
      <widget class="QGroupBox" name="groupBox">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="styleSheet">
        <string notr="true">background-color:#ffffff;</string>
       </property>
@@ -66,13 +102,16 @@
        <string>User Information</string>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="7,0,4,1">
+       <property name="sizeConstraint">
+        <enum>QLayout::SetDefaultConstraint</enum>
+       </property>
        <item>
         <layout class="QFormLayout" name="formLayout">
          <property name="horizontalSpacing">
           <number>35</number>
          </property>
          <property name="verticalSpacing">
-          <number>12</number>
+          <number>8</number>
          </property>
          <item row="0" column="0">
           <widget class="QLabel" name="fullNameLabel">
@@ -109,11 +148,11 @@
             </font>
            </property>
            <property name="text">
-            <string>Company:</string>
+            <string>Sample Date:</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="4" column="0">
           <widget class="QLabel" name="emailLabel">
            <property name="font">
             <font>
@@ -135,7 +174,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Role</string>
+            <string>Position</string>
            </property>
           </widget>
          </item>
@@ -153,10 +192,23 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="4" column="1">
           <widget class="QLabel" name="email">
            <property name="text">
             <string>john@example.com</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Sample Location</string>
            </property>
           </widget>
          </item>
@@ -171,6 +223,9 @@
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_5">
+         <property name="spacing">
+          <number>2</number>
+         </property>
          <item>
           <widget class="QLabel" name="label">
            <property name="font">
@@ -180,7 +235,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Description: </string>
+            <string>Comments:</string>
            </property>
           </widget>
          </item>
@@ -205,6 +260,9 @@
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::MinimumExpanding</enum>
+           </property>
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
@@ -217,15 +275,21 @@
        </item>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_6">
+         <property name="spacing">
+          <number>3</number>
+         </property>
          <item>
           <spacer name="verticalSpacer_3">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::MinimumExpanding</enum>
+           </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>20</width>
-             <height>40</height>
+             <width>0</width>
+             <height>5</height>
             </size>
            </property>
           </spacer>
@@ -255,13 +319,22 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="5,0,5">
+     <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,0,0,0,0,0">
+       <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,0,0,0">
+        <property name="spacing">
+         <number>3</number>
+        </property>
         <item>
          <widget class="QGroupBox" name="groupBox_2">
           <property name="enabled">
            <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
           <property name="font">
            <font>
@@ -293,17 +366,20 @@
           <property name="checked">
            <bool>false</bool>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_8">
+          <layout class="QVBoxLayout" name="verticalLayout_8" stretch="0,1">
+           <property name="spacing">
+            <number>23</number>
+           </property>
            <item>
             <layout class="QFormLayout" name="formLayout_2">
              <property name="horizontalSpacing">
-              <number>50</number>
+              <number>250</number>
              </property>
              <property name="verticalSpacing">
-              <number>16</number>
+              <number>15</number>
              </property>
              <property name="leftMargin">
-              <number>15</number>
+              <number>0</number>
              </property>
              <item row="0" column="0">
               <widget class="QLabel" name="sectorLabel">
@@ -353,26 +429,52 @@
              </item>
             </layout>
            </item>
+           <item>
+            <layout class="QFormLayout" name="formLayout_5">
+             <item row="0" column="0">
+              <widget class="QLabel" name="descriptionLabel">
+               <property name="font">
+                <font>
+                 <family>Calibri</family>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Description:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="label_4">
+               <property name="font">
+                <font>
+                 <family>Calibri</family>
+                 <pointsize>7</pointsize>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Group of companies that operate in the same segment of the economy or share a similar business type.</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
           </layout>
          </widget>
-        </item>
-        <item>
-         <spacer name="verticalSpacer_6">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
         </item>
         <item>
          <widget class="QGroupBox" name="groupBox_3">
           <property name="enabled">
            <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
           <property name="font">
            <font>
@@ -404,14 +506,17 @@
           <property name="checked">
            <bool>false</bool>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_9" stretch="0,0,0,1">
+          <layout class="QVBoxLayout" name="verticalLayout_9" stretch="0,0,0">
+           <property name="spacing">
+            <number>17</number>
+           </property>
            <item>
             <layout class="QFormLayout" name="formLayout_3">
              <property name="horizontalSpacing">
-              <number>80</number>
+              <number>279</number>
              </property>
              <property name="leftMargin">
-              <number>15</number>
+              <number>0</number>
              </property>
              <item row="0" column="0">
               <widget class="QLabel" name="selectUnitLabel">
@@ -448,19 +553,6 @@
               </widget>
              </item>
             </layout>
-           </item>
-           <item>
-            <spacer name="verticalSpacer_4">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>10</height>
-              </size>
-             </property>
-            </spacer>
            </item>
            <item>
             <widget class="QFrame" name="liningFrame">
@@ -533,38 +625,59 @@
             </widget>
            </item>
            <item>
-            <spacer name="verticalSpacer_5">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>10</height>
-              </size>
-             </property>
-            </spacer>
+            <layout class="QFormLayout" name="formLayout_6">
+             <item row="0" column="0">
+              <widget class="QLabel" name="descriptionLabel_2">
+               <property name="font">
+                <font>
+                 <family>Calibri</family>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Description:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="label_5">
+               <property name="font">
+                <font>
+                 <family>Calibri</family>
+                 <pointsize>7</pointsize>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>The processing unit refers to the component or unit to be assessed.
+Not Lined - Applies to storage units without lining considerations. 
+Lined - Applies to storage unit that has any lining considerations.</string>
+               </property>
+               <property name="wordWrap">
+                <bool>false</bool>
+               </property>
+               <property name="margin">
+                <number>7</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
         </item>
         <item>
-         <spacer name="verticalSpacer_10">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
          <widget class="QGroupBox" name="groupBox_4">
           <property name="enabled">
            <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
           <property name="font">
            <font>
@@ -597,16 +710,19 @@
            <bool>false</bool>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_10">
+           <property name="spacing">
+            <number>15</number>
+           </property>
            <item>
             <layout class="QFormLayout" name="formLayout_7">
              <property name="horizontalSpacing">
-              <number>50</number>
+              <number>250</number>
              </property>
              <property name="verticalSpacing">
               <number>16</number>
              </property>
              <property name="leftMargin">
-              <number>15</number>
+              <number>0</number>
              </property>
              <item row="0" column="0">
               <widget class="QLabel" name="sectorLabel_3">
@@ -647,24 +763,50 @@
              </item>
             </layout>
            </item>
+           <item>
+            <layout class="QFormLayout" name="formLayout_8">
+             <item row="0" column="0">
+              <widget class="QLabel" name="descriptionLabel_3">
+               <property name="font">
+                <font>
+                 <family>Calibri</family>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>Description:</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="label_6">
+               <property name="font">
+                <font>
+                 <family>Calibri</family>
+                 <pointsize>7</pointsize>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="text">
+                <string>For the selected Unit, this specifies the major material used for its construction.</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
           </layout>
          </widget>
         </item>
         <item>
-         <spacer name="verticalSpacer_11">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>10</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
          <widget class="QGroupBox" name="groupBox_5">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="font">
            <font>
             <weight>75</weight>
@@ -677,19 +819,6 @@
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_6">
-             <item>
-              <spacer name="horizontalSpacer_5">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
              <item>
               <widget class="QPushButton" name="buttonSelectAll">
                <property name="font">
@@ -706,6 +835,19 @@
                </property>
               </widget>
              </item>
+             <item>
+              <spacer name="horizontalSpacer_5">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
             </layout>
            </item>
            <item>
@@ -716,7 +858,7 @@
              <property name="frameShadow">
               <enum>QFrame::Raised</enum>
              </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="2,0,0,0,0,0">
+             <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0,0,0,1">
               <property name="topMargin">
                <number>5</number>
               </property>
@@ -726,19 +868,6 @@
               <property name="bottomMargin">
                <number>5</number>
               </property>
-              <item>
-               <spacer name="horizontalSpacer_7">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>57</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
               <item>
                <widget class="QCheckBox" name="checkBoxCorrosion">
                 <property name="font">
@@ -753,13 +882,16 @@
                </widget>
               </item>
               <item>
-               <spacer name="horizontalSpacer_16">
+               <spacer name="horizontalSpacer_7">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::MinimumExpanding</enum>
+                </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>15</width>
+                  <width>20</width>
                   <height>20</height>
                  </size>
                 </property>
@@ -779,13 +911,16 @@
                </widget>
               </item>
               <item>
-               <spacer name="horizontalSpacer_17">
+               <spacer name="horizontalSpacer_16">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::MinimumExpanding</enum>
+                </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>15</width>
+                  <width>20</width>
                   <height>20</height>
                  </size>
                 </property>
@@ -804,6 +939,19 @@
                 </property>
                </widget>
               </item>
+              <item>
+               <spacer name="horizontalSpacer_17">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>15</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
              </layout>
             </widget>
            </item>
@@ -812,77 +960,10 @@
         </item>
        </layout>
       </item>
-      <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <item>
-         <widget class="QLabel" name="label_4">
-          <property name="text">
-           <string>Description :</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTextBrowser" name="textBrowser">
-          <property name="cursor" stdset="0">
-           <cursorShape>IBeamCursor</cursorShape>
-          </property>
-          <property name="html">
-           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;* Sector&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:12px; margin-right:16px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'SourceSansPro,sans-serif'; font-size:8pt; color:#111111; background-color:#ffffff;&quot;&gt;Group of companies that operate in the same segment of the economy or share a similar business type.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:12px; margin-right:16px; -qt-block-indent:0; text-indent:0px; font-family:'SourceSansPro,sans-serif'; font-size:8pt; color:#111111;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;* Unit&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:12px; margin-right:16px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'SourceSansPro,sans-serif'; font-size:8pt; color:#111111; background-color:#ffffff;&quot;&gt;The unit refers to the component or unit to be assesed.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:12px; margin-right:16px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'SourceSansPro,sans-serif'; font-size:8pt; font-weight:600; font-style:italic; color:#111111; background-color:#ffffff;&quot;&gt;Not Lined - &lt;/span&gt;&lt;span style=&quot; font-family:'SourceSansPro,sans-serif'; font-size:8pt; color:#111111; background-color:#ffffff;&quot;&gt;Applies to storage units without lining considerations. &lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:12px; margin-right:16px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'SourceSansPro,sans-serif'; font-size:8pt; font-weight:600; font-style:italic; color:#111111; background-color:#ffffff;&quot;&gt;Lined - &lt;/span&gt;&lt;span style=&quot; font-family:'SourceSansPro,sans-serif'; font-size:8pt; color:#111111; background-color:#ffffff;&quot;&gt;Applies to storage unit that has any lining considerations.&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:12px; margin-right:16px; -qt-block-indent:0; text-indent:0px; font-family:'SourceSansPro,sans-serif'; font-size:8pt; color:#111111;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;* Materials of Construction&lt;/span&gt;&lt;/p&gt;
-&lt;p align=&quot;justify&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:12px; margin-right:16px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'SourceSansPro,sans-serif'; font-size:8pt; color:#111111; background-color:#ffffff;&quot;&gt;For the selected &lt;/span&gt;&lt;span style=&quot; font-family:'SourceSansPro,sans-serif'; font-size:8pt; font-weight:600; color:#111111; background-color:#ffffff;&quot;&gt;Unit&lt;/span&gt;&lt;span style=&quot; font-family:'SourceSansPro,sans-serif'; font-size:8pt; color:#111111; background-color:#ffffff;&quot;&gt;, this specifies the major material used for its construction.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
      </layout>
     </item>
     <item>
-     <spacer name="verticalSpacer_2">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
       <item>
        <widget class="QPushButton" name="buttonAbout">
         <property name="text">
@@ -989,9 +1070,15 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>913</width>
+     <width>800</width>
      <height>26</height>
     </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
@@ -1016,7 +1103,14 @@ p, li { white-space: pre-wrap; }
    <addaction name="menuEdit"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+  </widget>
   <action name="actionHome">
    <property name="text">
     <string>Home</string>
@@ -1040,54 +1134,6 @@ p, li { white-space: pre-wrap; }
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>buttonSelectAll</sender>
-   <signal>clicked()</signal>
-   <receiver>checkBoxFouling</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>425</x>
-     <y>575</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>425</x>
-     <y>609</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonSelectAll</sender>
-   <signal>clicked()</signal>
-   <receiver>checkBoxScaling</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>425</x>
-     <y>575</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>328</x>
-     <y>609</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonSelectAll</sender>
-   <signal>clicked()</signal>
-   <receiver>checkBoxCorrosion</receiver>
-   <slot>click()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>425</x>
-     <y>575</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>231</x>
-     <y>609</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>actionAbout</sender>
    <signal>triggered()</signal>

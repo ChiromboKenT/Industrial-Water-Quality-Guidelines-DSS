@@ -110,7 +110,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Fitness-of-use</string>
+             <string>Fitness-For-Use</string>
             </property>
            </widget>
           </item>
@@ -514,11 +514,11 @@ p, li { white-space: pre-wrap; }
                 <enum>QTabWidget::North</enum>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>1</number>
                </property>
                <widget class="QWidget" name="tab">
                 <attribute name="title">
-                 <string>Basic Info</string>
+                 <string>Assessment Criteria</string>
                 </attribute>
                 <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="6,8">
                  <item>
@@ -574,7 +574,7 @@ p, li { white-space: pre-wrap; }
                        <bool>false</bool>
                       </property>
                       <property name="text">
-                       <string>Type of Assessment(s)</string>
+                       <string>Type of assessment(s)</string>
                       </property>
                      </widget>
                     </item>
@@ -680,7 +680,7 @@ p, li { white-space: pre-wrap; }
                </widget>
                <widget class="QWidget" name="tab_2">
                 <attribute name="title">
-                 <string>Water-specific inputs</string>
+                 <string>Water Quality Inputs</string>
                 </attribute>
                 <layout class="QHBoxLayout" name="horizontalLayout_4">
                  <item>

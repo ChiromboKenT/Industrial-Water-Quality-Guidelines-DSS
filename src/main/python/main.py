@@ -87,7 +87,7 @@ class AppContext(ApplicationContext):
         return self.get_resource("home.ui")
     @cached_property
     def get_sector(self):
-        return self.get_resource("sector.ui")
+        return self.get_resource("sector_new.ui")
     @cached_property
     def get_inputs(self):
         return self.get_resource("bInput.ui")
@@ -100,7 +100,12 @@ class AppContext(ApplicationContext):
     @cached_property
     def get_userInfo(self):
         return self.get_resource("userInfo.ui")
-
+    @cached_property
+    def get_help(self):
+        return self.get_resource("help.ui")
+    @cached_property
+    def get_background(self):
+        return self.get_resource("background.ui")
     @cached_property
     def homePic(self):
         return qtg.QImage(self.get_resource("images/homeImage.png"))
@@ -202,7 +207,7 @@ def Aggressive(inputs):
     return aggressive
 def Langelier(inputs):
     CalciumHardness = inputs['Calcium'] / 0.401
-    A = (math.log((inputs['TDS']),10) -1) / 10
+    A = (math.log((inputs['Total Dissolved Solids(TDS)']),10) -1) / 10
     B = (-13.12) *math.log((inputs["Temperature"] +273.2), 10) + 34.55
     C = math.log(CalciumHardness,10) - 0.4
     D = math.log(inputs['Alkalinity'],10)  #needs to be investigated
@@ -221,7 +226,7 @@ def rsiAtTemp(temp, inputs):
     TotalHardness = (inputs["Calcium"] * 2.5) + (inputs["Magnesium"] *4.1) 
     rsi = (
         2 * (
-                11.017 + 0.197* math.log(abs(inputs['TDS'] +1), 10)
+                11.017 + 0.197* math.log(abs(inputs['Total Dissolved Solids(TDS)'] +1), 10)
                 - 0.995 * math.log(abs((CalciumHardness * 0.4) - 1), 10)
                 - 0.016 * math.log(abs((TotalHardness - CalciumHardness)* 0.24 + 1)) 
                 - 1.041 * math.log(abs(inputs["Alkalinity"] - 1), 10)
@@ -241,7 +246,7 @@ def Pisigan(inputs):
     #phs = rsiAtTemp(inputs["Temperature"], inputs)
 
     ea = inputs["Alkalinity"] / 50045.5
-    i = inputs["TDS"] /40000
+    i = inputs["Total Dissolved Solids(TDS)"] /40000
     t = ts = inputs["Temperature"] + 273.15
     d = -7.047968 + 0.016796 * t + 1795.711/t - 0.0000141566*(t**2)-153541/(t**2)
     dw = 87.74-0.4008* inputs["Temperature"] + 0.0009398*(inputs["Temperature"]**2)+0.00000141*(inputs["Temperature"]**3)
@@ -279,15 +284,21 @@ def Pisigan(inputs):
 def Larson(inputs):
     chloride_ = inputs["Chloride"] /35.45
     sulphate_ = inputs["Sulphate"]/48.03
+
     bicarbonate = Bicarbonate(inputs['P Alkalinity'],inputs['Alkalinity'])/61
     carbonate = Carbonate(inputs['P Alkalinity'],inputs["Alkalinity"])/30
+
+    #print(f"Larson cl-: {chloride_}")
+    #print(f"Larson SO-: {sulphate_}")
+    #print(f"Larson HCO-: {carbonate}")
+    #print(f"Larson CO3-: {bicarbonate}")
     larson = (chloride_ + sulphate_ )/(bicarbonate + carbonate)
 
     return larson
 def Ryzner(inputs):
     tempCalcium = (inputs["Calcium"] * 10) / 4.01
     print("Temp Calcium:{}".format(tempCalcium))
-    A = (math.log((inputs['TDS']),10)-1) / 10
+    A = (math.log((inputs['Total Dissolved Solids(TDS)']),10)-1) / 10
     print("A:{}".format(A))
     B = (-13.12) *math.log((inputs["Temperature"] +273.2), 10) + 34.55
     print("B:{}".format(B))
@@ -320,7 +331,8 @@ def Analyze(material,assesments,inputs):
                     data["Chloride"] = inputs["Chloride"]
                     #Calculate Temperature
                     data["Temperature"] = inputs["Temperature"]
-                    print(data["Flouride"])
+                    #Calculate pH
+                    data["pH"] = inputs["pH"]
                     if(material == "Stainless steel 316/316L"):
                         data["Critical Pitting Temp"] = 18
                         data["PREN"] = 20
@@ -349,8 +361,6 @@ def Analyze(material,assesments,inputs):
                     data['WaterTreatment'] = inputs["Contains water Treatment(Antiscalants)?"]
                     
                     data["CalciumSulphate"] = inputs["Calcium"] * inputs["Sulphate"]
-
-                    print(" Calcium Sulpahate: {}...".format(data["CalciumSulphate"]))
                 elif(assessment == "Fouling"):
                     #Calculate Suspended solids
                     data["Suspended Solids"] = inputs["Suspended Solids"]
@@ -406,7 +416,7 @@ def Analyze(material,assesments,inputs):
                     #Calculate Aggressive Index
                     data["Aggressive"] = Aggressive(inputs)
                     #IsConcrete Reinforced
-                    data["Concrete Reinforced"] = inputs['Is conrete reinforced?']
+                    data["Concrete Reinforced"] = inputs['Is the concrete reinforced?']
                     print(data["Aggressive"])
                 elif(assessment == "Scaling"):
                     
@@ -418,7 +428,7 @@ def Analyze(material,assesments,inputs):
                     data["Suspended Solids"] = inputs["Suspended Solids"]
                     print( data["Suspended Solids"])
             except Exception as e:
-                print(f"Concrete calculation error: {e}")
+                print(f"0 vbnm,: {e}")
                 continue
     elif(material == "Monel-Lead/Copper Alloys"):
         for assessment in assesments:
@@ -496,6 +506,7 @@ def Analyze(material,assesments,inputs):
                     try:
                         if(inputs["Particle Size"] > 0):
                             data["Particle Size"] = inputs["Particle Size"]
+                            data["Technology Type"] = inputs['Technology Type']
                     except KeyError as k:
                         print("Particle Size key error")
                         
@@ -557,7 +568,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
         super().__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_report,self)
-        ##self.center()
+        self.center()
         self.analysis = args[1]
         self.material = args[2]
         self.assessments = args[3]
@@ -672,8 +683,11 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
         frameGm = self.frameGeometry()
         screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
         centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
-        frameGm.moveCenter(centerPoint)
+        centerPoint = self.mapToGlobal(centerPoint)
+
+        frameGm.moveCenter(qtc.QPoint(centerPoint.x(),centerPoint.y() - self.sizeHint().height()/2))
         self.move(frameGm.topLeft())
+
     def tab1UI(self,key,data,tabNumber):
         styleSheet = "QHeaderView::section{Background-color:#404040;color:#fff;text-align:center;font-weight:900}"
 
@@ -712,8 +726,10 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                 item1.setBackground(qtg.QColor(255,255,0))
             elif(item_value["Risk"] == "Acceptable"):
                 item1.setBackground(qtg.QColor(146,208,80)) 
-            else:
+            elif(item_value["Risk"] == "Ideal"):
                 item1.setBackground(qtg.QColor(0,176,240))
+            else:
+                 item1.setBackground(qtg.QColor(40,40,40))
 
             table.setItem(rowCount, 0, qtw.QTableWidgetItem(f'{item_key}'))
             table.setItem(rowCount, 1, qtw.QTableWidgetItem(f"{item_value['Index']}"))
@@ -740,7 +756,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
         self.tab1.setLayout(layout)  
 
     def showBack(self):
-        print("Back pressef")
+        print("Back pressed")
         self.inputs_window = self.ctx.input_window()
         self.inputs_window.show()
         self.close()    
@@ -770,17 +786,17 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     chlorideRes = {}
 
                     #------------------------------------------------------Corrosion Ryzner-------------------------------------
-                    if(analysis['ryzner'] > 8.5):
+                    if(analysis['ryzner'] >= 8.5):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Severe Corrosion"
                         RyznerRes["Risk"] = "Unacceptable"
                         RyznerRes["Treatment"] = "Treatment Recommended such as Water Treatment or Chemical Dosing"
-                    elif(analysis['ryzner'] <= 8.5 and analysis['ryzner'] > 7.8):
+                    elif(analysis['ryzner'] < 8.5 and analysis['ryzner'] >= 7.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Corrosion"
                         RyznerRes["Risk"] = "Tolerable"
                         RyznerRes["Treatment"] = "Treatment Recommended such as Water Treatment or Chemical Dosing"
-                    elif(analysis['ryzner'] <= 7.8 and analysis['ryzner'] > 6.8):
+                    elif(analysis['ryzner'] < 7.8 and analysis['ryzner'] >= 6.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Corrosion"
                         RyznerRes["Risk"] = "Acceptable"
@@ -821,8 +837,8 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     try:
                         if(self.material == "Stainless steel 304/304L"):
                             prenRes["Index"] = 20
-                            prenRes["Description"] = ""
-                            prenRes["Risk"] = "No sea water resistance"
+                            prenRes["Description"] = "Low sea water resistance"
+                            prenRes["Risk"] = "Unacceptable"
                             prenRes["Treatment"] = ""
                             
                             #Chloride Concentration
@@ -859,8 +875,8 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                                 
                         elif(self.material == "Stainless steel 316/316L" ):
                             prenRes["Index"] = 25
-                            prenRes["Description"] = ""
-                            prenRes["Risk"] = "No sea water resistance"
+                            prenRes["Description"] = "Low sea water resistance"
+                            prenRes["Risk"] = "Unacceptable"
                             prenRes["Treatment"] = ""
 
                             #Chloride Concentration
@@ -896,8 +912,8 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                                 
                         elif(self.material == "Stainless steel Alloy 20"):
                             prenRes["Index"] = 30
-                            prenRes["Description"] = ""
-                            prenRes["Risk"] = "No sea water resistance"
+                            prenRes["Description"] = "Low sea water resistance"
+                            prenRes["Risk"] = "Unacceptable"
                             prenRes["Treatment"] = ""
 
                             #Chloride Concentration
@@ -1020,17 +1036,17 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
 
 
                     #------------------------------------------------------Ryzner for Scaling---------------------------
-                    if(analysis['ryzner'] > 6.8):
+                    if(analysis['ryzner'] >= 6.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "No scale formation due to CaCO3"
                         RyznerRes["Risk"] = "Ideal"
                         RyznerRes["Treatment"] = "No Treatment"
-                    elif(analysis['ryzner'] <= 6.8 and analysis['ryzner'] > 6.2):
+                    elif(analysis['ryzner'] < 6.8 and analysis['ryzner'] >= 6.2):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Moderate Scale Formation due to CaCO3"
                         RyznerRes["Risk"] = "Acceptable"
                         RyznerRes["Treatment"] = "Treatment may be needed"
-                    elif(analysis['ryzner'] <= 6.2 and analysis['ryzner'] > 5.5):
+                    elif(analysis['ryzner'] < 6.2 and analysis['ryzner'] >= 5.5):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Scale Formation due to CaCO3"
                         RyznerRes["Risk"] = "Tolerable"
@@ -1043,7 +1059,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     Scaling["Ryzner Index"] = RyznerRes
                     #-----------------------------------------------------Silica Concentration in Steam-----------------------
                     try:
-                        if(analysis["Silica Concentration in steam"] < 0.02):
+                        if(analysis["Silica Concentration in steam"] <= 0.02):
                             silicaSteamRes["Index"] = analysis["Silica Concentration in steam"]
                             silicaSteamRes["Description"] = "Minimal silica film formation"
                             silicaSteamRes["Risk"] = "Ideal"
@@ -1060,11 +1076,11 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                      #---------------------------------------------------Silica and Magnesium -------------------------------------------
                     try:
                         mgLimit = 0
-                        if(analysis['pH'] > 8.5):
+                        if(analysis['pH'] >= 8.5):
                             mgLimit = 6000
-                        elif(analysis['pH'] <= 8.5 and analysis['pH'] >= 7.5):
+                        elif(analysis['pH'] < 8.5 and analysis['pH'] > 7.5):
                             mgLimit = 12000
-                        elif(analysis['pH'] < 7.5):
+                        elif(analysis['pH'] <= 7.5):
                             mgLimit = 17000
                         
                         if(analysis['SilicaMagnesium'] < mgLimit):
@@ -1099,15 +1115,15 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                 elif(assessment == "Fouling"):
                     Fouling = {}
                     ssFoulRes = {}
-                    if(analysis['Suspended Solids'] > 30):
+                    if(analysis['Suspended Solids'] >= 30):
                         ssFoulRes["Description"] = "High Chance of Fouling"
                         ssFoulRes["Risk"] = "Unacceptable"
                         ssFoulRes["Treatment"] = "Treatment recommended"
-                    elif(analysis['Suspended Solids'] <= 30 and analysis['Suspended Solids'] < 15):
+                    elif(analysis['Suspended Solids'] < 30 and analysis['Suspended Solids'] >= 15):
                         ssFoulRes["Description"] = "Moderate Fouling"
                         ssFoulRes["Risk"] = "Tolerable"
                         ssFoulRes["Treatment"] = "Treatment may be needed"
-                    elif(analysis['Suspended Solids'] <= 15 and analysis['Suspended Solids'] < 5):
+                    elif(analysis['Suspended Solids'] < 15 and analysis['Suspended Solids'] >= 5):
                         ssFoulRes["Description"] = "Mild of Fouling"
                         ssFoulRes["Risk"] = "Acceptable"
                         ssFoulRes["Treatment"] = "Treatment may be needed"
@@ -1127,17 +1143,17 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     LarsonRes = {}
                     PisiganRes = {}
                     #------------------------------------------------------Corrosion Ryzner-------------------------------------
-                    if(analysis['ryzner'] > 8.5):
+                    if(analysis['ryzner'] >= 8.5):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Severe Corrosion"
                         RyznerRes["Risk"] = "Unacceptable"
                         RyznerRes["Treatment"] = "Treatment Recommended such as Water Treatment or Chemical Dosing"
-                    elif(analysis['ryzner'] <= 8.5 and analysis['ryzner'] > 7.8):
+                    elif(analysis['ryzner'] < 8.5 and analysis['ryzner'] >= 7.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Corrosion"
                         RyznerRes["Risk"] = "Tolerable"
                         RyznerRes["Treatment"] = "Treatment Recommended such as Water Treatment or Chemical Dosing"
-                    elif(analysis['ryzner'] <= 7.8 and analysis['ryzner'] > 6.8):
+                    elif(analysis['ryzner'] < 7.8 and analysis['ryzner'] >= 6.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Corrosion"
                         RyznerRes["Risk"] = "Acceptable"
@@ -1150,11 +1166,11 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     Corrosion["Ryzner Index"] = RyznerRes
 
                     #------------------------------------------------------Corrosion Larson--------------------------------------
-                    if(analysis['larson'] > 1.2):
+                    if(analysis['larson'] >= 1.2):
                         LarsonRes["Description"] = "Severe pitting corrosion"
                         LarsonRes["Risk"] = "Unacceptable"
                         LarsonRes["Treatment"] = "Treatment Recommended"
-                    elif(analysis['larson'] <= 1.2 and analysis['larson'] >= 1):
+                    elif(analysis['larson'] < 1.2 and analysis['larson'] >= 1):
                         LarsonRes["Description"] = "Significant pitting corrosion"
                         LarsonRes["Risk"] = "Tolerable"
                         LarsonRes["Treatment"] = "Treatment may be needed"
@@ -1163,49 +1179,53 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                         LarsonRes["Risk"] = "Acceptable"
                         LarsonRes["Treatment"] = "Treatment may be needed"
                     else:
-                        LarsonRes["Description"] = "Severe pitting corrosion"
-                        LarsonRes["Risk"] = "Unacceptable"
-                        LarsonRes["Treatment"] = "Treatment Recommended"
+                        LarsonRes["Description"] = "Minimal risk of pitting corrosion"
+                        LarsonRes["Risk"] = "Ideal"
+                        LarsonRes["Treatment"] = "No Treatment"
                     LarsonRes["Index"] = round(analysis["larson"],2)
                     Corrosion['Larson Index'] = LarsonRes
 
                     #---------------------------------------------------------Corrosion Pisigan----------------------------------------
-                    if(analysis['reticulation']):
-                        if(analysis['pisigan corrosion'] > 10):
-                            PisiganRes["Description"] = "High corrosion rate - Severe corrosion will be experienced"
-                            PisiganRes["Risk"] = "Unacceptable"
-                            PisiganRes["Treatment"] = "Treatment recommended"
-                        elif(analysis['pisigan corrosion'] <= 10 and analysis['pisigan corrosion'] > 5):
-                            PisiganRes["Description"] = "Intermediate corrosion rate - Moderate corrosion may be experienced"
-                            PisiganRes["Risk"] = "Tolerable"
-                            PisiganRes["Treatment"] = "Treatment may be needed"
-                        elif(analysis['pisigan corrosion'] <= 5 and analysis['pisigan corrosion'] >= 1):
-                            PisiganRes["Description"] = "Intermediate corrosion rate - Mild corrosion may be experienced"
-                            PisiganRes["Risk"] = "Acceptable"
-                            PisiganRes["Treatment"] = "Treatment may be needed"
+                    try:
+                        if(analysis['reticulation']):
+                            if(analysis['pisigan corrosion'] > 10):
+                                PisiganRes["Description"] = "High corrosion rate - Severe corrosion will be experienced"
+                                PisiganRes["Risk"] = "Unacceptable"
+                                PisiganRes["Treatment"] = "Treatment recommended"
+                            elif(analysis['pisigan corrosion'] <= 10 and analysis['pisigan corrosion'] > 5):
+                                PisiganRes["Description"] = "Intermediate corrosion rate - Moderate corrosion may be experienced"
+                                PisiganRes["Risk"] = "Tolerable"
+                                PisiganRes["Treatment"] = "Treatment may be needed"
+                            elif(analysis['pisigan corrosion'] <= 5 and analysis['pisigan corrosion'] >= 1):
+                                PisiganRes["Description"] = "Intermediate corrosion rate - Mild corrosion may be experienced"
+                                PisiganRes["Risk"] = "Acceptable"
+                                PisiganRes["Treatment"] = "Treatment may be needed"
+                            else:
+                                PisiganRes["Description"] = "Low corrosion rate - Minimal corrosion experienced"
+                                PisiganRes["Risk"] = "Ideal"
+                                PisiganRes["Treatment"] = "No treatment"
                         else:
-                            PisiganRes["Description"] = "Low corrosion rate - Minimal corrosion experienced"
-                            PisiganRes["Risk"] = "Ideal"
-                            PisiganRes["Treatment"] = "No treatment"
-                    else:
-                        if(analysis['pisigan corrosion'] > 1):
-                            PisiganRes["Description"] = "High corrosion rate - Severe corrosion will be experienced"
-                            PisiganRes["Risk"] = "Unacceptable"
-                            PisiganRes["Treatment"] = "Treatment recommended"
-                        elif(analysis['pisigan corrosion'] <= 1 and analysis['pisigan corrosion'] >= 0.5):
-                            PisiganRes["Description"] = "Intermediate corrosion rate - Moderate corrosion may be experienced"
-                            PisiganRes["Risk"] = "Tolerable"
-                            PisiganRes["Treatment"] = "Treatment may be needed"
-                        elif(analysis['pisigan corrosion'] < 0.5 and analysis['pisigan corrosion'] >= 0.2):
-                            PisiganRes["Description"] = "Intermediate corrosion rate - Mild corrosion may be experienced"
-                            PisiganRes["Risk"] = "Acceptable"
-                            PisiganRes["Treatment"] = "Treatment may be needed"
-                        else:
-                            PisiganRes["Description"] = "Low corrosion rate - Minimal corrosion experienced"
-                            PisiganRes["Risk"] = "Ideal"
-                            PisiganRes["Treatment"] = "No treatment"
-                    PisiganRes["Index"] = round(analysis['pisigan corrosion'], 2)
-                    Corrosion["Corrosion Rate due to the Pisigan and Shingley Correlation"] = PisiganRes
+                            if(analysis['pisigan corrosion'] > 1):
+                                PisiganRes["Description"] = "High corrosion rate - Severe corrosion will be experienced"
+                                PisiganRes["Risk"] = "Unacceptable"
+                                PisiganRes["Treatment"] = "Treatment recommended"
+                            elif(analysis['pisigan corrosion'] <= 1 and analysis['pisigan corrosion'] >= 0.5):
+                                PisiganRes["Description"] = "Intermediate corrosion rate - Moderate corrosion may be experienced"
+                                PisiganRes["Risk"] = "Tolerable"
+                                PisiganRes["Treatment"] = "Treatment may be needed"
+                            elif(analysis['pisigan corrosion'] < 0.5 and analysis['pisigan corrosion'] >= 0.2):
+                                PisiganRes["Description"] = "Intermediate corrosion rate - Mild corrosion may be experienced"
+                                PisiganRes["Risk"] = "Acceptable"
+                                PisiganRes["Treatment"] = "Treatment may be needed"
+                            else:
+                                PisiganRes["Description"] = "Low corrosion rate - Minimal corrosion experienced"
+                                PisiganRes["Risk"] = "Ideal"
+                                PisiganRes["Treatment"] = "No treatment"
+                        PisiganRes["Index"] = round(analysis['pisigan corrosion'], 2)
+                        Corrosion["Corrosion Rate due to the Pisigan and Shingley Correlation"] = PisiganRes
+                    except KeyError as e:
+                        print("Error For corrosion Rate :{e}")
+                    
                     #-------------------------------End of Corrosion-------------------------------------------------------------------------------------------------------------------
                     results["Corrosion"] = Corrosion
                 elif(assessment == "Scaling"):
@@ -1217,17 +1237,17 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
 
 
                     #------------------------------------------------------Ryzner for Scaling---------------------------
-                    if(analysis['ryzner'] > 6.8):
+                    if(analysis['ryzner'] >= 6.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "No scale formation due to CaCO3"
                         RyznerRes["Risk"] = "Ideal"
                         RyznerRes["Treatment"] = "No Treatment"
-                    elif(analysis['ryzner'] <= 6.8 and analysis['ryzner'] > 6.2):
+                    elif(analysis['ryzner'] < 6.8 and analysis['ryzner'] >= 6.2):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Moderate Scale Formation due to CaCO3"
                         RyznerRes["Risk"] = "Acceptable"
                         RyznerRes["Treatment"] = "Treatment may be needed"
-                    elif(analysis['ryzner'] <= 6.2 and analysis['ryzner'] > 5.5):
+                    elif(analysis['ryzner'] < 6.2 and analysis['ryzner'] >= 5.5):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Scale Formation due to CaCO3"
                         RyznerRes["Risk"] = "Tolerable"
@@ -1240,7 +1260,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     Scaling["Ryzner Index"] = RyznerRes
                     #-----------------------------------------------------Silica Concentration in Steam-----------------------
                     try:
-                        if(analysis["Silica Concentration in steam"] < 0.02):
+                        if(analysis["Silica Concentration in steam"] <= 0.02):
                             silicaSteamRes["Index"] = analysis["Silica Concentration in steam"]
                             silicaSteamRes["Description"] = "Minimal silica film formation"
                             silicaSteamRes["Risk"] = "Ideal"
@@ -1257,11 +1277,11 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                      #---------------------------------------------------Silica and Magnesium -------------------------------------------
                     try:
                         mgLimit = 0
-                        if(analysis['pH'] > 8.5):
+                        if(analysis['pH'] >= 8.5):
                             mgLimit = 6000
-                        elif(analysis['pH'] <= 8.5 and analysis['pH'] >= 7.5):
+                        elif(analysis['pH'] < 8.5 and analysis['pH'] > 7.5):
                             mgLimit = 12000
-                        elif(analysis['pH'] < 7.5):
+                        elif(analysis['pH'] <= 7.5):
                             mgLimit = 17000
                         
                         if(analysis['SilicaMagnesium'] < mgLimit):
@@ -1296,15 +1316,15 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                 elif(assessment == "Fouling"):
                     Fouling = {}
                     ssFoulRes = {}
-                    if(analysis['Suspended Solids'] > 30):
+                    if(analysis['Suspended Solids'] >= 30):
                         ssFoulRes["Description"] = "High Chance of Fouling"
                         ssFoulRes["Risk"] = "Unacceptable"
                         ssFoulRes["Treatment"] = "Treatment recommended"
-                    elif(analysis['Suspended Solids'] <= 30 and analysis['Suspended Solids'] < 15):
+                    elif(analysis['Suspended Solids'] < 30 and analysis['Suspended Solids'] >= 15):
                         ssFoulRes["Description"] = "Moderate Fouling"
                         ssFoulRes["Risk"] = "Tolerable"
                         ssFoulRes["Treatment"] = "Treatment may be needed"
-                    elif(analysis['Suspended Solids'] <= 15 and analysis['Suspended Solids'] < 5):
+                    elif(analysis['Suspended Solids'] < 15 and analysis['Suspended Solids'] >= 5):
                         ssFoulRes["Description"] = "Mild of Fouling"
                         ssFoulRes["Risk"] = "Acceptable"
                         ssFoulRes["Treatment"] = "Treatment may be needed"
@@ -1323,17 +1343,17 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     RyznerRes = {}
                     AggressiveRes = {}
                     #------------------------------------------------------Corrosion Ryzner-------------------------------------
-                    if(analysis['ryzner'] > 8.5):
+                    if(analysis['ryzner'] >= 8.5):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Severe Corrosion"
                         RyznerRes["Risk"] = "Unacceptable"
                         RyznerRes["Treatment"] = "Treatment Recommended such as Water Treatment or Chemical Dosing"
-                    elif(analysis['ryzner'] <= 8.5 and analysis['ryzner'] > 7.8):
+                    elif(analysis['ryzner'] < 8.5 and analysis['ryzner'] >= 7.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Corrosion"
                         RyznerRes["Risk"] = "Tolerable"
                         RyznerRes["Treatment"] = "Treatment Recommended such as Water Treatment or Chemical Dosing"
-                    elif(analysis['ryzner'] <= 7.8 and analysis['ryzner'] > 6.8):
+                    elif(analysis['ryzner'] < 7.8 and analysis['ryzner'] >= 6.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Corrosion"
                         RyznerRes["Risk"] = "Acceptable"
@@ -1348,11 +1368,11 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     #----------------------------------------------------------Corrosion Aggressive-------------------------------------
                     try:
                         if(analysis["Concrete Reinforced"]):
-                            if(analysis["Aggressive"] >12):
+                            if(analysis["Aggressive"] >= 12):
                                 AggressiveRes["Description"] = "Non aggressive, Lack of pitting corrosion of the concrete reinforced bars"
                                 AggressiveRes["Risk"] = "Ideal"
                                 AggressiveRes["Treatment"] = "No Treatment"
-                            elif(analysis["Aggressive"] <= 12 and analysis["Aggressive"] >= 11):
+                            elif(analysis["Aggressive"] < 12 and analysis["Aggressive"] >= 11):
                                 AggressiveRes["Description"] = "Moderately aggressive, Moderate pitting corrosion of the concrete reinforced bars"
                                 AggressiveRes["Risk"] = "Acceptable"
                                 AggressiveRes["Treatment"] = "Treatment may be needed"
@@ -1377,17 +1397,17 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     sulphateAttackRez = {}
 
                     #--------------------------------------------------------------------Ryzner for scaling------------------------------------------
-                    if(analysis['ryzner'] > 6.8):
+                    if(analysis['ryzner'] >= 6.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "No scale formation due to CaCO3"
                         RyznerRes["Risk"] = "Ideal"
                         RyznerRes["Treatment"] = "No Treatment"
-                    elif(analysis['ryzner'] <= 6.8 and analysis['ryzner'] > 6.2):
+                    elif(analysis['ryzner'] < 6.8 and analysis['ryzner'] >= 6.2):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Moderate Scale Formation due to CaCO3"
                         RyznerRes["Risk"] = "Acceptable"
                         RyznerRes["Treatment"] = "Treatment may be needed"
-                    elif(analysis['ryzner'] <= 6.2 and analysis['ryzner'] > 5.5):
+                    elif(analysis['ryzner'] < 6.2 and analysis['ryzner'] >= 5.5):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Scale Formation due to CaCO3"
                         RyznerRes["Risk"] = "Tolerable"
@@ -1417,20 +1437,20 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                         sulphateAttackRez["Risk"] = "Ideal"
                         sulphateAttackRez["Treatment"] = "No treatment" 
                     sulphateAttackRez["Index"] = analysis["Sulphate"]
-                    Scaling["Sulphate attack on concrete"] = sulphateAttackRez
+                    Scaling["Sulphate attack"] = sulphateAttackRez
                     results["Scaling"] = Scaling
                 elif(assessment == "Fouling"):
                     Fouling = {}
                     ssFoulRes = {}
-                    if(analysis['Suspended Solids'] > 30):
+                    if(analysis['Suspended Solids'] >= 30):
                         ssFoulRes["Description"] = "High Chance of Fouling"
                         ssFoulRes["Risk"] = "Unacceptable"
                         ssFoulRes["Treatment"] = "Treatment recommended"
-                    elif(analysis['Suspended Solids'] <= 30 and analysis['Suspended Solids'] < 15):
+                    elif(analysis['Suspended Solids'] < 30 and analysis['Suspended Solids'] >= 15):
                         ssFoulRes["Description"] = "Moderate Fouling"
                         ssFoulRes["Risk"] = "Tolerable"
                         ssFoulRes["Treatment"] = "Treatment may be needed"
-                    elif(analysis['Suspended Solids'] <= 15 and analysis['Suspended Solids'] < 5):
+                    elif(analysis['Suspended Solids'] < 15 and analysis['Suspended Solids'] >= 5):
                         ssFoulRes["Description"] = "Mild of Fouling"
                         ssFoulRes["Risk"] = "Acceptable"
                         ssFoulRes["Treatment"] = "Treatment may be needed"
@@ -1451,17 +1471,17 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     AggressiveRes = {}
                     csmr = {}
                     #------------------------------------------------------Corrosion Ryzner-------------------------------------
-                    if(analysis['ryzner'] > 8.5):
+                    if(analysis['ryzner'] >= 8.5):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Severe Corrosion"
                         RyznerRes["Risk"] = "Unacceptable"
                         RyznerRes["Treatment"] = "Treatment Recommended such as Water Treatment or Chemical Dosing"
-                    elif(analysis['ryzner'] <= 8.5 and analysis['ryzner'] > 7.8):
+                    elif(analysis['ryzner'] < 8.5 and analysis['ryzner'] >= 7.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Corrosion"
                         RyznerRes["Risk"] = "Tolerable"
                         RyznerRes["Treatment"] = "Treatment Recommended such as Water Treatment or Chemical Dosing"
-                    elif(analysis['ryzner'] <= 7.8 and analysis['ryzner'] > 6.8):
+                    elif(analysis['ryzner'] < 7.8 and analysis['ryzner'] >= 6.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Corrosion"
                         RyznerRes["Risk"] = "Acceptable"
@@ -1484,29 +1504,29 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                             else:
                                 csmr["Index"] = analysis["csmr"]
                                 csmr["Description"] = "Minimal corrosion risk"
-                                csmr["Risk"] = "Acceptable"
-                                csmr['Treatment'] = "Treatment recommended"
+                                csmr["Risk"] = "Ideal"
+                                csmr['Treatment'] = "No Treatment"
                             Corrosion["Chloride to Sulphate Mass Ratio "] = csmr
                     except Exception as e:
                         print(f"Error CSMR :{e}")
 
-                    #-----------------------------------------------------------Larson ------------------------------------------------
-                    if(analysis['larson'] > 1.2):
-                        LarsonRes["Description"] = "Severe pitting corrosion"
+                    #-----------------------------------------------------------Larson Alloys------------------------------------------------
+                    if(analysis['larson'] >= 1.2):
+                        LarsonRes["Description"] = "Severe corrosion"
                         LarsonRes["Risk"] = "Unacceptable"
                         LarsonRes["Treatment"] = "Treatment Recommended"
-                    elif(analysis['larson'] <= 1.2 and analysis['larson'] >= 1):
-                        LarsonRes["Description"] = "Significant pitting corrosion"
+                    elif(analysis['larson'] < 1.2 and analysis['larson'] >= 1):
+                        LarsonRes["Description"] = "Significant corrosion"
                         LarsonRes["Risk"] = "Tolerable"
                         LarsonRes["Treatment"] = "Treatment may be needed"
                     elif(analysis['larson'] < 1 and analysis['larson'] >= 0.8):
-                        LarsonRes["Description"] = "Mild pitting corrosion"
+                        LarsonRes["Description"] = "Mild corrosion"
                         LarsonRes["Risk"] = "Acceptable"
                         LarsonRes["Treatment"] = "Treatment may be needed"
                     else:
-                        LarsonRes["Description"] = "Severe pitting corrosion"
-                        LarsonRes["Risk"] = "Unacceptable"
-                        LarsonRes["Treatment"] = "Treatment Recommended"
+                        LarsonRes["Description"] = "Non corrosive water"
+                        LarsonRes["Risk"] = "Ideal"
+                        LarsonRes["Treatment"] = "No Treatment"
                     LarsonRes["Index"] = round(analysis["larson"],2)
                     Corrosion['Larson Index'] = LarsonRes
 
@@ -1521,17 +1541,17 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
 
 
                     #------------------------------------------------------Ryzner for Scaling---------------------------
-                    if(analysis['ryzner'] > 6.8):
+                    if(analysis['ryzner'] >= 6.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "No scale formation due to CaCO3"
                         RyznerRes["Risk"] = "Ideal"
                         RyznerRes["Treatment"] = "No Treatment"
-                    elif(analysis['ryzner'] <= 6.8 and analysis['ryzner'] > 6.2):
+                    elif(analysis['ryzner'] < 6.8 and analysis['ryzner'] >= 6.2):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Moderate Scale Formation due to CaCO3"
                         RyznerRes["Risk"] = "Acceptable"
                         RyznerRes["Treatment"] = "Treatment may be needed"
-                    elif(analysis['ryzner'] <= 6.2 and analysis['ryzner'] > 5.5):
+                    elif(analysis['ryzner'] < 6.2 and analysis['ryzner'] >= 5.5):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Scale Formation due to CaCO3"
                         RyznerRes["Risk"] = "Tolerable"
@@ -1544,7 +1564,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     Scaling["Ryzner Index"] = RyznerRes
                     #-----------------------------------------------------Silica Concentration in Steam-----------------------
                     try:
-                        if(analysis["Silica Concentration in steam"] < 0.02):
+                        if(analysis["Silica Concentration in steam"] <= 0.02):
                             silicaSteamRes["Index"] = analysis["Silica Concentration in steam"]
                             silicaSteamRes["Description"] = "Minimal silica film formation"
                             silicaSteamRes["Risk"] = "Ideal"
@@ -1561,11 +1581,11 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                      #---------------------------------------------------Silica and Magnesium -------------------------------------------
                     try:
                         mgLimit = 0
-                        if(analysis['pH'] > 8.5):
+                        if(analysis['pH'] >= 8.5):
                             mgLimit = 6000
-                        elif(analysis['pH'] <= 8.5 and analysis['pH'] >= 7.5):
+                        elif(analysis['pH'] < 8.5 and analysis['pH'] > 7.5):
                             mgLimit = 12000
-                        elif(analysis['pH'] < 7.5):
+                        elif(analysis['pH'] <= 7.5):
                             mgLimit = 17000
                         
                         if(analysis['SilicaMagnesium'] < mgLimit):
@@ -1601,15 +1621,15 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                 elif(assessment == "Fouling"):
                     Fouling = {}
                     ssFoulRes = {}
-                    if(analysis['Suspended Solids'] > 30):
+                    if(analysis['Suspended Solids'] >= 30):
                         ssFoulRes["Description"] = "High Chance of Fouling"
                         ssFoulRes["Risk"] = "Unacceptable"
                         ssFoulRes["Treatment"] = "Treatment recommended"
-                    elif(analysis['Suspended Solids'] <= 30 and analysis['Suspended Solids'] < 15):
+                    elif(analysis['Suspended Solids'] < 30 and analysis['Suspended Solids'] >= 15):
                         ssFoulRes["Description"] = "Moderate Fouling"
                         ssFoulRes["Risk"] = "Tolerable"
                         ssFoulRes["Treatment"] = "Treatment may be needed"
-                    elif(analysis['Suspended Solids'] <= 15 and analysis['Suspended Solids'] < 5):
+                    elif(analysis['Suspended Solids'] < 15 and analysis['Suspended Solids'] >= 5):
                         ssFoulRes["Description"] = "Mild of Fouling"
                         ssFoulRes["Risk"] = "Acceptable"
                         ssFoulRes["Treatment"] = "Treatment may be needed"
@@ -1627,17 +1647,17 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     Scaling = {}
                     RyznerRes = {}
                     #------------------------------------------------------Ryzner for Scaling---------------------------
-                    if(analysis['ryzner'] > 6.8):
+                    if(analysis['ryzner'] >= 6.8):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "No scale formation due to CaCO3"
                         RyznerRes["Risk"] = "Ideal"
                         RyznerRes["Treatment"] = "No Treatment"
-                    elif(analysis['ryzner'] <= 6.8 and analysis['ryzner'] > 6.2):
+                    elif(analysis['ryzner'] < 6.8 and analysis['ryzner'] >= 6.2):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Moderate Scale Formation due to CaCO3"
                         RyznerRes["Risk"] = "Acceptable"
                         RyznerRes["Treatment"] = "Treatment may be needed"
-                    elif(analysis['ryzner'] <= 6.2 and analysis['ryzner'] > 5.5):
+                    elif(analysis['ryzner'] < 6.2 and analysis['ryzner'] >= 5.5):
                         RyznerRes["Index"] = round(analysis['ryzner'], 2)
                         RyznerRes["Description"] = "Mild Scale Formation due to CaCO3"
                         RyznerRes["Risk"] = "Tolerable"
@@ -1652,15 +1672,15 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                 elif(assessment == "Fouling"):
                     Fouling = {}
                     ssFoulRes = {}
-                    if(analysis['Suspended Solids'] > 30):
+                    if(analysis['Suspended Solids'] >= 30):
                         ssFoulRes["Description"] = "High Chance of Fouling"
                         ssFoulRes["Risk"] = "Unacceptable"
                         ssFoulRes["Treatment"] = "Treatment recommended"
-                    elif(analysis['Suspended Solids'] <= 30 and analysis['Suspended Solids'] < 15):
+                    elif(analysis['Suspended Solids'] < 30 and analysis['Suspended Solids'] >= 15):
                         ssFoulRes["Description"] = "Moderate Fouling"
                         ssFoulRes["Risk"] = "Tolerable"
                         ssFoulRes["Treatment"] = "Treatment may be needed"
-                    elif(analysis['Suspended Solids'] <= 15 and analysis['Suspended Solids'] < 5):
+                    elif(analysis['Suspended Solids'] < 15 and analysis['Suspended Solids'] >= 5):
                         ssFoulRes["Description"] = "Mild of Fouling"
                         ssFoulRes["Risk"] = "Acceptable"
                         ssFoulRes["Treatment"] = "Treatment may be needed"
@@ -1679,15 +1699,15 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     ssFoulRes = {}
                     psRes = {}
                     sdensityRes = {}
-                    if(analysis['Suspended Solids'] > 30):
+                    if(analysis['Suspended Solids'] >= 30):
                         ssFoulRes["Description"] = "High Chance of Fouling"
                         ssFoulRes["Risk"] = "Unacceptable"
                         ssFoulRes["Treatment"] = "Treatment recommended"
-                    elif(analysis['Suspended Solids'] <= 30 and analysis['Suspended Solids'] < 15):
+                    elif(analysis['Suspended Solids'] < 30 and analysis['Suspended Solids'] >= 15):
                         ssFoulRes["Description"] = "Moderate Fouling"
                         ssFoulRes["Risk"] = "Tolerable"
                         ssFoulRes["Treatment"] = "Treatment may be needed"
-                    elif(analysis['Suspended Solids'] <= 15 and analysis['Suspended Solids'] < 5):
+                    elif(analysis['Suspended Solids'] < 15 and analysis['Suspended Solids'] >= 5):
                         ssFoulRes["Description"] = "Mild of Fouling"
                         ssFoulRes["Risk"] = "Acceptable"
                         ssFoulRes["Treatment"] = "Treatment may be needed"
@@ -1699,15 +1719,15 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
 
                     #--------------------------------------------------------------------------Fouling Silt Density----------------------
                     try:
-                        if(analysis["Silt Density Index"] < 1):
+                        if(analysis["Silt Density Index"] >= 5):
                             psRes["Description"] = "Several years without collodial fouling"
                             psRes['Risk'] = "Ideal"
                             psRes["Treatment"] = "Treatment not recommended"
-                        if(analysis["Silt Density Index"] < 3):
+                        if(analysis["Silt Density Index"] < 5 and analysis["Silt Density Index"] >= 3):
                             psRes["Description"] = "Several months between cleaning"
                             psRes['Risk'] = "Acceptable"
                             psRes["Treatment"] = "Treatment recommended"
-                        elif(analysis["Silt Density Index"] >= 3 and analysis["Silt Density Index"] <= 5):
+                        elif(analysis["Silt Density Index"] > 3 and analysis["Silt Density Index"] <= 1):
                             psRes["Description"] = "Particular fouling likely a problem, frequent cleaning"
                             psRes['Risk'] = "Tolerable"
                             psRes["Treatment"] = "Treatment recommended"
@@ -1719,7 +1739,39 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                         Fouling["Silt Density Index"] = psRes
                     except Exception as e:
                         print(f"Error Fouling Silt Density :{e}")
-        
+                    #-----------------------------------------------------------------------------Particle Size-----------------------------
+                    try:
+                        analysisLimit = 0
+                        if(analysis['Technology Type'] == 0): #Grit Removal
+                            analysisLimit = 1000
+                            description = "Treatment Recommended"
+
+                        elif(analysis["Technology Type"] == 1): #Microfiltration
+                            analysisLimit = 0.1
+                            description = "Treatment Recommended, This technology is recommended for suspended solids and large colloids"
+                        elif(analysis["Technology Type"] == 2): #Ultrafiltration
+                            analysisLimit = 0.1                            
+                            description = "Treatment Recommended, This technology is recommened for Proteins and large organics"
+                        elif(analysis["Technology Type"] == 3): #Nanofiltration
+                            analysisLimit = 0.001
+                            description = "Treatment Recommended, This technology is recommended for Organics and dissolved solids"
+                        elif(analysis["Technology Type"] == 4): #Reverse Osmosis
+                            analysisLimit = 0.001
+                            description = "Treatment Recommended, This technology is recommended for Dissolved salts and organics"
+
+                        if(analysis["Particle Size"] > analysisLimit): 
+                            sdensityRes["Treatment"] = description
+                            sdensityRes["Risk"] = "Unacceptable"
+                        else:
+                            sdensityRes["Treatment"] = "No Treatment"
+                            sdensityRes["Risk"] = "Acceptable"
+                        
+                        Fouling["Particle Size"] = sdensityRes
+                        sdensityRes["Description"] = "-"
+                        sdensityRes['Index'] = analysis["Particle Size"]
+                        
+                    except Exception as e:
+                        print(f"Error Paricle Size ;{e}")
                     Fouling["Suspended Solids Fouling"] = ssFoulRes
                     results["Fouling"] = Fouling      
         print(results)
@@ -1780,6 +1832,8 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         super().__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_inputs,self)
+        #self.centralwidget.adjustSize()
+        #self.resize(self.minimumSize())
         #self.center()
         
         self.level = args[1]['level']
@@ -1848,7 +1902,11 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         spin_input = qtw.QDoubleSpinBox()
                         spin_input.setRange(self.units_data[input]['rangeLow'],self.units_data[input]['rangeHigh'])
                         spin_input.setSingleStep(0.1)
-                        spin_input.setDecimals(1)
+                        try:
+                            spin_input.setDecimals(self.units_data[input]['decimals'])
+                        except Exception as e:
+                            spin_input.setDecimals(1)
+                            print(f'Decimal error: {e}')
                     spin_input.clear()
                     spin_input.setButtonSymbols(qtw.QAbstractSpinBox.NoButtons)
                     spin_input.setLocale(qtc.QLocale())
@@ -1868,9 +1926,17 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                 spin_input.setObjectName(f'{self.units_data[input]["label"]}')
                 
                 if(self.units_data[input]['unit'] == "n/a"):
-                    unit_box = qtw.QLineEdit()
+                    unit_box = qtw.QLabel()
                     unit_box.setEnabled(False)
                     unit_box.setText(self.units_data[input]['unit'])
+                    unit_box.setMinimumWidth(60)
+                    unit_box.setStyleSheet("font-size:12px;border:none")
+                elif(len(self.units_data[input]['unit']) <= 1):
+                    unit_box = qtw.QLabel()
+                    unit_box.setEnabled(False)
+                    unit_box.setText(self.units_data[input]['unit'][0])
+                    unit_box.setMinimumWidth(70)
+                    unit_box.setStyleSheet("font-size:12px;border:none")
                 else:
                     unit_box = qtw.QComboBox()
                     unit_box.setEnabled(False)
@@ -1905,7 +1971,11 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         spin_input = qtw.QDoubleSpinBox()
                         spin_input.setRange(self.units_data[input]['rangeLow'],self.units_data[input]['rangeHigh'])
                         spin_input.setSingleStep(0.1)
-                        spin_input.setDecimals(1)
+                        try:
+                            spin_input.setDecimals(self.units_data[input]['decimals'])
+                        except Exception as e:
+                            spin_input.setDecimals(1)
+                            print(f'Decimal error: {e}')
                     spin_input.clear()
                     spin_input.setButtonSymbols(qtw.QAbstractSpinBox.NoButtons)
                     spin_input.setLocale(qtc.QLocale())
@@ -1922,12 +1992,19 @@ class InputsWindow(QMainWindow, qtw.QWidget):
 
                 spin_input.setObjectName(f'{self.units_data[input]["label"]}')
                 if(self.units_data[input]['unit'] == "n/a"):
-                    unit_box = qtw.QLineEdit()
+                    unit_box = qtw.QLabel()
                     unit_box.setEnabled(False)
                     unit_box.setText(self.units_data[input]['unit'])
+                    unit_box.setStyleSheet("font-size:12px;border:none")
+                elif(len(self.units_data[input]['unit']) <= 1):
+                    unit_box = qtw.QLabel()
+                    unit_box.setEnabled(False)
+                    unit_box.setText(self.units_data[input]['unit'][0])
+                    unit_box.setMinimumWidth(70)
+                    unit_box.setStyleSheet("font-size:12px;border:none")
                 else:
                     unit_box = qtw.QComboBox()
-                    unit_box.setEnabled(False)
+                    #unit_box.setEnabled(False)
                     unit_box.addItems(self.units_data[input]['unit'])
                     unit_box.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
                     unit_box.setFont(qtg.QFont('Times', 8))
@@ -1949,8 +2026,10 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         frameGm = self.frameGeometry()
         screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
         centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
-        frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())    
+        centerPoint = self.mapToGlobal(centerPoint)
+
+        frameGm.moveCenter(qtc.QPoint(centerPoint.x(),centerPoint.y() - self.sizeHint().height()/2))
+        self.move(frameGm.topLeft())
 
     def showNext(self,analysis,material,assesments,inputs):
         info = {
@@ -1962,6 +2041,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         self.ui_reports_window = self.ctx.report_window_setter(analysis,material,assesments,inputs,user,info)
         self.ui_reports_window.show()
 
+        self.close()
         
         
     def showBack(self):
@@ -2022,6 +2102,14 @@ class InputsWindow(QMainWindow, qtw.QWidget):
             "input_ph": 0,
             "input_tds": 0,
             "input_ec": 0,
+            "input_palkalinity":0,
+            "input_silica_concentration":0,
+            "input_silica":0,
+            "input_suspended":0,
+            "input_oxygen":0,
+            "input_days":0,
+            "input_silt":0,
+            "input_particle":0,
             "isEditable" : True
         }
         store_data = {}
@@ -2078,15 +2166,21 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         inputs = {}
         for input_key,input_item in self.units_data.items():
            
-            inputWidget = self.findChild(qtw.QSpinBox, input_item["label"]) or self.findChild(qtw.QDoubleSpinBox, input_item["label"]) or self.findChild(qtw.QCheckBox, input_item["label"])
+            inputWidget = (self.findChild(qtw.QSpinBox, input_item["label"]) or self.findChild(qtw.QDoubleSpinBox, input_item["label"]) 
+                    or self.findChild(qtw.QCheckBox, input_item["label"]) or self.findChild(qtw.QComboBox, input_item["label"])
+                    )
             if(inputWidget):
                 try:
                     value = inputWidget.value() 
                     
                 except AttributeError as e:
-                    value = inputWidget.isChecked()
+                    try:
+                        value = inputWidget.isChecked()
+                    except AttributeError as e:
+                        value = inputWidget.currentIndex()
                 inputs[input_key] = value
                 #print("{}:{}".format(input_key,value))
+        
         analysis = (Analyze(self.material,self.assesments,inputs))
         self.showNext(analysis,self.material,self.assesments,inputs)
     def valueChanged(self):
@@ -2103,7 +2197,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
             "Optional" : []
         }
         requiredListRyzner = ["pH", "Alkalinity","Calcium",
-                              "Electrical Conductivity","Sulphate","TDS",
+                              "Electrical Conductivity","Total Dissolved Solids(TDS)",
                               "Temperature"]
         if(self.material == "Stainless steel 304/304L" or self.material == "Stainless steel 316/316L" or 
         self.material == "Stainless steel Alloy 20" or self.material == "Stainless steel 904L" or self.material == "Duplex Stainless Steel" ):
@@ -2173,8 +2267,8 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                     if(len(ryzner) > 0) : errorSheet["Required"].append({"Ryzner":ryzner})
                 if(assement == "Corrosion"):
                     corrRateReq = ["pH", "Alkalinity","Calcium","Chloride",
-                              "Electrical Conductivity","Sulphate","Dissolved Oxygen","TDS",
-                              "Temperature","Days of Exposure","P Alkalinity","Magnesium"]
+                              "Electrical Conductivity","Sulphate","Dissolved Oxygen","Total Dissolved Solids(TDS)",
+                              "Temperature","Days of Exposure","Magnesium"]
                     corrRate = []
                     for corr_input in corrRateReq:
                         try:
@@ -2183,7 +2277,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         except Exception as e:
                             print(f'Error validation Coorsion rate: {e}')
                             continue
-                    if(len(corrRate)>0):errorSheet["Required"].append({"Corrosion Rate":corrRate})
+                    if(len(corrRate)>0):errorSheet["Optional"].append({"Corrosion Rate":corrRate})
                 elif(assement == "Scaling"):
                     optional_sil = ["Silica", "Magnesium"]
                     optional_cal =["Calcium", "Sulphate"]
@@ -2242,7 +2336,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                         except Exception as e:
                             print(f'Error validation aggressive: {e}')
                             continue
-                    if(len(agg)>0):errorSheet["Required"].append({"Corrosion Rate":agg})
+                    if(len(agg)>0):errorSheet["Optional"].append({"Corrosion Rate":agg})
                 elif(assement == "Scaling"):
                     try:
                         if(self.errors["Sulphate"] == "Not Entered"):
@@ -2356,14 +2450,21 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         if(len(errorSheet["Required"]) > 0 or len(errorSheet["Optional"]) > 0):
             data = {}
             if(len(errorSheet["Required"]) > 0):
-               data['Required'] = errorSheet["Required"]
+                data['Required'] = errorSheet["Required"]
+                self.ui_validationDialog = self.ctx.input_validation_setter(data)
+                self.ui_validationDialog.show()
             if(len(errorSheet["Optional"]) > 0):
-               data['Optional'] = errorSheet["Optional"]
-            self.ui_validationDialog = self.ctx.input_validation_setter(data)
-            self.ui_validationDialog.show()
-        
-        if(len(errorSheet['Required']) <= 0):
+                data['Optional'] = errorSheet["Optional"]
+                self.ui_validationDialog = self.ctx.input_validation_setter(data)
+                self.ui_validationDialog.show()
+                if(self.ui_validationDialog.exec() == 1):
+                   self.calculate()
+            
+            #if(self.ui_validationDialog)
+        else:
             self.calculate()
+        #if(len(errorSheet['Required']) <= 0):
+            #self.calculate()
 
         # for error_keys,error_items in errorSheet.items():
         #     print(f'keys -> {error_keys}')
@@ -2376,8 +2477,11 @@ class SectorWindow(QMainWindow, qtw.QWidget):
         super(SectorWindow,self).__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_sector,self)
-        #self.center()
-        self.setWindowTitle("Sector Inputs")
+        print(f"Size:{self.centralwidget.sizeHint()}")
+        self.centralwidget.adjustSize()
+        self.resize(self.centralwidget.minimumSizeHint())
+        
+        self.setWindowTitle("Site-specific inputs")
         self.sector_data = self.ctx.import_data
         self.sector_keys = self.sector_data.iloc[:,0]
         self.level = args[1]['level']
@@ -2408,6 +2512,15 @@ class SectorWindow(QMainWindow, qtw.QWidget):
         self.buttonBack.clicked.connect(self.showBack)
         self.buttonUserInfoEdit.clicked.connect(self.editUserInfo)
         self.buttonAbout.clicked.connect(self.showAbout)
+        self.buttonSelectAll.clicked.connect(self.selectAll)
+
+    def selectAll(self):
+        if(self.checkBoxCorrosion_2.isEnabled() == True):
+            self.checkBoxCorrosion_2.setChecked(True)
+        if(self.checkBoxFouling_2.isEnabled() == True):
+            self.checkBoxFouling_2.setChecked(True)
+        if(self.checkBoxScaling_2.isEnabled() == True):
+            self.checkBoxScaling_2.setChecked(True)
 
     def editUserInfo(self):
         data = {
@@ -2433,37 +2546,38 @@ class SectorWindow(QMainWindow, qtw.QWidget):
         self.about_window = self.ctx.about_window
         self.about_window.show()
     def validate_type(self):
-        self.checkBoxCorrosion.setEnabled(True)
-        self.checkBoxFouling.setEnabled(True)
-        self.checkBoxScaling.setEnabled(True)
+        self.checkBoxCorrosion_2.setEnabled(True)
+        self.checkBoxFouling_2.setEnabled(True)
+        self.checkBoxScaling_2.setEnabled(True)
         if(self.materialComboBox.currentText() == "Plastic"):
 
-            self.checkBoxCorrosion.setChecked(False)
-            self.checkBoxFouling.setChecked(False)
-            self.checkBoxCorrosion.setEnabled(False)
-            self.checkBoxFouling.setEnabled(False)
+            self.checkBoxCorrosion_2.setChecked(False)
+            self.checkBoxCorrosion_2.setEnabled(False)
+            
             
         elif(self.materialComboBox.currentText() == "Membranes" ):
-            self.checkBoxCorrosion.setChecked(False)
-            self.checkBoxScaling.setChecked(False)
-            self.checkBoxCorrosion.setEnabled(False)
-            self.checkBoxScaling.setEnabled(False)
+            self.checkBoxCorrosion_2.setChecked(False)
+            self.checkBoxScaling_2.setChecked(False)
+            self.checkBoxCorrosion_2.setEnabled(False)
+            self.checkBoxScaling_2.setEnabled(False)
         else:
-            self.checkBoxCorrosion.setEnabled(True)
-            self.checkBoxFouling.setEnabled(True)
-            self.checkBoxScaling.setEnabled(True)
+            self.checkBoxCorrosion_2.setEnabled(True)
+            self.checkBoxFouling_2.setEnabled(True)
+            self.checkBoxScaling_2.setEnabled(True)
 
     def center(self):
         frameGm = self.frameGeometry()
         screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
         centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
-        frameGm.moveCenter(centerPoint)
+        centerPoint = self.mapToGlobal(centerPoint)
+
+        frameGm.moveCenter(qtc.QPoint(centerPoint.x(),centerPoint.y() - self.sizeHint().height()/2))
         self.move(frameGm.topLeft())
     def sector_selectionchange(self):
         self.sectorComboBox.setStyleSheet("border-color:#303030; background-color:#f7f7f7;")
         tempSelect = self.sectorComboBox.currentText()
         sector_unitList = self.sector_data.loc[self.sector_keys == tempSelect].iloc[:,1:].dropna(axis='columns')
-        sector_materials = ['Carbon Steel','Concrete','Membranes'
+        sector_materials = ['Carbon Steel','Concrete'
         ,'Monel-Lead/Copper Alloys','Plastic','Stainless steel 304/304L'
         ,'Stainless steel 316/316L','Stainless steel Alloy 20','Stainless steel 904L'
         ,'Duplex Stainless Steel']
@@ -2481,11 +2595,16 @@ class SectorWindow(QMainWindow, qtw.QWidget):
         self.materialComboBox.setModel(ProxyModel(model_materials, 'Select Unit...'))
         self.materialComboBox.setCurrentIndex(0)
 
-        #self.unitComboBox.currentIndexChanged.connect(self.unit_selectionChange)
+        self.unitComboBox.currentIndexChanged.connect(self.unit_selectionChange)
 
     def unit_selectionChange(self):
-        self.unitComboBox.setStyleSheet("border-color:#303030; background-color:#f7f7f7")
         text = self.unitComboBox.currentText()
+        self.unitComboBox.setStyleSheet("border-color:#303030; background-color:#f7f7f7")
+        self.resize(self.centralwidget.minimumSizeHint())
+        if(text == "Grids/Screens" or text == "Screens" or text == "Sand Filters"):
+            self.groupBox_4.hide()
+        else:
+            self.groupBox_4.show()
         
         if(text == "Dams" or text == "Reactor" or text == "Tanks"):
             self.liningFrame.show()
@@ -2522,9 +2641,17 @@ class SectorWindow(QMainWindow, qtw.QWidget):
                 if(msg.result() == 1024):
                     self.materialComboBox.setFocus()
                     self.materialComboBox.setStyleSheet("border:1px solid #ffcccb;")
-
-        elif(self.checkBoxCorrosion.isChecked() == True or self.checkBoxScaling.isChecked() == True or self.checkBoxFouling.isChecked() == True):
+        elif(self.liningFrame.isHidden() == False and (self.radioButton.isChecked() == False and self.radioButton_2.isChecked() == False)):
+                msg = qtw.QMessageBox()
+                msg.setText("Please specifiy if the storage unit is lined or not lined ")
+                msg.setWindowTitle("Missing Input Information")
+                msg.setStyleSheet("QmessageBox QLabel{min-width: "+str(300)+"px;}")
+                msg.exec_()
+                if(msg.result() == 1024):
+                    self.radioButton.setFocus()
+        elif(self.checkBoxCorrosion_2.isChecked() == True or self.checkBoxScaling_2.isChecked() == True or self.checkBoxFouling_2.isChecked() == True):
             self.showNext()
+        
         else:
             errorMessage = qtw.QMessageBox()
             errorMessage.setIcon(qtw.QMessageBox.Critical)
@@ -2553,20 +2680,20 @@ class SectorWindow(QMainWindow, qtw.QWidget):
         Field_data['unit'] = self.unitComboBox.currentIndex()
         Field_data['material'] = self.materialComboBox.currentIndex()
 
-        Field_data['corrosion'] = self.checkBoxCorrosion.isChecked()
-        Field_data['scaling'] = self.checkBoxScaling.isChecked()
-        Field_data['fouling'] = self.checkBoxFouling.isChecked()
+        Field_data['corrosion'] = self.checkBoxCorrosion_2.isChecked()
+        Field_data['scaling'] = self.checkBoxScaling_2.isChecked()
+        Field_data['fouling'] = self.checkBoxFouling_2.isChecked()
         #Validate
 
          
         
 
         typeLabels = []
-        if(self.checkBoxCorrosion.isChecked() == True):
+        if(self.checkBoxCorrosion_2.isChecked() == True):
             typeLabels.append("Corrosion")
-        if(self.checkBoxScaling.isChecked() == True):
+        if(self.checkBoxScaling_2.isChecked() == True):
             typeLabels.append("Scaling")
-        if(self.checkBoxFouling.isChecked() == True):
+        if(self.checkBoxFouling_2.isChecked() == True):
             typeLabels.append("Fouling") 
         
         
@@ -2613,11 +2740,16 @@ class MainWindow(QMainWindow):
         self.move(frameGm.topLeft())
     def showNext(self):
         self.ui_sector = self.ctx.sector_setter(level="Advanced")
+        
         self.ui_sector.show()
         self.close()
 
 
 if __name__ == '__main__':
+    if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+        qtw.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+    if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+        qtw.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
     appctxt = AppContext()       # 1. Instantiate ApplicationContext
     exit_code = appctxt.run()     # 2. Invoke appctxt.app.exec_()
     sys.exit(exit_code)
