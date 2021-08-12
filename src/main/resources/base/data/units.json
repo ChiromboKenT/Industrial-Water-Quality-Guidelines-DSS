@@ -39,7 +39,7 @@
         "decimals":2,
         "input_type": "number"
     },
-    "TDS":{
+    "Total Dissolved Solids(TDS)":{
         "unit" : ["mg/L"],
         "rangeLow" :0,
         "label" : "input_tds",
