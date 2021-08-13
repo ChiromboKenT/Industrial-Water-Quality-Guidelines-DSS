@@ -6,18 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1249</width>
-    <height>980</height>
+    <width>1372</width>
+    <height>1027</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>0</width>
-    <height>980</height>
+    <height>990</height>
    </size>
   </property>
   <property name="windowTitle">
    <string>Fitness for Use</string>
+  </property>
+  <property name="documentMode">
+   <bool>false</bool>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
@@ -688,15 +691,21 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
             <number>0</number>
            </property>
            <widget class="QWidget" name="page">
-            <layout class="QVBoxLayout" name="verticalLayout_13" stretch="0,1,2,1,1,0">
+            <layout class="QVBoxLayout" name="verticalLayout_13" stretch="0,1,2,1,1">
              <property name="spacing">
-              <number>15</number>
+              <number>13</number>
              </property>
              <property name="leftMargin">
               <number>15</number>
              </property>
+             <property name="topMargin">
+              <number>9</number>
+             </property>
              <property name="rightMargin">
               <number>10</number>
+             </property>
+             <property name="bottomMargin">
+              <number>9</number>
              </property>
              <item>
               <widget class="QFrame" name="frame_7">
@@ -858,8 +867,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                    </font>
                   </property>
                   <property name="styleSheet">
-                   <string notr="true">
-</string>
+                   <string notr="true"/>
                   </property>
                   <property name="frameShadow">
                    <enum>QFrame::Sunken</enum>
@@ -1241,6 +1249,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          <bold>false</bold>
                         </font>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color:transparent</string>
+                       </property>
                        <property name="text">
                         <string>Select Industry: </string>
                        </property>
@@ -1255,6 +1266,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                        <family>Segoe UI</family>
                        <stylestrategy>PreferAntialias</stylestrategy>
                       </font>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background-color:transparent</string>
                      </property>
                      <property name="frameShape">
                       <enum>QFrame::NoFrame</enum>
@@ -1308,6 +1322,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                           <stylestrategy>PreferDefault</stylestrategy>
                           <kerning>true</kerning>
                          </font>
+                        </property>
+                        <property name="styleSheet">
+                         <string notr="true">background-color:transparent</string>
                         </property>
                         <property name="text">
                          <string>Group of companies that operate in the same segment of the economy or share a similar business type.</string>
@@ -1429,7 +1446,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                   <property name="minimumSize">
                    <size>
                     <width>0</width>
-                    <height>130</height>
+                    <height>133</height>
                    </size>
                   </property>
                   <property name="styleSheet">
@@ -1469,6 +1486,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          <bold>false</bold>
                         </font>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color:transparent</string>
+                       </property>
                        <property name="text">
                         <string>Select Unit:</string>
                        </property>
@@ -1507,7 +1527,10 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                        <height>25</height>
                       </size>
                      </property>
-                     <layout class="QHBoxLayout" name="horizontalLayout_13" stretch="1,0,0,0">
+                     <property name="styleSheet">
+                      <string notr="true">background-color:transparent</string>
+                     </property>
+                     <layout class="QHBoxLayout" name="horizontalLayout_13" stretch="1,0">
                       <property name="topMargin">
                        <number>0</number>
                       </property>
@@ -1519,6 +1542,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                       </property>
                       <item>
                        <spacer name="horizontalSpacer_10">
+                        <property name="styleSheet">
+                         <string notr="true">background-color:transparent</string>
+                        </property>
                         <property name="orientation">
                          <enum>Qt::Horizontal</enum>
                         </property>
@@ -1531,64 +1557,91 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                        </spacer>
                       </item>
                       <item>
-                       <widget class="QRadioButton" name="radioButton">
-                        <property name="font">
-                         <font>
-                          <family>Yu Gothic UI</family>
-                          <pointsize>9</pointsize>
-                          <weight>50</weight>
-                          <bold>false</bold>
-                         </font>
-                        </property>
-                        <property name="cursor">
-                         <cursorShape>PointingHandCursor</cursorShape>
-                        </property>
-                        <property name="layoutDirection">
-                         <enum>Qt::RightToLeft</enum>
-                        </property>
+                       <widget class="QFrame" name="frame_20">
                         <property name="styleSheet">
-                         <string notr="true">opacity:0;</string>
+                         <string notr="true">background:none</string>
                         </property>
-                        <property name="text">
-                         <string>Not Lined: </string>
+                        <property name="frameShape">
+                         <enum>QFrame::NoFrame</enum>
                         </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <spacer name="horizontalSpacer_11">
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
+                        <property name="frameShadow">
+                         <enum>QFrame::Raised</enum>
                         </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>45</width>
-                          <height>20</height>
-                         </size>
-                        </property>
-                       </spacer>
-                      </item>
-                      <item>
-                       <widget class="QRadioButton" name="radioButton_2">
-                        <property name="font">
-                         <font>
-                          <family>Yu Gothic UI</family>
-                          <pointsize>9</pointsize>
-                          <weight>50</weight>
-                          <bold>false</bold>
-                         </font>
-                        </property>
-                        <property name="cursor">
-                         <cursorShape>PointingHandCursor</cursorShape>
-                        </property>
-                        <property name="layoutDirection">
-                         <enum>Qt::RightToLeft</enum>
-                        </property>
-                        <property name="styleSheet">
-                         <string notr="true">opacity:0;</string>
-                        </property>
-                        <property name="text">
-                         <string>Lined: </string>
-                        </property>
+                        <layout class="QHBoxLayout" name="horizontalLayout_4">
+                         <property name="leftMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="topMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="rightMargin">
+                          <number>0</number>
+                         </property>
+                         <property name="bottomMargin">
+                          <number>0</number>
+                         </property>
+                         <item>
+                          <widget class="QRadioButton" name="radioButton">
+                           <property name="font">
+                            <font>
+                             <family>Yu Gothic UI</family>
+                             <pointsize>9</pointsize>
+                             <weight>50</weight>
+                             <bold>false</bold>
+                            </font>
+                           </property>
+                           <property name="cursor">
+                            <cursorShape>PointingHandCursor</cursorShape>
+                           </property>
+                           <property name="layoutDirection">
+                            <enum>Qt::RightToLeft</enum>
+                           </property>
+                           <property name="styleSheet">
+                            <string notr="true">opacity:0;</string>
+                           </property>
+                           <property name="text">
+                            <string>Not Lined: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_11">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>45</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                         <item>
+                          <widget class="QRadioButton" name="radioButton_2">
+                           <property name="font">
+                            <font>
+                             <family>Yu Gothic UI</family>
+                             <pointsize>9</pointsize>
+                             <weight>50</weight>
+                             <bold>false</bold>
+                            </font>
+                           </property>
+                           <property name="cursor">
+                            <cursorShape>PointingHandCursor</cursorShape>
+                           </property>
+                           <property name="layoutDirection">
+                            <enum>Qt::RightToLeft</enum>
+                           </property>
+                           <property name="styleSheet">
+                            <string notr="true">opacity:0;</string>
+                           </property>
+                           <property name="text">
+                            <string>Lined: </string>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
                        </widget>
                       </item>
                      </layout>
@@ -1596,10 +1649,19 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                    </item>
                    <item>
                     <widget class="QFrame" name="frame_14">
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>40</height>
+                      </size>
+                     </property>
                      <property name="font">
                       <font>
                        <family>Segoe UI</family>
                       </font>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background-color:transparent</string>
                      </property>
                      <property name="frameShape">
                       <enum>QFrame::NoFrame</enum>
@@ -1633,6 +1695,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                           <kerning>true</kerning>
                          </font>
                         </property>
+                        <property name="styleSheet">
+                         <string notr="true">background-color:transparent</string>
+                        </property>
                         <property name="text">
                          <string/>
                         </property>
@@ -1660,10 +1725,11 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                           <kerning>true</kerning>
                          </font>
                         </property>
+                        <property name="styleSheet">
+                         <string notr="true">background-color:transparent</string>
+                        </property>
                         <property name="text">
-                         <string>The processing unit refers to the component or unit to be assessed.
-Not Lined - Applies to storage units without lining considerations. 
-Lined - Applies to storage unit that has any lining considerations.</string>
+                         <string>The processing unit refers to the component or unit to be assessed.</string>
                         </property>
                         <property name="textFormat">
                          <enum>Qt::PlainText</enum>
@@ -1672,7 +1738,7 @@ Lined - Applies to storage unit that has any lining considerations.</string>
                          <bool>false</bool>
                         </property>
                         <property name="alignment">
-                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+                         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                         </property>
                         <property name="wordWrap">
                          <bool>true</bool>
@@ -1828,6 +1894,9 @@ Lined - Applies to storage unit that has any lining considerations.</string>
                          <bold>false</bold>
                         </font>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color:transparent</string>
+                       </property>
                        <property name="text">
                         <string>Select Material:</string>
                        </property>
@@ -1884,6 +1953,9 @@ Lined - Applies to storage unit that has any lining considerations.</string>
                        <property name="autoFillBackground">
                         <bool>false</bool>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color:transparent</string>
+                       </property>
                        <property name="text">
                         <string/>
                        </property>
@@ -1909,6 +1981,9 @@ Lined - Applies to storage unit that has any lining considerations.</string>
                        </property>
                        <property name="autoFillBackground">
                         <bool>false</bool>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">background-color:transparent</string>
                        </property>
                        <property name="text">
                         <string>For the selected Unit, this specifies the major material used for its construction.</string>
@@ -2108,6 +2183,9 @@ Lined - Applies to storage unit that has any lining considerations.</string>
                           <bold>false</bold>
                          </font>
                         </property>
+                        <property name="styleSheet">
+                         <string notr="true">bor</string>
+                        </property>
                         <property name="text">
                          <string>Corrosion</string>
                         </property>
@@ -2138,6 +2216,9 @@ Lined - Applies to storage unit that has any lining considerations.</string>
                           <weight>50</weight>
                           <bold>false</bold>
                          </font>
+                        </property>
+                        <property name="styleSheet">
+                         <string notr="true">bor</string>
                         </property>
                         <property name="text">
                          <string>Scaling</string>
@@ -2170,6 +2251,9 @@ Lined - Applies to storage unit that has any lining considerations.</string>
                           <bold>false</bold>
                          </font>
                         </property>
+                        <property name="styleSheet">
+                         <string notr="true">bor</string>
+                        </property>
                         <property name="text">
                          <string>Fouling</string>
                         </property>
@@ -2196,19 +2280,6 @@ Lined - Applies to storage unit that has any lining considerations.</string>
                 </item>
                </layout>
               </widget>
-             </item>
-             <item>
-              <spacer name="verticalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </widget>
@@ -2348,7 +2419,7 @@ Lined - Applies to storage unit that has any lining considerations.</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1249</width>
+     <width>1372</width>
      <height>26</height>
     </rect>
    </property>
