@@ -54,11 +54,12 @@ class AppContext(ApplicationContext):
     def app_window(self):
         return AppWindow(self)
 
-    @cached_property 
-    def sector_window(self):
-        return SectorWindow(self,self.App_data)
+    # @cached_property 
+    # def sector_window(self):
+    #     return SectorWindow(self,self.App_data)
+
     def sector_setter(self,level):
-        self.App_data["level"] = level
+        self.App_data["level"] = "Advanced"
         return self.sector_window
 
     def report_window_setter(self,analysis,material,assesments,inputs,user,info):
@@ -94,7 +95,8 @@ class AppContext(ApplicationContext):
         return self.get_resource("about.ui")
     @cached_property
     def get_report(self):
-        return self.get_resource("reports.ui")
+        #return self.get_resource("reports.ui")
+        return self.get_resource("New_UI/Report.ui")
     @cached_property
     def get_main(self):
         return self.get_resource("home.ui")
@@ -103,7 +105,8 @@ class AppContext(ApplicationContext):
         return self.get_resource("sector_new.ui")
     @cached_property
     def get_inputs(self):
-        return self.get_resource("bInput.ui")
+        #return self.get_resource("bInput.ui")
+        return self.get_resource("New_UI/parameterInputs.ui")
     @cached_property
     def get_validation(self):
         return self.get_resource("validation.ui")
@@ -371,7 +374,7 @@ def Analyze(material,assesments,inputs):
                         data["SilicaMagnesium"] = inputs["Silica"] * inputs["Magnesium"]
                     #Water Treatment, Ca * S0$
                     ##data["WaterTreatment"] = inputs["WaterTreatment"]
-                    data['WaterTreatment'] = inputs["Contains water Treatment(Antiscalants)?"]
+                    data['WaterTreatment'] = inputs["Contains Antiscalants?"]
                     
                     data["CalciumSulphate"] = inputs["Calcium"] * inputs["Sulphate"]
                 elif(assessment == "Fouling"):
@@ -407,7 +410,7 @@ def Analyze(material,assesments,inputs):
                         data["SilicaMagnesium"] = inputs["Silica"] * inputs["Magnesium"]
                     #Water Treatment, Ca * S0$
                     #data["WaterTreatment"] = inputs["WaterTreatment"]
-                    data['WaterTreatment'] = inputs["Contains water Treatment(Antiscalants)?"]
+                    data['WaterTreatment'] = inputs["Contains Antiscalants?"]
                     data["CalciumSulphate"] = inputs["Calcium"] * inputs["Sulphate"]
 
                     print(" Calcium Sulpahate: {}...".format(data["CalciumSulphate"]))
@@ -474,7 +477,7 @@ def Analyze(material,assesments,inputs):
                         print(f'Alloy Error Silica Magnesium: {e}')
                     #Water Treatment, Ca * S0$
                     #data["WaterTreatment"] = inputs["WaterTreatment"]
-                    data['WaterTreatment'] = inputs["Contains water Treatment(Antiscalants)?"]
+                    data['WaterTreatment'] = inputs["Contains Antiscalants?"]
                     try:
                         
                         data["CalciumSulphate"] = inputs["Calcium"] * inputs["Sulphate"]
@@ -565,6 +568,7 @@ class UserInfo(QDialog,qtw.QWidget):
         self.emailLineEdit.setText(self.data["email"])
         self.roleLineEdit.setText(self.data["role"])
         self.companyLineEdit.setText(self.data["company"])
+        self.locationLineEdit.setText(self.data["location"])
         self.descriptionLineEdit.appendPlainText(self.data["description"])
         
         self.buttonInfo.accepted.connect(self.saveData)
@@ -574,14 +578,15 @@ class UserInfo(QDialog,qtw.QWidget):
         self.data["email"] = self.emailLineEdit.text()
         self.data["role"] = self.roleLineEdit.text()
         self.data["company"] = self.companyLineEdit.text()
+        self.data["location"] = self.locationLineEdit.text()
         self.data["description"] = self.descriptionLineEdit.toPlainText()
 #--------------------------------------------------------------------------------------------------------Reports Window-----------------------------------------------------------
-class ReportsWindow(QMainWindow, qtw.QWidget):
+class ReportsWindow(QDialog, qtw.QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_report,self)
-        #self.center()
+        
         self.analysis = args[1]
         self.material = args[2]
         self.assessments = args[3]
@@ -600,6 +605,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
         self.reportFullName.setText(self.user['fullName'])
         self.reportJobTitle.setText(self.user['role'])
         self.reportCompany.setText(self.user['company'])
+        self.reportLocation.setText(self.user['location'])
         self.reportEmail.setText(self.user['email'])
         self.reportDescription.setPlainText(self.user['description'])
 
@@ -607,7 +613,6 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
         typeText = ""
         for word in self.assessments:
             typeText += (" " + word)
-        self.labelLevelAsses.setText(self.info['level'])
         self.labelTypeAssess.setText(typeText)
         self.labelSector.setText(self.info['sector'])
         self.labelUnit.setText(self.info['unit'])
@@ -683,7 +688,6 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
             print("Error adding Spacer: {e}") 
 
         print("grid right done")
-        self.buttonBack.clicked.connect(self.showBack)
 
         assesment_keys = list(self.report_data.keys())
         tabNumber = 0
@@ -692,20 +696,10 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
             self.resultTab.addTab(self.tab1, f'{key}')
             self.tab1UI(key,self.report_data,tabNumber)
             tabNumber = tabNumber + 1
-    def center(self):
-        frameGm = self.frameGeometry()
-        screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
-        centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
-        centerPoint = self.mapToGlobal(centerPoint)
-
-        frameGm.moveCenter(qtc.QPoint(centerPoint.x(),centerPoint.y() - self.sizeHint().height()/2))
-        self.move(frameGm.topLeft())
-
     def tab1UI(self,key,data,tabNumber):
         styleSheet = "QHeaderView::section{Background-color:#404040;color:#fff;text-align:center;font-weight:900}"
 
         layout = qtw.QVBoxLayout()
-        layout.addWidget(qtw.QLabel("Results"))
         
         table = qtw.QTableWidget()
 
@@ -713,7 +707,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
         table.setColumnCount(5)
         #RowCount
         table.setRowCount(len(data[key]))
-        table.setHorizontalHeaderLabels(["Index","Index Rating","Risk Category","Description","Treatment Recommendations"])
+        table.setHorizontalHeaderLabels(["Index","Value","Risk Category","Description","Treatment Recommendations"])
         table.horizontalHeader().setSectionResizeMode(0, qtw.QHeaderView.ResizeToContents)
         table.horizontalHeader().setSectionResizeMode(1, qtw.QHeaderView.ResizeToContents)
         table.horizontalHeader().setSectionResizeMode(2, qtw.QHeaderView.ResizeToContents)
@@ -745,10 +739,15 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                  item1.setBackground(qtg.QColor(40,40,40))
 
             table.setItem(rowCount, 0, qtw.QTableWidgetItem(f'{item_key}'))
-            table.setItem(rowCount, 1, qtw.QTableWidgetItem(f"{item_value['Index']}"))
+            try:
+                table.setItem(rowCount, 1, qtw.QTableWidgetItem(f"{round(item_value['Index'],2)}"))
+            except TypeError as e:
+                table.setItem(rowCount, 1, qtw.QTableWidgetItem(f"{item_value['Index']}"))
             table.setItem(rowCount, 2, item1)
             table.setItem(rowCount, 3, qtw.QTableWidgetItem(f"{item_value['Description']}"))
             table.setItem(rowCount, 4, qtw.QTableWidgetItem(f"{item_value['Treatment']}"))
+            table.resizeRowToContents(rowCount)
+            table.setStyleSheet("font-size:13px;")
 
             
 
@@ -762,9 +761,8 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
         #table.setTextElideMode()
         table.resizeRowsToContents()
 
+        table.setTextElideMode(qtc.Qt.ElideNone)
         layout.addWidget(table,2,alignment=qtc.Qt.AlignTop)
-        layout.setStretch(0,0) 
-        layout.setStretch(1,2)
         self.resultTab.setTabText(tabNumber,f"{key}")
         self.tab1.setLayout(layout)  
 
@@ -1073,12 +1071,12 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     #-----------------------------------------------------Silica Concentration in Steam-----------------------
                     try:
                         if(analysis["Silica Concentration in steam"] <= 0.02):
-                            silicaSteamRes["Index"] = analysis["Silica Concentration in steam"]
+                            silicaSteamRes["Index"] = round(analysis["Silica Concentration in steam"],2)
                             silicaSteamRes["Description"] = "Minimal silica film formation"
                             silicaSteamRes["Risk"] = "Ideal"
                             silicaSteamRes["Treatment"] = "No Treatment"
                         else:
-                            silicaSteamRes["Index"] = analysis["Silica Concentration in steam"]
+                            silicaSteamRes["Index"] = round(analysis["Silica Concentration in steam"],2)
                             silicaSteamRes["Description"] = "High silica film formation"
                             silicaSteamRes["Risk"] = "Tolerable"
                             silicaSteamRes["Treatment"] = "Treatment recommended"
@@ -1510,12 +1508,12 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     try:
                         if(analysis["Lead or Copper"]):
                             if(analysis["csmr"] > 0.5):
-                                csmr["Index"] = analysis["csmr"]
+                                csmr["Index"] = round(analysis["csmr"],2)
                                 csmr["Description"] = "Significant corrosion risk and lead exposure"
                                 csmr["Risk"] = "Unacceptable"
                                 csmr['Treatment'] = "Treatment recommended"
                             else:
-                                csmr["Index"] = analysis["csmr"]
+                                csmr["Index"] = round(analysis["csmr"],2)
                                 csmr["Description"] = "Minimal corrosion risk"
                                 csmr["Risk"] = "Ideal"
                                 csmr['Treatment'] = "No Treatment"
@@ -1578,12 +1576,12 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                     #-----------------------------------------------------Silica Concentration in Steam-----------------------
                     try:
                         if(analysis["Silica Concentration in steam"] <= 0.02):
-                            silicaSteamRes["Index"] = analysis["Silica Concentration in steam"]
+                            silicaSteamRes["Index"] = round(analysis["Silica Concentration in steam"],2)
                             silicaSteamRes["Description"] = "Minimal silica film formation"
                             silicaSteamRes["Risk"] = "Ideal"
                             silicaSteamRes["Treatment"] = "No Treatment"
                         else:
-                            silicaSteamRes["Index"] = analysis["Silica Concentration in steam"]
+                            silicaSteamRes["Index"] = round(analysis["Silica Concentration in steam"],2)
                             silicaSteamRes["Description"] = "High silica film formation"
                             silicaSteamRes["Risk"] = "Tolerable"
                             silicaSteamRes["Treatment"] = "Treatment recommended"
@@ -1748,7 +1746,7 @@ class ReportsWindow(QMainWindow, qtw.QWidget):
                             psRes["Description"] = "Unacceptable, additional pre-treatment is needed"
                             psRes['Risk'] = "Unacceptable"
                             psRes["Treatment"] = "Treatment required"
-                        psRes["Index"] = analysis["Silt Density Index"]
+                        psRes["Index"] = round(analysis["Silt Density Index"],2)
                         Fouling["Silt Density Index"] = psRes
                     except Exception as e:
                         print(f"Error Fouling Silt Density :{e}")
@@ -1795,7 +1793,7 @@ class ValidationDialog(QDialog,QWidget):
         super().__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_validation,self)
-        ##self.center()
+        
 
         self.requiredFrame.hide()
         self.optionalFrame.hide()
@@ -1837,19 +1835,19 @@ class ValidationDialog(QDialog,QWidget):
         screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
         centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())            
+        self.move(frameGm.topLeft())           
 #-------------------------------------------------------------------------------------------------------Inputs Window-------------------------------------------------------------
 
-class InputsWindow(QMainWindow, qtw.QWidget):
+class InputsWindow(QDialog, qtw.QWidget):
+    statusBarSignal = qtc.pyqtSignal(str,str)
+    reportsSignal = qtc.pyqtSignal(dict,str,list,dict,dict,dict)
     def __init__(self, *args, **kwargs):
         super().__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_inputs,self)
-        #self.centralwidget.adjustSize()
-        #self.resize(self.minimumSize())
-        ##self.center()
         
-        self.level = args[1]['level']
+        
+        
         #print(args[0])
         # Opening JSON file
         self.units_data = self.ctx.import_units_data
@@ -1858,12 +1856,12 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         
         #Buttons
         self.buttonLoadDefaults.clicked.connect(self.loadDefaults)
-        self.buttonBack.clicked.connect(self.showBack)
+        #self.buttonBack.clicked.connect(self.showBack)
         self.buttonSaveDefaults.clicked.connect(self.saveDefaults)
-        self.buttonNext.clicked.connect(self.Validate)
+        #self.buttonNext.clicked.connect(self.Validate)
         self.buttonDeleteDefaults.clicked.connect(self.deleteParams)
         self.buttonDeleteDefaults.setEnabled(False)
-        self.buttonAbout.clicked.connect(self.showAbout)
+        #self.buttonAbout.clicked.connect(self.showAbout)
         #List Widget
         for item in self.parameters_list.keys():
             self.listDefaults.addItem(f'{item}')
@@ -1874,7 +1872,6 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         for word in args[1]['type']:
             typeText += (" " + word)
         self.inputType.setText(typeText)
-        self.inputLevel.setText(args[1]['level'])
         self.inputSector.setText(args[1]['sector'])
         self.inputUnit.setText(args[1]['unit'])
         self.inputMaterial.setText(args[1]['material'])
@@ -1932,6 +1929,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                     spin_input.addItems(self.units_data[input]['options'])
                 else:
                     spin_input = qtw.QCheckBox()
+                    spin_input.setText("Tick,if yes")
                     spin_input.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
                                    
 
@@ -2001,17 +1999,16 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                     spin_input.setMaximumWidth(180)
                 else:
                     spin_input = qtw.QCheckBox()
+                    spin_input.setText("Tick,if yes")
                     spin_input.setCursor(qtg.QCursor(qtc.Qt.PointingHandCursor))
 
                 spin_input.setObjectName(f'{self.units_data[input]["label"]}')
                 if(self.units_data[input]['unit'] == "n/a"):
                     unit_box = qtw.QLabel()
-                    unit_box.setEnabled(False)
                     unit_box.setText(self.units_data[input]['unit'])
                     unit_box.setStyleSheet("font-size:12px;border:none")
                 elif(len(self.units_data[input]['unit']) <= 1):
                     unit_box = qtw.QLabel()
-                    unit_box.setEnabled(False)
                     unit_box.setText(self.units_data[input]['unit'][0])
                     unit_box.setMinimumWidth(70)
                     unit_box.setStyleSheet("font-size:12px;border:none")
@@ -2035,27 +2032,22 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                 self.gridInputsRight.addItem(verticalSpacer)
         except Exception as e:
             print(f'Error inputting into grid: {e}')    
-    def center(self):
-        frameGm = self.frameGeometry()
-        screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
-        centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
-        centerPoint = self.mapToGlobal(centerPoint)
-
-        frameGm.moveCenter(qtc.QPoint(centerPoint.x(),centerPoint.y() - self.sizeHint().height()/2))
-        self.move(frameGm.topLeft())
-
+   
     def showNext(self,analysis,material,assesments,inputs):
         info = {
             "sector" : self.sector,
-            "level" : self.level,
             "unit": self.unit
         }
         user = self.user
-        self.ui_reports_window = self.ctx.report_window_setter(analysis,material,assesments,inputs,user,info)
-        self.ui_reports_window.show()
+        self.reportsSignal.emit(analysis,material,assesments,inputs,user,info)
+        
 
         self.close()
-        
+    def emitStatusBar(self,color, message):
+        self.statusBarSignal.emit(
+            color,
+            message
+        )
         
     def showBack(self):
         self.ui_sector = self.ctx.sector_window
@@ -2072,12 +2064,10 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                     if(inputToChange):
                         increment = increment + 1
                         inputToChange.setValue(param_value)
-                        self.statusBar.setStyleSheet("color: green")
-                        self.statusBar.showMessage(f'Loaded default values for {loadText} successfully!',4000)
+                        self.emitStatusBar("green",str(f'Loaded default values for {loadText} successfully!'))
                         
             if(increment == 0):
-                self.statusBar.setStyleSheet("color: red")
-                self.statusBar.showMessage(f'No defaults for these parameters found',3000)
+                self.emitStatusBar("red",str(f'No defaults for these parameters found'))
     def showAbout(self):
         self.about_window = self.ctx.about_window
         self.about_window.show()
@@ -2089,19 +2079,16 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                 if(self.parameters_list[saveText]['isEditable']):
                     self.storeParams(saveText)
                 else:
-                    self.statusBar.setStyleSheet("color: red")
-                    self.statusBar.showMessage(f'Can not edit default values for {saveText}',3000)
+                    self.emitStatusBar("red",str(f'The values for {saveText} are not editable. Please specify a different save name and try again'))
             else:
                 try:
                     self.storeParams(saveText)
                     self.listDefaults.addItem(saveText)
                 except Exception as e:
                     print(f'Error Add item to Defaults List: {e}')
-                    self.statusBar.setStyleSheet("color: red")
-                    self.statusBar.showMessage(f'Error! Could not save the parameters',3000) 
+                    self.emitStatusBar("red",str(f'Error! Could not save the parameters'))
         else :
-            self.statusBar.setStyleSheet("color: red")
-            self.statusBar.showMessage(f'No Save filename specified',3000) 
+            self.emitStatusBar("red",str(f'No save filename specified'))
 
     def storeParams(self,text):
         params = {
@@ -2140,8 +2127,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                     params[objName] = itemInRow.widget().value()
         store_data[text] = params
         self.ctx.write_json(store_data)
-        self.statusBar.setStyleSheet("color: green")
-        self.statusBar.showMessage(f'Successfully Saved default parameters for {text}',3000) 
+        self.emitStatusBar("green",str(f'Successfully Saved default parameters for {text}'))
         self.parameters_list = self.ctx.import_param_data()       
     def deleteParams(self):
 
@@ -2156,9 +2142,7 @@ class InputsWindow(QMainWindow, qtw.QWidget):
 
             print(data)
             self.ctx.delete_json(data)
-
-            self.statusBar.setStyleSheet("color: green")
-            self.statusBar.showMessage(f'Successfully removed {deletedItem.text()} defualts',3000)
+            self.emitStatusBar("green",str(f'Successfully removed {deletedItem.text()} defaults'))
             self.parameters_list = self.ctx.import_param_data()
         except Exception as e:
             print(f"Delete Error: {e}")
@@ -2204,6 +2188,8 @@ class InputsWindow(QMainWindow, qtw.QWidget):
                     self.errors[field_key] = "Not Entered"
                 else:
                     self.errors[field_key] = ""
+    
+   
     def Validate(self):
         errorSheet = {
             "Required" : [],
@@ -2483,272 +2469,24 @@ class InputsWindow(QMainWindow, qtw.QWidget):
         #     print(f'keys -> {error_keys}')
         #     print("----------")
         #     print(f"Items: -> {error_items}")
-    
-#-------------------------------------------------------------------------------------------------------Sector Window -------------------------------------------------------------
-# class SectorWindow(qtw.QDialog,qtw.QWidget):
-#     def __init__(self, *args, **kwargs):
-#         super(SectorWindow,self).__init__()
-#         self.ctx = args[0]
-#         uic.loadUi(self.ctx.get_siteSpecific,self)
-        
-#         #self.setWindowTitle("Site-specific inputs")
-#         self.sector_data = self.ctx.import_data
-#         self.sector_keys = self.sector_data.iloc[:,0]
-#         self.level = args[1]['level']
-#         self.data = self.ctx.import_inputs_data 
-        
-#         #Populate Comboboxes
-        
-#         model_place = qtg.QStandardItemModel()
-        
-#         for key in self.sector_keys:
-#             model_place.appendRow(qtg.QStandardItem(f"{key}"))
-
-#         self.sectorComboBox.setModel(ProxyModel(model_place, 'Select Industry...'))
-#         self.sectorComboBox.setCurrentIndex(0)
-#         self.sectorComboBox.currentIndexChanged.connect(self.sector_selectionchange)
-#         #Combobox for Unit
-#         model_unit = qtg.QStandardItemModel()
-#         self.unitComboBox.setModel(ProxyModel(model_unit, 'Select Unit...'))
-#         self.unitComboBox.setCurrentIndex(0)
-#         self.materialComboBox.currentTextChanged.connect(self.validate_type)
-#         self.unitComboBox.currentTextChanged.connect(self.unit_selectionChange)
-#         self.materialComboBox.currentTextChanged.connect(self.material_selectionChange)
-#         #Text
-#         self.radioButton.hide()
-#         self.radioButton_2.hide()
-#         self.label_14.setText("The processing unit refers to the component or unit to be assessed.")
-            
-
-#         #Buttons
-#         #self.buttonProceed.clicked.connect(self.SectorValidate)
-#         #self.buttonBack.clicked.connect(self.showBack)
-#         self.buttonUserInfoEdit.clicked.connect(self.editUserInfo)
-#         #self.buttonAbout.clicked.connect(self.showAbout)
-#         self.buttonSelectAll.clicked.connect(self.selectAll)
-
-#     def selectAll(self):
-#         if(self.checkBoxCorrosion_2.isEnabled() == True):
-#             self.checkBoxCorrosion_2.setChecked(True)
-#         if(self.checkBoxFouling_2.isEnabled() == True):
-#             self.checkBoxFouling_2.setChecked(True)
-#         if(self.checkBoxScaling_2.isEnabled() == True):
-#             self.checkBoxScaling_2.setChecked(True)
-
-#     def editUserInfo(self):
-#         data = {
-#             "fullName" : self.fullName.text(),
-#             "role": self.role.text(),
-#             "company": self.company.text(),
-#             "email":self.email.text(),
-#             "description":self.description.text()
-#         }
-#         self.user_info = self.ctx.user_info_setter(data)
-#         self.user_info.show()
-        
-#         if(self.user_info.exec() == 1):
-#             updated_data = self.user_info.data
-#             print(updated_data)
-#             self.fullName.setText(updated_data["fullName"])
-#             self.role.setText(updated_data["role"])
-#             self.company.setText(updated_data["company"])
-#             self.email.setText(updated_data["email"])
-#             self.description.setText(updated_data["description"])
-
-#     def showAbout(self):
-#         self.about_window = self.ctx.about_window
-#         self.about_window.show()
-#     def validate_type(self):
-#         self.checkBoxCorrosion_2.setEnabled(True)
-#         self.checkBoxFouling_2.setEnabled(True)
-#         self.checkBoxScaling_2.setEnabled(True)
-#         if(self.materialComboBox.currentText() == "Plastic"):
-
-#             self.checkBoxCorrosion_2.setChecked(False)
-#             self.checkBoxCorrosion_2.setEnabled(False)
-            
-            
-#         elif(self.materialComboBox.currentText() == "Membranes" ):
-#             self.checkBoxCorrosion_2.setChecked(False)
-#             self.checkBoxScaling_2.setChecked(False)
-#             self.checkBoxCorrosion_2.setEnabled(False)
-#             self.checkBoxScaling_2.setEnabled(False)
-#         else:
-#             self.checkBoxCorrosion_2.setEnabled(True)
-#             self.checkBoxFouling_2.setEnabled(True)
-#             self.checkBoxScaling_2.setEnabled(True)
-
-#     def center(self):
-#         frameGm = self.frameGeometry()
-#         screen = qtw.QApplication.desktop().screenNumber(qtw.QApplication.desktop().cursor().pos())
-#         centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
-#         centerPoint = self.mapToGlobal(centerPoint)
-
-#         frameGm.moveCenter(qtc.QPoint(centerPoint.x(),centerPoint.y() - self.sizeHint().height()/2))
-#         self.move(frameGm.topLeft())
-#     def sector_selectionchange(self):
-#         self.sectorComboBox.setStyleSheet("border-color:#303030; background-color:#f7f7f7;")
-#         tempSelect = self.sectorComboBox.currentText()
-#         sector_unitList = self.sector_data.loc[self.sector_keys == tempSelect].iloc[:,1:].dropna(axis='columns')
-#         sector_materials = ['Carbon Steel','Concrete'
-#         ,'Monel-Lead/Copper Alloys','Plastic','Stainless steel 304/304L'
-#         ,'Stainless steel 316/316L','Stainless steel Alloy 20','Stainless steel 904L'
-#         ,'Duplex Stainless Steel']
-#         model_unit = qtg.QStandardItemModel()
-#         model_materials = qtg.QStandardItemModel()
-        
-#         for unit in sector_unitList:
-#             model_unit.appendRow(qtg.QStandardItem(f"{sector_unitList[unit].values[0]}"))
-#         for material in sector_materials:
-#             model_materials.appendRow(qtg.QStandardItem(f"{material}"))
-
-
-#         self.unitComboBox.setModel(ProxyModel(model_unit, 'Select Unit...'))
-#         self.unitComboBox.setCurrentIndex(0)
-#         self.materialComboBox.setModel(ProxyModel(model_materials, 'Select Unit...'))
-#         self.materialComboBox.setCurrentIndex(0)
-
-#         self.unitComboBox.currentIndexChanged.connect(self.unit_selectionChange)
-
-#     def unit_selectionChange(self):
-#         text = self.unitComboBox.currentText()
-#         self.unitComboBox.setStyleSheet("border-color:#303030; background-color:#f7f7f7")
-#         if(text == "Grids/Screens" or text == "Screens" or text == "Sand Filters"):
-#             self.frame_18.hide()
-#         else:
-#             self.frame_18.show()
-        
-#         if(text == "Dams" or text == "Reactor" or text == "Tanks"):
-#             self.radioButton.show()
-#             self.radioButton_2.show()
-#             self.label_14.setText("The processing unit refers to the component or unit to be assessed.\nNot Lined - Applies to storage units without lining considerations. \nLined - Applies to storage unit that has any lining considerations.")
-#         else:
-#             self.radioButton.hide()
-#             self.radioButton_2.hide()
-#             self.label_14.setText("The processing unit refers to the component or unit to be assessed.")
-            
-#     def material_selectionChange(self):
-#         self.materialComboBox.setStyleSheet("border-color:#303030; background-color:#f7f7f7")
-
-#     def SectorValidate(self):
-#         if(self.sectorComboBox.currentIndex() == 0):
-#             msg = qtw.QMessageBox()
-#             msg.setText("Please specifiy the Sector")
-#             msg.setWindowTitle("Missing Input Information")
-#             msg.setStyleSheet("QmessageBox QLabel{min-width: "+str(300)+"px;}")
-#             msg.exec_()
-#             if(msg.result() == 1024):
-#                 self.sectorComboBox.setFocus()
-#                 self.sectorComboBox.setStyleSheet("border:1px solid #ff4500; background-color:#ffcccb")
-#         elif(self.unitComboBox.currentIndex() == 0):
-#                 msg = qtw.QMessageBox()
-#                 msg.setText("Please specifiy the Unit")
-#                 msg.setWindowTitle("Missing Input Information")
-#                 msg.setStyleSheet("QmessageBox QLabel{min-width: "+str(300)+"px;}")
-#                 msg.exec_()
-#                 if(msg.result() == 1024):
-#                     self.unitComboBox.setFocus()
-#                     self.unitComboBox.setStyleSheet("border:1px solid #ff4500; background-color:#ffcccb")
-#         elif(self.materialComboBox.currentIndex() == 0):
-#                 msg = qtw.QMessageBox()
-#                 msg.setText("Please specifiy the material of construction")
-#                 msg.setWindowTitle("Missing Input Information")
-#                 msg.setStyleSheet("QmessageBox QLabel{min-width: "+str(300)+"px;}")
-#                 msg.exec_()
-#                 if(msg.result() == 1024):
-#                     self.materialComboBox.setFocus()
-#                     self.materialComboBox.setStyleSheet("border:1px solid #ffcccb;")
-#         elif(self.liningFrame.isHidden() == False and (self.radioButton.isChecked() == False and self.radioButton_2.isChecked() == False)):
-#                 msg = qtw.QMessageBox()
-#                 msg.setText("Please specifiy if the storage unit is lined or not lined ")
-#                 msg.setWindowTitle("Missing Input Information")
-#                 msg.setStyleSheet("QmessageBox QLabel{min-width: "+str(300)+"px;}")
-#                 msg.exec_()
-#                 if(msg.result() == 1024):
-#                     self.radioButton.setFocus()
-#         elif(self.checkBoxCorrosion_2.isChecked() == True or self.checkBoxScaling_2.isChecked() == True or self.checkBoxFouling_2.isChecked() == True):
-#             self.showNext()
-        
-#         else:
-#             errorMessage = qtw.QMessageBox()
-#             errorMessage.setIcon(qtw.QMessageBox.Critical)
-#             errorMessage.setText("Please select at least one assessment type!")
-#             errorMessage.setStyleSheet("QmessageBox QLabel{min-width: "+str(100)+"px;}")
-#             errorMessage.setWindowTitle("Missing Input Information")
-#             errorMessage.exec_()
-#     def showNext(self):
-#         data = {
-#             "fullName" : self.fullName.text(),
-#             "role": self.role.text(),
-#             "company": self.company.text(),
-#             "email":self.email.text(),
-#             "description":self.description.text()
-#         }
-#         assesmentDetails = {
-#             "level" : self.level,
-#             "sector": self.sectorComboBox.currentText(),
-#             "unit": self.unitComboBox.currentText(),
-#             "material" : self.materialComboBox.currentText(),
-#             "user": data
-#         }
-
-#         #Store Selections
-#         Field_data['sector'] = self.sectorComboBox.currentIndex()
-#         Field_data['unit'] = self.unitComboBox.currentIndex()
-#         Field_data['material'] = self.materialComboBox.currentIndex()
-
-#         Field_data['corrosion'] = self.checkBoxCorrosion_2.isChecked()
-#         Field_data['scaling'] = self.checkBoxScaling_2.isChecked()
-#         Field_data['fouling'] = self.checkBoxFouling_2.isChecked()
-#         #Validate
-
-         
-        
-
-#         typeLabels = []
-#         if(self.checkBoxCorrosion_2.isChecked() == True):
-#             typeLabels.append("Corrosion")
-#         if(self.checkBoxScaling_2.isChecked() == True):
-#             typeLabels.append("Scaling")
-#         if(self.checkBoxFouling_2.isChecked() == True):
-#             typeLabels.append("Fouling") 
-        
-        
-#         typeList = []
-#         for label in typeLabels:
-#             for x in self.data[assesmentDetails['material']][label]:
-#                 typeList.append(x)
-
-#         assesmentDetails['type'] = typeLabels
-#         assesmentDetails['inputs'] = list(set(typeList))
-                  
-        
-#         self.ui_inputs = self.ctx.input_window_setter(assesmentDetails)
-
-#         self.ui_inputs.show()
-#         # Closing file
-#         self.close()
-#     def showBack(self):
-#         self.ui_main = self.ctx.main_window
-#         self.ui_main.show()
-        
-#         self.close()
-
-
+ 
 #---------------------------------------------------------------------------------------------------------App Window--------------------------------------------------------------
 class AppWindow(QMainWindow):
+
+    updateVisual = qtc.pyqtSignal()
     def __init__(self, *args, **kwargs):
         super(AppWindow, self).__init__()
         self.ctx = args[0]
         uic.loadUi(self.ctx.get_appWindow, self)
-
+        self.center()
         self.sector_data = self.ctx.import_data
         self.sector_keys = self.sector_data.iloc[:,0]
         self.level = "Advanced"
         self.data = self.ctx.import_inputs_data 
         
         #Populate Comboboxes
-        
+        self.updateVisual.connect(self.levelDisplay)
+
         model_place = qtg.QStandardItemModel()
         
         for key in self.sector_keys:
@@ -2776,11 +2514,85 @@ class AppWindow(QMainWindow):
 
         #Buttons
         self.buttonProceed.clicked.connect(self.SectorValidate)
+    
         self.buttonBack.clicked.connect(self.showBack)
         self.buttonUserInfoEdit.clicked.connect(self.editUserInfo)
         self.buttonAbout.clicked.connect(self.showAbout)
         self.buttonSelectAll.clicked.connect(self.selectAll)
+    
+    @qtc.pyqtSlot()
+    def levelDisplay(self):
+        if(self.stackedWidget.currentIndex() == 0):
+            self.step_1.setStyleSheet("background-color:rgb(12, 75, 85);border:3px solid rgb(223, 223, 223);border-radius:13px")
+            self.step_2.setStyleSheet("background-color:rgb(223, 223, 223);border:none;border-radius:7px")
+            self.step_3.setStyleSheet("background-color:rgb(223, 223, 223);border:none;border-radius:7px")
+
+            self.step_1.setMinimumWidth(26)
+            self.step_1.setMaximumWidth(26)
+            self.step_1.setMinimumHeight(26)
+            self.step_1.setMaximumHeight(26)
+
+            self.step_2.setMinimumWidth(15)
+            self.step_2.setMaximumWidth(15)
+            self.step_2.setMinimumHeight(15)
+            self.step_2.setMaximumHeight(15)
+
+            self.step_3.setMinimumWidth(15)
+            self.step_3.setMaximumWidth(15)
+            self.step_3.setMinimumHeight(15)
+            self.step_3.setMaximumHeight(15)
+
+            self.buttonCurrentPage1.setStyleSheet("background:#fff;border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:12px solid rgb(12, 75, 85);padding:5px;color:rgb(12, 75, 85)")
+            self.buttonCurrentPage2.setStyleSheet("background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)")
+            self.buttonCurrentPage3.setStyleSheet("background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)")
+        elif(self.stackedWidget.currentIndex() == 1):
+            self.step_1.setStyleSheet("background-color:rgb(223, 223, 223);border:none;border-radius:7px")
+            self.step_2.setStyleSheet("background-color:rgb(12, 75, 85);border:3px solid rgb(223, 223, 223);border-radius:13px")
+            self.step_3.setStyleSheet("background-color:rgb(223, 223, 223);border:none;border-radius:7px")
+
+            self.step_1.setMinimumWidth(15)
+            self.step_1.setMaximumWidth(15)
+            self.step_1.setMinimumHeight(15)
+            self.step_1.setMaximumHeight(15)
+
+            self.step_2.setMinimumWidth(26)
+            self.step_2.setMaximumWidth(26)
+            self.step_2.setMinimumHeight(26)
+            self.step_2.setMaximumHeight(26)
+
+            self.step_3.setMinimumWidth(15)
+            self.step_3.setMaximumWidth(15)
+            self.step_3.setMinimumHeight(15)
+            self.step_3.setMaximumHeight(15)
+
+            self.buttonCurrentPage1.setStyleSheet("background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)")
+            self.buttonCurrentPage2.setStyleSheet("background:#fff;border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:12px solid rgb(12, 75, 85);padding:5px;color:rgb(12, 75, 85)")
+            self.buttonCurrentPage3.setStyleSheet("background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)")
+        else:
+            self.step_1.setStyleSheet("background-color:rgb(223, 223, 223);border:none;border-radius:7px")
+            self.step_2.setStyleSheet("background-color:rgb(223, 223, 223);border:none;border-radius:7px")
+            self.step_3.setStyleSheet("background-color:rgb(12, 75, 85);border:3px solid rgb(223, 223, 223);border-radius:13px")
+
+            self.step_1.setMinimumWidth(15)
+            self.step_1.setMaximumWidth(15)
+            self.step_1.setMinimumHeight(15)
+            self.step_1.setMaximumHeight(15)
+
+            self.step_2.setMinimumWidth(15)
+            self.step_2.setMaximumWidth(15)
+            self.step_2.setMinimumHeight(15)
+            self.step_2.setMaximumHeight(15)
+
+            self.step_3.setMinimumWidth(26)
+            self.step_3.setMaximumWidth(26)
+            self.step_3.setMinimumHeight(26)
+            self.step_3.setMaximumHeight(26)
+
+            self.buttonCurrentPage1.setStyleSheet("background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)")
+            self.buttonCurrentPage2.setStyleSheet("background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)")
+            self.buttonCurrentPage3.setStyleSheet("background:#fff;border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:12px solid rgb(12, 75, 85);padding:5px;color:rgb(12, 75, 85)")
         
+
     def selectAll(self):
         if(self.checkBoxCorrosion_2.isEnabled() == True):
             self.checkBoxCorrosion_2.setChecked(True)
@@ -2793,6 +2605,7 @@ class AppWindow(QMainWindow):
             "fullName" : self.fullName.text(),
             "role": self.role.text(),
             "company": self.company.text(),
+            "location": self.location.text(),
             "email":self.email.text(),
             "description":self.description.text()
         }
@@ -2805,6 +2618,7 @@ class AppWindow(QMainWindow):
             self.fullName.setText(updated_data["fullName"])
             self.role.setText(updated_data["role"])
             self.company.setText(updated_data["company"])
+            self.location.setText(updated_data['location'])
             self.email.setText(updated_data["email"])
             self.description.setText(updated_data["description"])
     def showAbout(self):
@@ -2829,7 +2643,17 @@ class AppWindow(QMainWindow):
             self.checkBoxCorrosion_2.setEnabled(True)
             self.checkBoxFouling_2.setEnabled(True)
             self.checkBoxScaling_2.setEnabled(True)
-    
+    def center(self):
+        multiplier_x = 1
+        multiplier_y = 1.1
+        cursor_pos = qtw.QApplication.desktop().cursor().pos()
+        screen = qtw.QApplication.desktop().screenNumber(cursor_pos)
+        pos_x = qtw.QDesktopWidget().screenGeometry(screen).center().x()
+        pos_x -= self.frameGeometry().center().x() * multiplier_x
+        pos_y = qtw.QDesktopWidget().screenGeometry(screen).center().y()
+        pos_y -= self.frameGeometry().center().y() * multiplier_y
+        self.move(pos_x, pos_y)
+
     def sector_selectionchange(self):
         self.sectorComboBox.setStyleSheet("border-color:#303030; background-color:#f7f7f7;")
         tempSelect = self.sectorComboBox.currentText()
@@ -2914,7 +2738,8 @@ class AppWindow(QMainWindow):
                 if(msg.result() == 1024):
                     self.radioButton.setFocus()
         elif(self.checkBoxCorrosion_2.isChecked() == True or self.checkBoxScaling_2.isChecked() == True or self.checkBoxFouling_2.isChecked() == True):
-            self.showNext()
+            if(self.radioButton.isHidden() == True or self.radioButton.isChecked() == True):
+                self.showNext()
         
         else:
             errorMessage = qtw.QMessageBox()
@@ -2923,16 +2748,29 @@ class AppWindow(QMainWindow):
             errorMessage.setStyleSheet("QmessageBox QLabel{min-width: "+str(100)+"px;}")
             errorMessage.setWindowTitle("Missing Input Information")
             errorMessage.exec_()
+        self.updateVisual.emit()
+    @qtc.pyqtSlot(str,str)
+    def updateStatusBar(self,color,message):
+        self.statusBarText.setStyleSheet(f'color:{color};background-color:#fff')
+        self.statusBarText.setText(message)
+
+        qtc.QTimer.singleShot(3000, self.statusBarReset)
+    @qtc.pyqtSlot()
+    def statusBarReset(self):
+        self.statusBarText.setStyleSheet(f'color:;background-color:#fff')
+        self.statusBarText.setText(" ")
+
     def showNext(self):
         data = {
             "fullName" : self.fullName.text(),
             "role": self.role.text(),
             "company": self.company.text(),
+            "location": self.location.text(),
             "email":self.email.text(),
             "description":self.description.text()
         }
         assesmentDetails = {
-            "level" : self.level,
+            "level" : "Advanced",
             "sector": self.sectorComboBox.currentText(),
             "unit": self.unitComboBox.currentText(),
             "material" : self.materialComboBox.currentText(),
@@ -2969,24 +2807,44 @@ class AppWindow(QMainWindow):
         assesmentDetails['type'] = typeLabels
         assesmentDetails['inputs'] = list(set(typeList))
                   
-        
-        self.ui_inputs = self.ctx.input_window_setter(assesmentDetails)
+        if(self.stackedWidget.currentIndex() == 0):
+            self.ui_inputs = self.ctx.input_window_setter(assesmentDetails)
+            self.ui_inputs.statusBarSignal.connect(self.updateStatusBar)
+            self.ui_inputs.reportsSignal.connect(self.showReports)
+            self.stackedWidget.insertWidget(1,self.ui_inputs)
+            self.stackedWidget.setCurrentIndex(1)
+        elif(self.stackedWidget.currentIndex() == 1):
+            self.ui_inputs.reportsSignal.connect(self.showReports)
+            self.ui_inputs.Validate()
+            
 
-        self.ui_inputs.show()
+            print("Report")
+
         # Closing file
-        self.close()
+    @qtc.pyqtSlot(dict,str,list,dict,dict,dict)
+    def showReports(self,analysis,material,assesments,inputs,user,info):
+        self.ui_reports_window = self.ctx.report_window_setter(analysis,material,assesments,inputs,user,info)
+        self.stackedWidget.insertWidget(2,self.ui_reports_window)
+        self.stackedWidget.setCurrentIndex(2)
+        self.showMaximized()
+
+
     def showBack(self):
-        self.ui_main = self.ctx.main_window
-        self.ui_main.show()
         
-        self.close()
+        if(self.stackedWidget.currentIndex() > 0):
+            self.stackedWidget.setCurrentIndex(self.stackedWidget.currentIndex() - 1)
+        else:
+            self.ui_main = self.ctx.main_window
+            self.ui_main.show()
+            self.close()
+        self.updateVisual.emit()
 #----------------------------------------------------------------------------------------- -------------Main Window ---------------------------------------------------------------
 class MainWindow(QMainWindow):
     def __init__(self, ctx):
         super(MainWindow, self).__init__()
         self.ctx = ctx
         uic.loadUi(self.ctx.get_main, self)
-        ##self.center()
+        
         self.labelHome.setPixmap(qtg.QPixmap.fromImage(self.ctx.homePic))
         self.labelHome.setMaximumWidth(370)
         self.labelHome.setMaximumHeight(170)
@@ -3000,7 +2858,6 @@ class MainWindow(QMainWindow):
         centerPoint = qtw.QApplication.desktop().screenGeometry(screen).center()
         frameGm.moveCenter(centerPoint)
         self.move(frameGm.topLeft())
-
     def showNext(self):
         self.app_window = self.ctx.app_window
         

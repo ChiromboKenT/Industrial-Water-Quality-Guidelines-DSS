@@ -199,7 +199,7 @@ border:none;padding:20px 10px;</string>
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,7">
+     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,10">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -212,10 +212,16 @@ border:none;padding:20px 10px;</string>
          <number>0</number>
         </property>
         <property name="sizeConstraint">
-         <enum>QLayout::SetDefaultConstraint</enum>
+         <enum>QLayout::SetMaximumSize</enum>
         </property>
         <item>
          <widget class="QFrame" name="frame_3">
+          <property name="minimumSize">
+           <size>
+            <width>250</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
@@ -261,19 +267,18 @@ border:none;padding:20px 10px;</string>
              </property>
              <property name="minimumSize">
               <size>
-               <width>15</width>
-               <height>15</height>
+               <width>26</width>
+               <height>26</height>
               </size>
              </property>
              <property name="maximumSize">
               <size>
-               <width>15</width>
-               <height>15</height>
+               <width>26</width>
+               <height>26</height>
               </size>
              </property>
              <property name="styleSheet">
-              <string notr="true">background-color:rgb(223, 223, 223);border:none;
-border-radius:7px
+              <string notr="true">background-color:rgb(12, 75, 85);border:3px solid rgb(223, 223, 223);border-radius:13px
 </string>
              </property>
              <property name="text">
@@ -305,8 +310,7 @@ border-radius:7px
               </size>
              </property>
              <property name="styleSheet">
-              <string notr="true">background-color:rgb(223, 223, 223);border:none;
-border-radius:7px
+              <string notr="true">background-color:rgb(223, 223, 223);border:none;border-radius:7px
 </string>
              </property>
              <property name="text">
@@ -365,6 +369,12 @@ border-radius:7px
         </item>
         <item>
          <widget class="QFrame" name="frame_4">
+          <property name="minimumSize">
+           <size>
+            <width>250</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="styleSheet">
            <string notr="true">background:rgb(223, 223, 223)</string>
           </property>
@@ -518,6 +528,9 @@ border-radius:7px
                   <bold>true</bold>
                  </font>
                 </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
                 <property name="styleSheet">
                  <string notr="true">background:#fff;border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:12px solid rgb(12, 75, 85);
 padding:5px;color:rgb(12, 75, 85)</string>
@@ -528,6 +541,79 @@ padding:5px;color:rgb(12, 75, 85)</string>
                 <property name="icon">
                  <iconset>
                   <normaloff>../Images/site-specific.png</normaloff>../Images/site-specific.png</iconset>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="buttonCurrentPage2">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>60</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Yu Gothic UI</family>
+                  <pointsize>11</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)</string>
+                </property>
+                <property name="text">
+                 <string>Water Quality inputs</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="buttonCurrentPage3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>60</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Yu Gothic UI</family>
+                  <pointsize>11</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="cursor">
+                 <cursorShape>PointingHandCursor</cursorShape>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;
+padding:5px;color:rgb(12, 75, 85)</string>
+                </property>
+                <property name="text">
+                 <string>Fitness for Use Report</string>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -558,6 +644,12 @@ padding:5px;color:rgb(12, 75, 85)</string>
         </item>
         <item>
          <widget class="QFrame" name="frame_5">
+          <property name="minimumSize">
+           <size>
+            <width>250</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="styleSheet">
            <string notr="true">background:rgb(12, 75, 85)</string>
           </property>
@@ -655,6 +747,18 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
       </item>
       <item>
        <widget class="QFrame" name="frame_2">
+        <property name="minimumSize">
+         <size>
+          <width>850</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="cursor">
          <cursorShape>ArrowCursor</cursorShape>
         </property>
@@ -918,7 +1022,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                         </font>
                        </property>
                        <property name="text">
-                        <string>John Doe</string>
+                        <string/>
                        </property>
                       </widget>
                      </item>
@@ -964,7 +1068,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                      <item row="1" column="1">
                       <widget class="QLabel" name="role">
                        <property name="text">
-                        <string>Manager</string>
+                        <string/>
                        </property>
                       </widget>
                      </item>
@@ -978,7 +1082,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                      <item row="4" column="1">
                       <widget class="QLabel" name="email">
                        <property name="text">
-                        <string>john@example.com</string>
+                        <string/>
                        </property>
                       </widget>
                      </item>
@@ -992,6 +1096,13 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                        </property>
                        <property name="text">
                         <string>Sample Location:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="1">
+                      <widget class="QLabel" name="location">
+                       <property name="text">
+                        <string/>
                        </property>
                       </widget>
                      </item>
@@ -2377,7 +2488,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
           </layout>
          </item>
          <item>
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="statusBarText">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -2393,7 +2504,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
            <property name="font">
             <font>
              <family>Nirmala UI</family>
-             <pointsize>9</pointsize>
+             <pointsize>8</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
             </font>
            </property>
            <property name="styleSheet">

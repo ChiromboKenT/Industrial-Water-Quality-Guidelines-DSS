@@ -143,7 +143,7 @@
         "decimals":2,
         "input_type": "number"
     },
-    "Is conrete reinforced?":{
+    "Is the concrete reinforced?":{
         "unit" : "n/a",
         "label" : "input_conc_reinforced",
         "options": ["No, Not Reinforced","Yes, Reinforced"],
@@ -167,7 +167,7 @@
         "options": ["No,does not contain Copper","Yes, contains Copper"],
         "input_type": "checkbox"
     },
-    "Contains water Treatment(Antiscalants)?":{
+    "Contains Antiscalants?":{
         "unit" : "n/a",
         "label" : "input_water_treat",
         "options": ["No water treatment required","Water treatment required"],

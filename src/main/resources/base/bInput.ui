@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>860</width>
-    <height>650</height>
+    <height>837</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -64,30 +64,9 @@
        </property>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,3">
-         <item>
-          <widget class="QLabel" name="labelInputTitle">
-           <property name="font">
-            <font>
-             <family>Arial Narrow</family>
-             <pointsize>12</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">color:rgb(64,64,64);</string>
-           </property>
-           <property name="text">
-            <string>Risk-Based Water Quality Guidelines for Industrial Use</string>
-           </property>
-           <property name="scaledContents">
-            <bool>false</bool>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-           </property>
-          </widget>
-         </item>
+         <property name="spacing">
+          <number>10</number>
+         </property>
          <item>
           <widget class="QGroupBox" name="groupBox_2">
            <property name="minimumSize">
@@ -115,84 +94,41 @@
            <property name="alignment">
             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
            </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="4,1">
+           <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="4">
             <item>
              <layout class="QFormLayout" name="formLayout_3">
               <property name="horizontalSpacing">
-               <number>6</number>
+               <number>5</number>
               </property>
               <property name="verticalSpacing">
-               <number>1</number>
+               <number>0</number>
               </property>
               <item row="0" column="0">
-               <widget class="QLabel" name="typeOfAssmentLabel">
+               <widget class="QLabel" name="typeOfAssementsLabel">
                 <property name="font">
                  <font>
-                  <pointsize>8</pointsize>
+                  <family>Yu Gothic UI</family>
+                  <pointsize>9</pointsize>
                   <weight>50</weight>
                   <bold>false</bold>
                  </font>
                 </property>
                 <property name="text">
-                 <string>Level of assessment:</string>
+                 <string>Effect being assessed:</string>
                 </property>
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QLineEdit" name="inputLevel">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>8</pointsize>
-                 </font>
-                </property>
-                <property name="cursor">
-                 <cursorShape>ArrowCursor</cursorShape>
-                </property>
-                <property name="text">
-                 <string>Advanced</string>
-                </property>
-                <property name="frame">
-                 <bool>false</bool>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QLabel" name="typeOfAssementsLabel">
-                <property name="font">
-                 <font>
-                  <pointsize>8</pointsize>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Risk assessment(s):</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
                <widget class="QLineEdit" name="inputType">
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>8</pointsize>
+                  <family>Yu Gothic UI Semilight</family>
+                  <pointsize>9</pointsize>
+                  <weight>50</weight>
+                  <bold>false</bold>
                  </font>
                 </property>
                 <property name="frame">
@@ -203,11 +139,12 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="0">
+              <item row="1" column="0">
                <widget class="QLabel" name="sectorLabel">
                 <property name="font">
                  <font>
-                  <pointsize>8</pointsize>
+                  <family>Yu Gothic UI</family>
+                  <pointsize>9</pointsize>
                   <weight>50</weight>
                   <bold>false</bold>
                  </font>
@@ -217,7 +154,7 @@
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="1" column="1">
                <widget class="QLineEdit" name="inputSector">
                 <property name="enabled">
                  <bool>false</bool>
@@ -230,7 +167,10 @@
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>8</pointsize>
+                  <family>Yu Gothic UI Semilight</family>
+                  <pointsize>9</pointsize>
+                  <weight>50</weight>
+                  <bold>false</bold>
                  </font>
                 </property>
                 <property name="cursor">
@@ -250,11 +190,12 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
+              <item row="2" column="0">
                <widget class="QLabel" name="unitUnderAssesmentLabel">
                 <property name="font">
                  <font>
-                  <pointsize>8</pointsize>
+                  <family>Yu Gothic UI</family>
+                  <pointsize>9</pointsize>
                   <weight>50</weight>
                   <bold>false</bold>
                  </font>
@@ -264,7 +205,7 @@
                 </property>
                </widget>
               </item>
-              <item row="3" column="1">
+              <item row="2" column="1">
                <widget class="QLineEdit" name="inputUnit">
                 <property name="enabled">
                  <bool>false</bool>
@@ -277,7 +218,10 @@
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>8</pointsize>
+                  <family>Yu Gothic UI Semilight</family>
+                  <pointsize>9</pointsize>
+                  <weight>50</weight>
+                  <bold>false</bold>
                  </font>
                 </property>
                 <property name="cursor">
@@ -297,11 +241,12 @@
                 </property>
                </widget>
               </item>
-              <item row="4" column="0">
+              <item row="3" column="0">
                <widget class="QLabel" name="materialOfConstructionLabel">
                 <property name="font">
                  <font>
-                  <pointsize>8</pointsize>
+                  <family>Yu Gothic UI</family>
+                  <pointsize>9</pointsize>
                   <weight>50</weight>
                   <bold>false</bold>
                  </font>
@@ -311,7 +256,7 @@
                 </property>
                </widget>
               </item>
-              <item row="4" column="1">
+              <item row="3" column="1">
                <widget class="QLineEdit" name="inputMaterial">
                 <property name="enabled">
                  <bool>false</bool>
@@ -330,7 +275,8 @@
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>8</pointsize>
+                  <family>Yu Gothic UI Semilight</family>
+                  <pointsize>9</pointsize>
                   <weight>50</weight>
                   <italic>false</italic>
                   <bold>false</bold>
@@ -376,18 +322,58 @@
               </item>
              </layout>
             </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QFrame" name="frame_4">
+           <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+            <property name="leftMargin">
+             <number>10</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>10</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
-             <spacer name="horizontalSpacer_5">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
+             <widget class="QLabel" name="label_9">
+              <property name="maximumSize">
                <size>
-                <width>40</width>
-                <height>20</height>
+                <width>32</width>
+                <height>32</height>
                </size>
               </property>
-             </spacer>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="pixmap">
+               <pixmap>Images/info-a.png</pixmap>
+              </property>
+              <property name="scaledContents">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_10">
+              <property name="text">
+               <string>The user has the option to load, edit and save preset values for the water type. Select a preset from the list below and press load to populate the fields with default parameters for the selected water type. To save parameters as a default, specify a given name and clicking save will save the values in the input fields.</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+              <property name="margin">
+               <number>5</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -421,95 +407,16 @@
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_3">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="8,1,6,3">
+             <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="">
               <property name="spacing">
                <number>6</number>
               </property>
-              <item>
-               <layout class="QFormLayout" name="formLayout_2">
-                <property name="fieldGrowthPolicy">
-                 <enum>QFormLayout::ExpandingFieldsGrow</enum>
-                </property>
-                <property name="formAlignment">
-                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                </property>
-                <property name="horizontalSpacing">
-                 <number>23</number>
-                </property>
-                <item row="0" column="0">
-                 <widget class="QLabel" name="configurationNameLabel">
-                  <property name="font">
-                   <font>
-                    <pointsize>9</pointsize>
-                    <weight>50</weight>
-                    <bold>false</bold>
-                   </font>
-                  </property>
-                  <property name="text">
-                   <string>Save as:</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="0" column="1">
-                 <widget class="QLineEdit" name="defaultsSaveInput">
-                  <property name="font">
-                   <font>
-                    <pointsize>9</pointsize>
-                   </font>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_8">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item>
-               <widget class="QPushButton" name="buttonSaveDefaults">
-                <property name="font">
-                 <font>
-                  <pointsize>9</pointsize>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <property name="cursor">
-                 <cursorShape>PointingHandCursor</cursorShape>
-                </property>
-                <property name="text">
-                 <string>Save</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_4">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
              </layout>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="3,2,1">
+             <layout class="QVBoxLayout" name="verticalLayout_4" stretch="2">
               <item>
-               <layout class="QVBoxLayout" name="verticalLayout_7" stretch="2,10">
+               <layout class="QVBoxLayout" name="verticalLayout_7" stretch="2,10,0">
                 <property name="spacing">
                  <number>0</number>
                 </property>
@@ -552,76 +459,72 @@
                   </property>
                  </widget>
                 </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_6" stretch="0,0,1">
                 <item>
-                 <spacer name="verticalSpacer_2">
-                  <property name="font">
-                   <font>
-                    <pointsize>9</pointsize>
-                   </font>
+                 <widget class="QFrame" name="">
+                  <property name="styleSheet">
+                   <string notr="true">background-color:white</string>
                   </property>
-                  <property name="orientation">
-                   <enum>Qt::Vertical</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>20</width>
-                    <height>40</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="buttonLoadDefaults">
-                  <property name="font">
-                   <font>
-                    <pointsize>9</pointsize>
-                    <weight>50</weight>
-                    <bold>false</bold>
-                   </font>
-                  </property>
-                  <property name="cursor">
-                   <cursorShape>PointingHandCursor</cursorShape>
-                  </property>
-                  <property name="text">
-                   <string>Load</string>
-                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,1">
+                   <property name="leftMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="topMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="rightMargin">
+                    <number>0</number>
+                   </property>
+                   <property name="bottomMargin">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QPushButton" name="buttonDeleteDefaults">
+                     <property name="font">
+                      <font>
+                       <family>Nirmala UI</family>
+                       <pointsize>9</pointsize>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="cursor">
+                      <cursorShape>PointingHandCursor</cursorShape>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">color: rgb(12, 75, 85);
+background-color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px; border-radius:8px</string>
+                     </property>
+                     <property name="text">
+                      <string>Delete</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="buttonLoadDefaults">
+                     <property name="font">
+                      <font>
+                       <family>Nirmala UI</family>
+                       <pointsize>9</pointsize>
+                       <weight>75</weight>
+                       <bold>true</bold>
+                      </font>
+                     </property>
+                     <property name="cursor">
+                      <cursorShape>PointingHandCursor</cursorShape>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">background-color: rgb(12, 75, 85);
+color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px; border-radius:8px</string>
+                     </property>
+                     <property name="text">
+                      <string>Load</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
                  </widget>
                 </item>
-                <item>
-                 <widget class="QPushButton" name="buttonDeleteDefaults">
-                  <property name="font">
-                   <font>
-                    <pointsize>9</pointsize>
-                    <weight>50</weight>
-                    <bold>false</bold>
-                   </font>
-                  </property>
-                  <property name="cursor">
-                   <cursorShape>PointingHandCursor</cursorShape>
-                  </property>
-                  <property name="text">
-                   <string>Delete</string>
-                  </property>
-                 </widget>
-                </item>
                </layout>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_3">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
               </item>
              </layout>
             </item>
@@ -635,6 +538,9 @@
              <number>7</number>
             </property>
             <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
              <number>0</number>
             </property>
             <property name="rightMargin">
@@ -886,6 +792,72 @@
                </size>
               </property>
              </spacer>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_4">
+              <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,1,0,1">
+               <property name="spacing">
+                <number>25</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="configurationNameLabel">
+                 <property name="font">
+                  <font>
+                   <pointsize>9</pointsize>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="text">
+                  <string>Save water type as:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="defaultsSaveInput">
+                 <property name="font">
+                  <font>
+                   <pointsize>9</pointsize>
+                  </font>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="buttonSaveDefaults">
+                 <property name="font">
+                  <font>
+                   <pointsize>9</pointsize>
+                   <weight>50</weight>
+                   <bold>false</bold>
+                  </font>
+                 </property>
+                 <property name="cursor">
+                  <cursorShape>PointingHandCursor</cursorShape>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">background-color: rgb(12, 75, 85);
+color: rgb(255, 255, 255);border: 1px solid rgb(12, 75, 85); padding: 5px 20px; border-radius:8px</string>
+                 </property>
+                 <property name="text">
+                  <string>Save</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_4">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>251</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
             </item>
            </layout>
           </widget>
