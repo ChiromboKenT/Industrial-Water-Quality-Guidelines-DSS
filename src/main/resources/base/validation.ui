@@ -9,9 +9,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>430</width>
-    <height>219</height>
+    <width>617</width>
+    <height>459</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>5</pointsize>
+   </font>
   </property>
   <property name="windowTitle">
    <string>Input Validation</string>
@@ -21,31 +26,119 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
    <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Missing Input values:</string>
-     </property>
+    <widget class="QFrame" name="frame_13">
+     <layout class="QVBoxLayout" name="verticalLayout_11" stretch="1,0">
+      <property name="spacing">
+       <number>5</number>
+      </property>
+      <property name="leftMargin">
+       <number>10</number>
+      </property>
+      <property name="topMargin">
+       <number>5</number>
+      </property>
+      <property name="rightMargin">
+       <number>10</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QFrame" name="frame_14">
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_12" stretch="0,1">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_24">
+           <property name="font">
+            <font>
+             <family>Yu Gothic UI</family>
+             <pointsize>12</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color:transparent;color:rgb(50, 50, 50)</string>
+           </property>
+           <property name="text">
+            <string>Missing Inputs:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_8">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>667</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_5">
+        <property name="styleSheet">
+         <string notr="true">color: rgb(12, 75, 85);</string>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="lineWidth">
+         <number>2</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
     <widget class="QFrame" name="frame">
      <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+      <enum>QFrame::NoFrame</enum>
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1,2">
       <property name="spacing">
        <number>12</number>
       </property>
       <item>
        <widget class="QFrame" name="requiredFrame">
+        <property name="font">
+         <font>
+          <family>Yu Gothic UI</family>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
         <property name="styleSheet">
-         <string notr="true">background-color:rgba(255, 75, 75, 80);border:2px solid red;</string>
+         <string notr="true">background-color:rgba(255, 75, 75, 80);border:2px solid red;border-radius:5px</string>
         </property>
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::NoFrame</enum>
         </property>
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
@@ -55,29 +148,135 @@
           <number>10</number>
          </property>
          <item>
-          <layout class="QVBoxLayout" name="verticalRequired">
-           <property name="spacing">
-            <number>4</number>
+          <widget class="QLabel" name="label">
+           <property name="font">
+            <font>
+             <family>Yu Gothic UI Semibold</family>
+             <pointsize>9</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
            </property>
-          </layout>
+           <property name="styleSheet">
+            <string notr="true">border:none;background:transparent</string>
+           </property>
+           <property name="text">
+            <string>The following parameters are required:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QFrame" name="verticalRequired_2">
+           <property name="styleSheet">
+            <string notr="true">border:none;color:#000;background:transparent</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalRequired">
+            <property name="spacing">
+             <number>4</number>
+            </property>
+           </layout>
+          </widget>
          </item>
         </layout>
        </widget>
       </item>
       <item>
        <widget class="QFrame" name="optionalFrame">
+        <property name="font">
+         <font>
+          <family>Yu Gothic UI</family>
+          <pointsize>9</pointsize>
+         </font>
+        </property>
         <property name="styleSheet">
-         <string notr="true">background-color:rgba(255, 213, 41,80);border:2px solid rgb(255, 123, 8);color:rgb(139, 98, 3)</string>
+         <string notr="true">background-color:rgba(255, 213, 41,80);border:2px solid rgb(255, 123, 8);color:rgb(139, 98, 3);border-radius:5px</string>
         </property>
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::NoFrame</enum>
         </property>
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <layout class="QVBoxLayout" name="verticalOptional"/>
+          <widget class="QLabel" name="label_2">
+           <property name="font">
+            <font>
+             <family>Yu Gothic UI Semibold</family>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border:none;background:transparent;color:#000</string>
+           </property>
+           <property name="text">
+            <string>The following parameters are optional: </string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QFrame" name="verticalOptional_2">
+           <property name="styleSheet">
+            <string notr="true">border:none;color:#000;background:transparent</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalOptional"/>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QFrame" name="frame_2">
+        <property name="frameShape">
+         <enum>QFrame::NoFrame</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+         <property name="bottomMargin">
+          <number>10</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label_4">
+           <property name="minimumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="pixmap">
+            <pixmap>Images/info.png</pixmap>
+           </property>
+           <property name="scaledContents">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="font">
+            <font>
+             <family>Yu Gothic UI</family>
+             <pointsize>9</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -93,7 +292,7 @@
         <property name="sizeHint" stdset="0">
          <size>
           <width>20</width>
-          <height>58</height>
+          <height>5</height>
          </size>
         </property>
        </spacer>
@@ -103,11 +302,11 @@
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>

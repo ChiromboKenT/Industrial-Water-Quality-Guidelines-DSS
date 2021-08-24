@@ -1,57 +1,62 @@
 {
     "Carbon Steel": {
-      "Corrosion": ["Chloride","Sulphate","Alkalinity","P Alkalinity","pH","Electrical Conductivity","Calcium","Alkalinity","Open reticulation system?","Magnesium","Total Dissolved Solids(TDS)","Temperature","Sulphate","Dissolved Oxygen","Days of Exposure"],
-      "Scaling": ["pH","Calcium","Alkalinity","Electrical Conductivity","Total Dissolved Solids(TDS)","Temperature","Silica in steam","Magnesium","Contains Antiscalants?","Silica","Calcium","Sulphate"],
+      "Corrosion": ["Chloride","Sulphate","Alkalinity","P Alkalinity","pH","Electrical Conductivity","Calcium","Alkalinity","Open reticulation system?","Magnesium","Total Dissolved Solids","Temperature","Sulphate","Dissolved Oxygen","Days of Exposure"],
+      "Scaling": ["pH","Calcium","Alkalinity","Electrical Conductivity","Total Dissolved Solids","Temperature","Silica in steam","Magnesium","Contains Antiscalants?","Silica","Calcium","Sulphate"],
       "Fouling": ["Suspended Solids"]
     },
     "Stainless steel 304/304L": {
       "Corrosion": [
-          "pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Temperature","Flouride","Chloride"
+          "pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Temperature","Flouride","Chloride"
       ],
-      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Temperature","Silica in steam","Magnesium","Silica","Calcium","Sulphate","Contains Antiscalants?"],
+      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Temperature","Silica in steam","Magnesium","Silica","Calcium","Sulphate","Contains Antiscalants?"],
       "Fouling": ["Suspended Solids"]
     },
     "Stainless steel 316/316L": {
       "Corrosion": [
-          "pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Temperature","Flouride","Chloride"
+          "pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Temperature","Flouride","Chloride"
       ],
-      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Temperature","Silica in steam","Magnesium","Silica","Calcium","Sulphate","Contains Antiscalants?"],
+      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Temperature","Silica in steam","Magnesium","Silica","Calcium","Sulphate","Contains Antiscalants?"],
       "Fouling": ["Suspended Solids"]
     },
     "Stainless steel Alloy 20": {
       "Corrosion": [
-          "pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Temperature","Flouride","Chloride"
+          "pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Temperature","Flouride","Chloride"
       ],
-      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Temperature","Silica in steam","Magnesium","Silica","Calcium","Sulphate","Contains Antiscalants?"],
+      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Temperature","Silica in steam","Magnesium","Silica","Calcium","Sulphate","Contains Antiscalants?"],
       "Fouling": ["Suspended Solids"]
     },
     "Stainless steel 904L": {
       "Corrosion": [
-          "pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Temperature","Flouride","Chloride"
+          "pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Temperature","Flouride","Chloride"
       ],
-      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Temperature","Silica in steam","Magnesium","Silica","Calcium","Sulphate","Contains Antiscalants?"],
+      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Temperature","Silica in steam","Magnesium","Silica","Calcium","Sulphate","Contains Antiscalants?"],
       "Fouling": ["Suspended Solids"]
     },
     "Duplex Stainless Steel": {
       "Corrosion": [
-          "pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Temperature","Flouride","Chloride"
+          "pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Temperature","Flouride","Chloride"
       ],
-      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Temperature","Silica in steam","Magnesium","Silica","Calcium","Sulphate","Contains Antiscalants?"],
+      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Temperature","Silica in steam","Magnesium","Silica","Calcium","Sulphate","Contains Antiscalants?"],
       "Fouling": ["Suspended Solids"]
     },
     "Concrete": {
-      "Corrosion": ["pH","Electrical Conductivity","Calcium","Alkalinity","Temperature","Total Dissolved Solids(TDS)","Magnesium","P Alkalinity","Is the concrete reinforced?"],
-      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Temperature","Sulphate"],
+      "Corrosion": ["pH","Electrical Conductivity","Calcium","Alkalinity","Temperature","Total Dissolved Solids","Magnesium","P Alkalinity","Is the concrete reinforced?"],
+      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Temperature","Sulphate"],
       "Fouling": ["Suspended Solids"]
     },
     "Monel-Lead/Copper Alloys": {
-      "Corrosion": ["pH","Electrical Conductivity","Alkalinity","Calcium","Temperature","Total Dissolved Solids(TDS)","Chloride","P Alkalinity","Sulphate","Does Material contain Lead?","Does Material contain Copper?"],
-      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Contains Antiscalants?","Temperature","Silica in steam","Magnesium","Silica","Sulphate"],
+      "Corrosion": ["pH","Electrical Conductivity","Alkalinity","Calcium","Temperature","Total Dissolved Solids","Chloride","P Alkalinity","Sulphate","Does Material contain Lead?","Does Material contain Copper?"],
+      "Scaling": ["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Contains Antiscalants?","Temperature","Silica in steam","Magnesium","Silica","Sulphate"],
       "Fouling": ["Suspended Solids"]
     },
     "Plastic": {
-      "Scaling":["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids(TDS)","Temperature"],
+      "Scaling":["pH","Electrical Conductivity","Calcium","Alkalinity","Total Dissolved Solids","Temperature"],
       "Fouling": ["Suspended Solids"]
-    }  
+    },
+    "Membranes" : {
+      "Corrosion" : ["pH","Calcium","Alkalinity","Total Dissolved Solids","Temperature"],
+      "Scaling" : ["pH","Calcium","Alkalinity","Total Dissolved Solids","Temperature"],
+      "Fouling": ["Suspended Solids","Silt Density Index","Technology Type","Particle Size"]
+    }
     
   }

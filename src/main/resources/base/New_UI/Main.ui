@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1372</width>
-    <height>1027</height>
+    <width>1341</width>
+    <height>990</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -576,7 +576,11 @@ padding:5px;color:rgb(12, 75, 85)</string>
                  <string notr="true">background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)</string>
                 </property>
                 <property name="text">
-                 <string>Water Quality inputs</string>
+                 <string>Water Quality Inputs</string>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../Images/waterquality.png</normaloff>../Images/waterquality.png</iconset>
                 </property>
                 <property name="iconSize">
                  <size>
@@ -615,6 +619,10 @@ padding:5px;color:rgb(12, 75, 85)</string>
                 <property name="text">
                  <string>Fitness for Use Report</string>
                 </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>../Images/report.png</normaloff>../Images/report.png</iconset>
+                </property>
                 <property name="iconSize">
                  <size>
                   <width>32</width>
@@ -635,6 +643,38 @@ padding:5px;color:rgb(12, 75, 85)</string>
                  </size>
                 </property>
                </spacer>
+              </item>
+              <item>
+               <widget class="QFrame" name="frame_21">
+                <property name="frameShape">
+                 <enum>QFrame::StyledPanel</enum>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_18">
+                 <item>
+                  <widget class="QPushButton" name="exportToPdf">
+                   <property name="font">
+                    <font>
+                     <family>Nirmala UI</family>
+                     <pointsize>9</pointsize>
+                    </font>
+                   </property>
+                   <property name="cursor">
+                    <cursorShape>PointingHandCursor</cursorShape>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background:rgb(18, 114, 129);border-radius:10px;
+border:2px solid rgb(12, 75, 85);color:#fff;padding:5px 0</string>
+                   </property>
+                   <property name="text">
+                    <string>Export To PDF</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
               </item>
              </layout>
             </widget>
@@ -872,6 +912,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                        <bold>true</bold>
                       </font>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(48, 48, 48)</string>
+                     </property>
                      <property name="text">
                       <string>User Information</string>
                      </property>
@@ -1008,6 +1051,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          <bold>true</bold>
                         </font>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(48,48,48);</string>
+                       </property>
                        <property name="text">
                         <string>Full Name:</string>
                        </property>
@@ -1020,6 +1066,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          <weight>50</weight>
                          <bold>false</bold>
                         </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(48,48,48);</string>
                        </property>
                        <property name="text">
                         <string/>
@@ -1034,6 +1083,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          <bold>true</bold>
                         </font>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(48,48,48);</string>
+                       </property>
                        <property name="text">
                         <string>Sample Date:</string>
                        </property>
@@ -1046,6 +1098,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          <weight>75</weight>
                          <bold>true</bold>
                         </font>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(48,48,48);</string>
                        </property>
                        <property name="text">
                         <string>Email:</string>
@@ -1060,6 +1115,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          <bold>true</bold>
                         </font>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(48,48,48);</string>
+                       </property>
                        <property name="text">
                         <string>Position:</string>
                        </property>
@@ -1067,6 +1125,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                      </item>
                      <item row="1" column="1">
                       <widget class="QLabel" name="role">
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(48,48,48);</string>
+                       </property>
                        <property name="text">
                         <string/>
                        </property>
@@ -1074,13 +1135,19 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                      </item>
                      <item row="2" column="1">
                       <widget class="QLabel" name="company">
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(48,48,48);</string>
+                       </property>
                        <property name="text">
-                        <string>--/--/----</string>
+                        <string/>
                        </property>
                       </widget>
                      </item>
                      <item row="4" column="1">
                       <widget class="QLabel" name="email">
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(48,48,48);</string>
+                       </property>
                        <property name="text">
                         <string/>
                        </property>
@@ -1094,6 +1161,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          <bold>true</bold>
                         </font>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(48,48,48);</string>
+                       </property>
                        <property name="text">
                         <string>Sample Location:</string>
                        </property>
@@ -1101,6 +1171,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                      </item>
                      <item row="3" column="1">
                       <widget class="QLabel" name="location">
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(48,48,48);</string>
+                       </property>
                        <property name="text">
                         <string/>
                        </property>
@@ -1134,6 +1207,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          <bold>true</bold>
                         </font>
                        </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(48,48,48);</string>
+                       </property>
                        <property name="text">
                         <string>Comments:</string>
                        </property>
@@ -1146,6 +1222,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          <width>256</width>
                          <height>16777215</height>
                         </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">color:rgb(48,48,48);</string>
                        </property>
                        <property name="text">
                         <string/>
@@ -1237,6 +1316,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                        <bold>true</bold>
                       </font>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(48, 48, 48)</string>
+                     </property>
                      <property name="text">
                       <string>Sector</string>
                      </property>
@@ -1317,6 +1399,124 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                      </property>
                      <item row="0" column="1">
                       <widget class="QComboBox" name="sectorComboBox">
+                       <property name="palette">
+                        <palette>
+                         <active>
+                          <colorrole role="Button">
+                           <brush brushstyle="SolidPattern">
+                            <color alpha="255">
+                             <red>248</red>
+                             <green>248</green>
+                             <blue>249</blue>
+                            </color>
+                           </brush>
+                          </colorrole>
+                          <colorrole role="Base">
+                           <brush brushstyle="SolidPattern">
+                            <color alpha="255">
+                             <red>248</red>
+                             <green>248</green>
+                             <blue>249</blue>
+                            </color>
+                           </brush>
+                          </colorrole>
+                          <colorrole role="Window">
+                           <brush brushstyle="SolidPattern">
+                            <color alpha="255">
+                             <red>248</red>
+                             <green>248</green>
+                             <blue>249</blue>
+                            </color>
+                           </brush>
+                          </colorrole>
+                          <colorrole role="HighlightedText">
+                           <brush brushstyle="SolidPattern">
+                            <color alpha="255">
+                             <red>12</red>
+                             <green>75</green>
+                             <blue>85</blue>
+                            </color>
+                           </brush>
+                          </colorrole>
+                         </active>
+                         <inactive>
+                          <colorrole role="Button">
+                           <brush brushstyle="SolidPattern">
+                            <color alpha="255">
+                             <red>248</red>
+                             <green>248</green>
+                             <blue>249</blue>
+                            </color>
+                           </brush>
+                          </colorrole>
+                          <colorrole role="Base">
+                           <brush brushstyle="SolidPattern">
+                            <color alpha="255">
+                             <red>248</red>
+                             <green>248</green>
+                             <blue>249</blue>
+                            </color>
+                           </brush>
+                          </colorrole>
+                          <colorrole role="Window">
+                           <brush brushstyle="SolidPattern">
+                            <color alpha="255">
+                             <red>248</red>
+                             <green>248</green>
+                             <blue>249</blue>
+                            </color>
+                           </brush>
+                          </colorrole>
+                          <colorrole role="HighlightedText">
+                           <brush brushstyle="SolidPattern">
+                            <color alpha="255">
+                             <red>12</red>
+                             <green>75</green>
+                             <blue>85</blue>
+                            </color>
+                           </brush>
+                          </colorrole>
+                         </inactive>
+                         <disabled>
+                          <colorrole role="Button">
+                           <brush brushstyle="SolidPattern">
+                            <color alpha="255">
+                             <red>248</red>
+                             <green>248</green>
+                             <blue>249</blue>
+                            </color>
+                           </brush>
+                          </colorrole>
+                          <colorrole role="Base">
+                           <brush brushstyle="SolidPattern">
+                            <color alpha="255">
+                             <red>248</red>
+                             <green>248</green>
+                             <blue>249</blue>
+                            </color>
+                           </brush>
+                          </colorrole>
+                          <colorrole role="Window">
+                           <brush brushstyle="SolidPattern">
+                            <color alpha="255">
+                             <red>248</red>
+                             <green>248</green>
+                             <blue>249</blue>
+                            </color>
+                           </brush>
+                          </colorrole>
+                          <colorrole role="HighlightedText">
+                           <brush brushstyle="SolidPattern">
+                            <color alpha="255">
+                             <red>12</red>
+                             <green>75</green>
+                             <blue>85</blue>
+                            </color>
+                           </brush>
+                          </colorrole>
+                         </disabled>
+                        </palette>
+                       </property>
                        <property name="font">
                         <font>
                          <family>Yu Gothic UI</family>
@@ -1361,7 +1561,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                         </font>
                        </property>
                        <property name="styleSheet">
-                        <string notr="true">background-color:transparent</string>
+                        <string notr="true">background-color:transparent;color:rgb(48,48,48);</string>
                        </property>
                        <property name="text">
                         <string>Select Industry: </string>
@@ -1435,7 +1635,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          </font>
                         </property>
                         <property name="styleSheet">
-                         <string notr="true">background-color:transparent</string>
+                         <string notr="true">background-color:transparent;color:rgb(48,48,48);</string>
                         </property>
                         <property name="text">
                          <string>Group of companies that operate in the same segment of the economy or share a similar business type.</string>
@@ -1508,6 +1708,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                        <weight>75</weight>
                        <bold>true</bold>
                       </font>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(48, 48, 48)</string>
                      </property>
                      <property name="text">
                       <string>Unit</string>
@@ -1598,7 +1801,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                         </font>
                        </property>
                        <property name="styleSheet">
-                        <string notr="true">background-color:transparent</string>
+                        <string notr="true">background-color:transparent;color:rgb(48,48,48);</string>
                        </property>
                        <property name="text">
                         <string>Select Unit:</string>
@@ -1708,7 +1911,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                             <enum>Qt::RightToLeft</enum>
                            </property>
                            <property name="styleSheet">
-                            <string notr="true">opacity:0;</string>
+                            <string notr="true">color:rgb(48,48,48);</string>
                            </property>
                            <property name="text">
                             <string>Not Lined: </string>
@@ -1745,7 +1948,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                             <enum>Qt::RightToLeft</enum>
                            </property>
                            <property name="styleSheet">
-                            <string notr="true">opacity:0;</string>
+                            <string notr="true">color:rgb(48,48,48);</string>
                            </property>
                            <property name="text">
                             <string>Lined: </string>
@@ -1837,7 +2040,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          </font>
                         </property>
                         <property name="styleSheet">
-                         <string notr="true">background-color:transparent</string>
+                         <string notr="true">background-color:transparent;color:rgb(48,48,48);</string>
                         </property>
                         <property name="text">
                          <string>The processing unit refers to the component or unit to be assessed.</string>
@@ -1923,6 +2126,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                        <bold>true</bold>
                       </font>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(48, 48, 48)</string>
+                     </property>
                      <property name="text">
                       <string>Material of construction</string>
                      </property>
@@ -2006,7 +2212,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                         </font>
                        </property>
                        <property name="styleSheet">
-                        <string notr="true">background-color:transparent</string>
+                        <string notr="true">background-color:transparent;color:rgb(48,48,48);</string>
                        </property>
                        <property name="text">
                         <string>Select Material:</string>
@@ -2094,7 +2300,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                         <bool>false</bool>
                        </property>
                        <property name="styleSheet">
-                        <string notr="true">background-color:transparent</string>
+                        <string notr="true">background-color:transparent;color:rgb(48,48,48);</string>
                        </property>
                        <property name="text">
                         <string>For the selected Unit, this specifies the major material used for its construction.</string>
@@ -2167,6 +2373,9 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                        <bold>true</bold>
                       </font>
                      </property>
+                     <property name="styleSheet">
+                      <string notr="true">color:rgb(48, 48, 48)</string>
+                     </property>
                      <property name="text">
                       <string>Select the effect to be assessed</string>
                      </property>
@@ -2213,7 +2422,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                 <item>
                  <widget class="QGroupBox" name="groupBox_20">
                   <property name="styleSheet">
-                   <string notr="true">background-color:rgb(248, 248, 249)</string>
+                   <string notr="true">color:rgb(48,48,48);</string>
                   </property>
                   <layout class="QVBoxLayout" name="verticalLayout_14">
                    <property name="leftMargin">
@@ -2295,7 +2504,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          </font>
                         </property>
                         <property name="styleSheet">
-                         <string notr="true">bor</string>
+                         <string notr="true">color:rgb(48,48,48);</string>
                         </property>
                         <property name="text">
                          <string>Corrosion</string>
@@ -2329,7 +2538,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          </font>
                         </property>
                         <property name="styleSheet">
-                         <string notr="true">bor</string>
+                         <string notr="true">color:rgb(48,48,48);</string>
                         </property>
                         <property name="text">
                          <string>Scaling</string>
@@ -2363,7 +2572,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                          </font>
                         </property>
                         <property name="styleSheet">
-                         <string notr="true">bor</string>
+                         <string notr="true">color:rgb(48,48,48);</string>
                         </property>
                         <property name="text">
                          <string>Fouling</string>
@@ -2527,33 +2736,6 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1372</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuFile">
-    <property name="title">
-     <string>File</string>
-    </property>
-    <addaction name="actionHome"/>
-    <addaction name="actionClose"/>
-   </widget>
-   <widget class="QMenu" name="menuHelp">
-    <property name="title">
-     <string>Help</string>
-    </property>
-    <addaction name="actionAbout"/>
-    <addaction name="actionBackground_Info"/>
-    <addaction name="actionManual"/>
-   </widget>
-   <addaction name="menuFile"/>
-   <addaction name="menuHelp"/>
-  </widget>
   <action name="actionHome">
    <property name="text">
     <string>Home</string>
@@ -2610,30 +2792,14 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
  <resources/>
  <connections>
   <connection>
-   <sender>pb_minimize</sender>
-   <signal>clicked()</signal>
-   <receiver>MainWindow</receiver>
-   <slot>showMinimized()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>934</x>
-     <y>65</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>1086</x>
-     <y>125</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>pb_minimize_3</sender>
    <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1048</x>
-     <y>57</y>
+     <x>1330</x>
+     <y>53</y>
     </hint>
     <hint type="destinationlabel">
      <x>1088</x>
@@ -2642,34 +2808,18 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
    </hints>
   </connection>
   <connection>
-   <sender>pb_minimize_2</sender>
-   <signal>clicked(bool)</signal>
+   <sender>pb_minimize</sender>
+   <signal>clicked()</signal>
    <receiver>MainWindow</receiver>
-   <slot>showMaximized()</slot>
+   <slot>showMinimized()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1004</x>
-     <y>68</y>
+     <x>1212</x>
+     <y>53</y>
     </hint>
     <hint type="destinationlabel">
-     <x>1084</x>
-     <y>210</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pb_minimize_2</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>pb_minimize_2</receiver>
-   <slot>showNormal()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>978</x>
-     <y>60</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>984</x>
-     <y>42</y>
+     <x>1086</x>
+     <y>125</y>
     </hint>
    </hints>
   </connection>

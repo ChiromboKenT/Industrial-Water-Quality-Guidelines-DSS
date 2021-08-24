@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>719</width>
-    <height>661</height>
+    <width>718</width>
+    <height>693</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -95,6 +95,9 @@
                 <bold>true</bold>
                </font>
               </property>
+              <property name="styleSheet">
+               <string notr="true">color:rgb(48, 48, 48)</string>
+              </property>
               <property name="text">
                <string>Assessment Details</string>
               </property>
@@ -138,7 +141,7 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,3">
         <property name="spacing">
-         <number>10</number>
+         <number>8</number>
         </property>
         <item>
          <widget class="QFrame" name="frame_2">
@@ -191,12 +194,12 @@
                 <font>
                  <family>Yu Gothic UI</family>
                  <pointsize>9</pointsize>
-                 <weight>50</weight>
-                 <bold>false</bold>
+                 <weight>75</weight>
+                 <bold>true</bold>
                 </font>
                </property>
                <property name="text">
-                <string>Effect(s) under assessment:</string>
+                <string>Risk(s) assessed:</string>
                </property>
               </widget>
              </item>
@@ -230,8 +233,8 @@
                 <font>
                  <family>Yu Gothic UI</family>
                  <pointsize>9</pointsize>
-                 <weight>50</weight>
-                 <bold>false</bold>
+                 <weight>75</weight>
+                 <bold>true</bold>
                 </font>
                </property>
                <property name="text">
@@ -284,8 +287,8 @@
                 <font>
                  <family>Yu Gothic UI</family>
                  <pointsize>9</pointsize>
-                 <weight>50</weight>
-                 <bold>false</bold>
+                 <weight>75</weight>
+                 <bold>true</bold>
                 </font>
                </property>
                <property name="text">
@@ -338,8 +341,8 @@
                 <font>
                  <family>Yu Gothic UI</family>
                  <pointsize>9</pointsize>
-                 <weight>50</weight>
-                 <bold>false</bold>
+                 <weight>75</weight>
+                 <bold>true</bold>
                 </font>
                </property>
                <property name="text">
@@ -418,7 +421,13 @@
         </item>
         <item>
          <widget class="QFrame" name="frame_4">
-          <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
+          <property name="font">
+           <font>
+            <family>Yu Gothic UI</family>
+            <pointsize>8</pointsize>
+           </font>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1,0">
            <property name="leftMargin">
             <number>10</number>
            </property>
@@ -435,8 +444,8 @@
             <widget class="QLabel" name="label_9">
              <property name="maximumSize">
               <size>
-               <width>32</width>
-               <height>32</height>
+               <width>48</width>
+               <height>48</height>
               </size>
              </property>
              <property name="text">
@@ -452,8 +461,22 @@
            </item>
            <item>
             <widget class="QLabel" name="label_10">
+             <property name="maximumSize">
+              <size>
+               <width>575</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>-1</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color:rgb(48, 48, 48);font-size:11px</string>
+             </property>
              <property name="text">
-              <string>The user has the option to load, edit and save preset values for the water type. Select a preset from the list below and press load to populate the fields with default parameters for the selected water type. To save parameters as a default, specify a given name and clicking save will save the values in the input fields.</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;ul type=&quot;circle&quot; style=&quot;margin-top: 0px; margin-bottom: 0px; margin-left: 0px; margin-right: 0px; -qt-list-indent: 0&quot;&gt;&lt;li style=&quot;font-size:11px&quot;&gt;&amp;#10233; User has the option to load default values OR&lt;/li&gt;&lt;li style=&quot;font-size:11px&quot;&gt;&amp;#10233; User can input site specific water qualities OR&lt;/li&gt;&lt;li style=&quot;font-size:11px&quot;&gt;&amp;#10233; User can load default values and edit with site specific water qualities&lt;/li&gt;&lt;/ul&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -466,11 +489,24 @@
              </property>
             </widget>
            </item>
+           <item>
+            <spacer name="horizontalSpacer_6">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
           </layout>
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="groupBox">
+         <widget class="QFrame" name="frame">
           <property name="minimumSize">
            <size>
             <width>250</width>
@@ -491,19 +527,95 @@
             <bold>true</bold>
            </font>
           </property>
-          <property name="title">
-           <string>Enter measured values or select default values from water types below:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+          <property name="styleSheet">
+           <string notr="true">color:rgb(48, 48, 48)</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
-             <property name="spacing">
-              <number>6</number>
-             </property>
-            </layout>
+            <widget class="QGroupBox" name="groupBox">
+             <layout class="QVBoxLayout" name="verticalLayout_10" stretch="0,1">
+              <property name="leftMargin">
+               <number>0</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>0</number>
+              </property>
+              <property name="bottomMargin">
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QFrame" name="frame_8">
+                <property name="frameShadow">
+                 <enum>QFrame::Plain</enum>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="0,1">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="QLabel" name="label_15">
+                   <property name="font">
+                    <font>
+                     <family>Yu Gothic UI</family>
+                     <pointsize>11</pointsize>
+                     <weight>75</weight>
+                     <bold>true</bold>
+                    </font>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">color:rgb(48, 48, 48)</string>
+                   </property>
+                   <property name="text">
+                    <string>Enter measured values or select default values from water types listed below:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <spacer name="horizontalSpacer_7">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>667</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_4">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(12, 75, 85);</string>
+                </property>
+                <property name="frameShadow">
+                 <enum>QFrame::Plain</enum>
+                </property>
+                <property name="lineWidth">
+                 <number>2</number>
+                </property>
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
            </item>
            <item>
             <layout class="QVBoxLayout" name="verticalLayout_4" stretch="2">
@@ -675,6 +787,9 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
                   <bold>true</bold>
                  </font>
                 </property>
+                <property name="styleSheet">
+                 <string notr="true">color:rgb(48, 48, 48)</string>
+                </property>
                 <property name="text">
                  <string>Inputs</string>
                 </property>
@@ -717,7 +832,7 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
         </item>
         <item>
          <widget class="QFrame" name="vertLayoutInputs">
-          <layout class="QVBoxLayout" name="verticalLayout">
+          <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0,0">
            <property name="spacing">
             <number>7</number>
            </property>
@@ -731,7 +846,7 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
             <number>0</number>
            </property>
            <property name="bottomMargin">
-            <number>0</number>
+            <number>4</number>
            </property>
            <item>
             <widget class="QFrame" name="frame_3">
@@ -792,6 +907,9 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
                     <underline>true</underline>
                    </font>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">color:rgb(48, 48, 48)</string>
+                  </property>
                   <property name="text">
                    <string>Parameter</string>
                   </property>
@@ -816,6 +934,9 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
                     <underline>true</underline>
                    </font>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">color:rgb(48, 48, 48)</string>
+                  </property>
                   <property name="text">
                    <string>Unit</string>
                   </property>
@@ -839,6 +960,9 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
                     <bold>true</bold>
                     <underline>true</underline>
                    </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color:rgb(48, 48, 48)</string>
                   </property>
                   <property name="text">
                    <string>Value</string>
@@ -895,6 +1019,9 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
                     <underline>true</underline>
                    </font>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">color:rgb(48, 48, 48)</string>
+                  </property>
                   <property name="text">
                    <string>Value</string>
                   </property>
@@ -925,6 +1052,9 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
                     <underline>true</underline>
                    </font>
                   </property>
+                  <property name="styleSheet">
+                   <string notr="true">color:rgb(48, 48, 48)</string>
+                  </property>
                   <property name="text">
                    <string>Parameter</string>
                   </property>
@@ -948,6 +1078,9 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
                     <bold>true</bold>
                     <underline>true</underline>
                    </font>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color:rgb(48, 48, 48)</string>
                   </property>
                   <property name="text">
                    <string>Unit</string>
@@ -973,7 +1106,7 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
              <property name="sizeHint" stdset="0">
               <size>
                <width>20</width>
-               <height>20</height>
+               <height>10</height>
               </size>
              </property>
             </spacer>
@@ -984,6 +1117,9 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
               <property name="spacing">
                <number>25</number>
               </property>
+              <property name="bottomMargin">
+               <number>1</number>
+              </property>
               <item>
                <widget class="QLabel" name="configurationNameLabel">
                 <property name="font">
@@ -993,6 +1129,9 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
                   <weight>75</weight>
                   <bold>true</bold>
                  </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color:rgb(48, 48, 48)</string>
                 </property>
                 <property name="text">
                  <string>Save water type as:</string>
@@ -1005,6 +1144,9 @@ color: rgb(255, 255, 255);border: 2px solid rgb(12, 75, 85); padding: 6px 5px;</
                  <font>
                   <pointsize>9</pointsize>
                  </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color:rgb(48, 48, 48)</string>
                 </property>
                </widget>
               </item>
@@ -1042,6 +1184,79 @@ color: rgb(255, 255, 255);border: 1px solid rgb(12, 75, 85); padding: 5px 20px; 
                  </size>
                 </property>
                </spacer>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QFrame" name="frame_7">
+             <property name="frameShape">
+              <enum>QFrame::NoFrame</enum>
+             </property>
+             <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,2">
+              <property name="leftMargin">
+               <number>10</number>
+              </property>
+              <property name="topMargin">
+               <number>0</number>
+              </property>
+              <property name="rightMargin">
+               <number>10</number>
+              </property>
+              <property name="bottomMargin">
+               <number>4</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="label_14">
+                <property name="maximumSize">
+                 <size>
+                  <width>32</width>
+                  <height>32</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="pixmap">
+                 <pixmap>../Images/info-a.png</pixmap>
+                </property>
+                <property name="scaledContents">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_13">
+                <property name="maximumSize">
+                 <size>
+                  <width>167453</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Yu Gothic UI</family>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color:rgb(48, 48, 48)</string>
+                </property>
+                <property name="text">
+                 <string>If site specific or edited default water qualities are used, provide a reference name to save the user specified qualities.</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <property name="wordWrap">
+                 <bool>true</bool>
+                </property>
+                <property name="margin">
+                 <number>5</number>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
