@@ -11,11 +11,13 @@ from about import AboutWindow
 from assessments import ReportsWindow
 from userInfo import UserInfo
 from floatingButton import FloatingButtonWidget
+from background import BackgroundWindow
+from pdfViewer import PDFWindow
 
 import sys
 import pandas as pd
-from PyQt5.QtCore import Qt,QPoint
-from PyQt5.QtGui import QImage
+from PyQt5.QtCore import Qt,QPoint,pyqtSlot,pyqtSignal
+from PyQt5.QtGui import QImage,QCursor
 from PyQt5 import uic
 import json
 import os
@@ -38,6 +40,10 @@ class AppContext(ApplicationContext):
     @cached_property
     def main_window(self):
         return MainWindow(self)
+
+    @cached_property
+    def background_window(self):
+        return BackgroundWindow(self)
 
 
     @cached_property
@@ -101,6 +107,10 @@ class AppContext(ApplicationContext):
     @cached_property
     def get_main(self):
         return self.get_resource("New_UI/Home.ui")
+
+    @cached_property
+    def get_background(self):
+        return self.get_resource("New_UI/BackgroundInfo.ui")
     
     @cached_property
     def get_inputs(self):
@@ -138,6 +148,50 @@ class AppContext(ApplicationContext):
             data = json.load(file)
         return data
     @cached_property
+    def import_assessment_alloy(self):
+        fileName = self.get_resource("data/assessment_alloy.json")
+        with open(fileName,'r') as file:
+            # Opening JSON file
+            data = json.load(file)
+        return data
+    @cached_property
+    def import_assessment_carbon(self):
+        fileName = self.get_resource("data/assessment_carbon.json")
+        with open(fileName,'r') as file:
+            # Opening JSON file
+            data = json.load(file)
+        return data
+    @cached_property
+    def import_assessment_concrete(self):
+        fileName = self.get_resource("data/assessment_concrete.json")
+        with open(fileName,'r') as file:
+            # Opening JSON file
+            data = json.load(file)
+        return data
+    @cached_property
+    def import_assessment_membrane(self):
+        fileName = self.get_resource("data/assessment_membrane.json")
+        with open(fileName,'r') as file:
+            # Opening JSON file
+            data = json.load(file)
+        return data
+    @cached_property
+    def import_assessment_plastic(self):
+        fileName = self.get_resource("data/assessment_plastic.json")
+        with open(fileName,'r') as file:
+            # Opening JSON file
+            data = json.load(file)
+        return data
+    @cached_property
+    def import_assessment_ss(self):
+        fileName = self.get_resource("data/assessment_ss.json")
+        with open(fileName,'r') as file:
+            # Opening JSON file
+            data = json.load(file)
+        return data
+        
+
+    @cached_property
     def import_units_data(self):
         fileName = self.get_resource("data/units.json")
         with open(fileName,'r') as file:
@@ -151,7 +205,9 @@ class AppContext(ApplicationContext):
         with open(fileName, 'r') as file:
             html = file.read()
         return html
-    
+    def retrieve_pdf(self, document):
+        fileName = self.get_resource(f"documents/{document}.pdf")
+        return fileName
     @cached_property
     def get_param_filename(self):
         return self.get_resource("data/parameters.json")
@@ -184,6 +240,8 @@ class AppContext(ApplicationContext):
 
 #----------------------------------------------------------------------------------------- -------------Main Window ---------------------------------------------------------------
 class MainWindow(QMainWindow):
+
+    _background_window = pyqtSignal(str)
     def __init__(self, ctx):
         super(MainWindow, self).__init__()
         self.ctx = ctx
@@ -191,21 +249,42 @@ class MainWindow(QMainWindow):
         self.setWindowFlags(Qt.FramelessWindowHint)
         
         #buttons
+        self.frame_3.mousePressEvent = self.PressEvent
+        self.frame_3.mouseMoveEvent = self.MoveEvent
+        self.frame_3.mouseReleaseEvent = self.PressRelease
+
         self.buttonAdvancedAssess.mouseReleaseEvent = self.showNext
         self.buttonWaterQuality.mouseReleaseEvent = self.showWaterQuality
         self.buttonAbout.clicked.connect(self.showAbout)
+        self._background_window.connect(self.showBackGround)
+        self.buttonHelp.clicked.connect(self.showManual)
+    
 
-        self.buttonNice = FloatingButtonWidget(parent = self.label)
+        self.buttonNice = FloatingButtonWidget(self )
+        #self.buttonNice.clicked.connect(lambda: print("clicked"))
         #Show Window
         #self.show()
         
-    def mousePressEvent(self, event):
-        self.oldPos = event.globalPos()
-
-    def mouseMoveEvent(self, event):
+    def showManual(self):
+        self.infoWindow = PDFWindow(self,"manual")
+        self.infoWindow.show()
+       
+    
+    def PressEvent(self, event):
+        
+        if event.button() == Qt.LeftButton:
+            self.oldPos = event.globalPos()
+            self.frame_3.setCursor(QCursor(Qt.ClosedHandCursor))
+            super().mousePressEvent(event)
+    def PressRelease(self,event):
+        if event.button() == Qt.LeftButton:
+            self.frame_3.setCursor(QCursor(Qt.OpenHandCursor))
+            super().mouseReleaseEvent(event)
+    def MoveEvent(self, event):
         delta = QPoint(event.globalPos() - self.oldPos)
         self.move(self.x() + delta.x(), self.y() + delta.y())
         self.oldPos = event.globalPos()
+
     def center(self):
         frameGm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
@@ -223,6 +302,11 @@ class MainWindow(QMainWindow):
         self.water_window = self.ctx.water_window
         self.water_window.show()
         self.close()
+
+    
+    def showBackGround(self):
+        self.background_window = self.ctx.background_window
+        self.background_window.show()
 
 
 # See ``pyi_rth_qt5.py`: use a "standard" PyQt5 layout.

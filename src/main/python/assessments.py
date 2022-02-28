@@ -1,3 +1,4 @@
+from typing import cast
 from PyQt5.QtWidgets import QApplication, QDialog,  QLabel, QWidget
 
 
@@ -5,87 +6,9 @@ from PyQt5 import QtCore, QtWidgets as qtw
 from PyQt5 import QtCore as qtc
 from PyQt5 import QtGui as qtg
 from PyQt5 import uic
+import math
+import webbrowser
 #--------------------------------------------------------------------------------------------------------Reports Window-----------------------------------------------------------
-class HighlightDelegate(qtw.QStyledItemDelegate):
-    def __init__(self, parent=None):
-        super(HighlightDelegate, self).__init__(parent)
-        self._filters = []
-        self._wordwrap = False
-        self.doc = qtg.QTextDocument(self)
-    def createEditor(self,parent,option,index):
-        print('createEditor event fired')
-        return
-
-    def paint(self, painter, option, index):
-        painter.save()
-        options = qtw.QStyleOptionViewItem(option)
-        self.initStyleOption(options, index)
-        self.doc.setPlainText(options.text)
-        self.apply_highlight()
-
-        if self._wordwrap:
-            self.doc.setTextWidth(options.rect.width())
-        options.text = ""
-
-        style = QApplication.style() if options.widget is None else options.widget.style()
-        style.drawControl(qtw.QStyle.CE_ItemViewItem, options, painter)
-
-        if self._wordwrap:
-            painter.translate(options.rect.left(), options.rect.top())
-            clip = QtCore.QRectF(QtCore.QPointF(), QtCore.QSizeF(options.rect.size()))
-            self.doc.drawContents(painter, clip)
-        else:
-            ctx = qtg.QAbstractTextDocumentLayout.PaintContext()
-            if option.state & qtw.QStyle.State_Selected:
-                ctx.palette.setColor(qtg.QPalette.Text, option.palette.color(
-                    qtg.QPalette.Active, qtg.QPalette.HighlightedText))
-            else:
-                ctx.palette.setColor(qtg.QPalette.Text, option.palette.color(
-                    qtg.QPalette.Active, qtg.QPalette.Text))
-            textRect = style.subElementRect(qtw.QStyle.SE_ItemViewItemText, options, None)
-            if index.column() != 0:
-                textRect.adjust(5, 0, 0, 0)
-            constant = 4
-            margin = (option.rect.height() - options.fontMetrics.height()) // 2
-            margin = margin - constant
-            textRect.setTop(textRect.top() + margin)
-            painter.translate(textRect.topLeft())
-            painter.setClipRect(textRect.translated(-textRect.topLeft()))
-            self.doc.documentLayout().draw(painter, ctx)
-
-        painter.restore()
-        s = QtCore.QSize(self.doc.idealWidth(), self.doc.size().height())
-        index.model().setData(index, s, QtCore.Qt.SizeHintRole)
-    def apply_highlight(self):
-        cursor = qtg.QTextCursor(self.doc)
-        cursor.beginEditBlock()
-        fmt = qtg.QTextCharFormat()
-        fmt.setForeground(QtCore.Qt.red)
-        for f in self.filters():
-            highlightCursor = qtg.QTextCursor(self.doc)
-            while not highlightCursor.isNull() and not highlightCursor.atEnd():
-                highlightCursor = self.doc.find(f, highlightCursor)
-                if not highlightCursor.isNull():
-                    highlightCursor.mergeCharFormat(fmt)
-        cursor.endEditBlock()
-
-    @QtCore.pyqtSlot(list)
-    def setFilters(self, filters):
-        if self._filters == filters: return
-        self._filters = filters
-        self.parent().viewport().update()
-
-    def filters(self):
-        return self._filters
-
-    def setWordWrap(self, on):
-        self._wordwrap = on
-        mode = qtg.QTextOption.WordWrap if on else qtg.QTextOption.WrapAtWordBoundaryOrAnywhere
-
-        textOption = qtg.QTextOption(self.doc.defaultTextOption())
-        textOption.setWrapMode(mode)
-        self.doc.setDefaultTextOption(textOption)
-        #self.parent().viewport().update()
 
 class AlignDelegate(qtw.QStyledItemDelegate):
     def createEditor(self,parent,option,index):
@@ -94,6 +17,18 @@ class AlignDelegate(qtw.QStyledItemDelegate):
     def initStyleOption(self, option, index):
         super(AlignDelegate, self).initStyleOption(option, index)
         option.displayAlignment = qtc.Qt.AlignCenter
+        option.font = qtg.QFont("Times",10)
+
+class AlignLeftDelegate(qtw.QStyledItemDelegate):
+    def createEditor(self,parent,option,index):
+        print('createEditor event fired')
+        return
+    def initStyleOption(self, option, index):
+        super(AlignLeftDelegate, self).initStyleOption(option, index)
+        option.displayAlignment = qtc.Qt.AlignLeft
+        option.font = qtg.QFont("Times",10)
+        
+
 class ReportsWindow(QDialog, qtw.QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__()
@@ -107,14 +42,22 @@ class ReportsWindow(QDialog, qtw.QWidget):
         self.user = args[5]
         self.info = args[6]
         self.units = self.ctx.import_units_data
-
-        
-
-       
+        self.assessment_alloy = self.ctx.import_assessment_alloy
+        self.assessment_carbon = self.ctx.import_assessment_carbon
+        self.assessment_concrete = self.ctx.import_assessment_concrete
+        self.assessment_plastic = self.ctx.import_assessment_plastic
+        self.assessment_membrane = self.ctx.import_assessment_membrane
+        self.assessment_ss = self.ctx.import_assessment_ss
+     
         
         self.setWindowTitle("Fitness-of-use Report")
-        print(args[1])
+       
         self.report_data = self.parseTable()
+        
+        if(self.material == "Membranes"):
+            self.label_20.setText("")
+            self.labelMaterial.setText("")
+            self.material = "-"
 
         self.data = {
             "report_data" :self.report_data,
@@ -139,6 +82,10 @@ class ReportsWindow(QDialog, qtw.QWidget):
         self.labelSector.setText(self.info['sector'])
         self.labelUnit.setText(self.info['unit'])
         self.labelMaterial.setText(self.material)
+
+       
+            
+        
 
         #Specific Inputs Tab
         inputsSize = len(self.inputs)
@@ -176,7 +123,7 @@ class ReportsWindow(QDialog, qtw.QWidget):
             self.gridReportLeft.addWidget(paramValue,i+1,1,alignment=qtc.Qt.AlignTop)
             self.gridReportLeft.addWidget(paramUnits,i+1,2,alignment=qtc.Qt.AlignTop)
         self.gridReportLeft.addItem(qtw.QSpacerItem(20, 10, qtw.QSizePolicy.Fixed,qtw.QSizePolicy.Expanding))
-        print("grid left done")
+        
 
 
         for i, item in enumerate(inputListRight):
@@ -209,8 +156,6 @@ class ReportsWindow(QDialog, qtw.QWidget):
         except Exception as e:
             print("Error adding Spacer: {e}") 
 
-        print("grid right done")
-
         assesment_keys = list(self.report_data.keys())
         tabNumber = 0
         for key in assesment_keys:
@@ -218,6 +163,25 @@ class ReportsWindow(QDialog, qtw.QWidget):
             self.resultTab.addTab(self.tab1, f'{key}')
             self.tab1UI(key,self.report_data,tabNumber)
             tabNumber = tabNumber + 1
+
+        self.resultTab.currentChanged.connect(self.TabChanger)
+        myText = self.resultTab.tabText(self.resultTab.currentIndex())
+        if(myText != "Scaling"):
+            self.linkToToolFrame.hide()
+
+        self.linkToTool.clicked.connect(self.open_webbrowser)
+   
+
+    def open_webbrowser(self): 
+        webbrowser.open('http://wrcwebsite.azurewebsites.net/mdocs-posts/stasoft-install/stasoft-install-2/')
+
+    def TabChanger(self):
+        myText = self.resultTab.tabText(self.resultTab.currentIndex())
+        if(myText != "Scaling"):
+            self.linkToToolFrame.hide()
+        else :
+            self.linkToToolFrame.show()
+
     def tab1UI(self,key,data,tabNumber):
         styleSheet = "QHeaderView::section{Background-color:#404040;color:#fff;text-align:center;font-weight:900}"
 
@@ -229,39 +193,39 @@ class ReportsWindow(QDialog, qtw.QWidget):
         table.setColumnCount(5)
         #RowCount
         table.setRowCount(len(data[key]))
-        table.setHorizontalHeaderLabels(["  Parameter ","Value","Risk Category","Description","Treatment Recommendations"])
-        table.horizontalHeader().setStyleSheet("border: 1px solid #000;background-color:rgb(17, 111, 125);font-weight:700")
+        table.setHorizontalHeaderLabels(["  Parameter ","Value"," Risk Category ","Description","Options for Consideration"])
+        table.horizontalHeader().setStyleSheet("border: 1px solid #000;background-color:rgb(17, 111, 125);font-weight:700;color:#fff")
         table.horizontalHeader().setSectionResizeMode(0, qtw.QHeaderView.ResizeToContents)
         table.horizontalHeader().setSectionResizeMode(1, qtw.QHeaderView.Fixed)
-        table.horizontalHeader().setSectionResizeMode(2, qtw.QHeaderView.Fixed)
+        table.horizontalHeader().setSectionResizeMode(2, qtw.QHeaderView.ResizeToContents)
         table.horizontalHeader().setSectionResizeMode(3, qtw.QHeaderView.ResizeToContents)
         table.horizontalHeader().setSectionResizeMode(4, qtw.QHeaderView.Stretch)
+        table.setWordWrap(True)
 
-        table.horizontalHeader().resizeSection(1, 90)
-        table.horizontalHeader().resizeSection(1, 120)
+        #table.horizontalHeader().resizeSection(1, 90)
+        #table.horizontalHeader().resizeSection(1, 120)
 
         table.horizontalHeader().setStretchLastSection(True)
         table.verticalHeader().hide()
         
         
         table.setStyleSheet(styleSheet)
-        table.setVerticalScrollBarPolicy(qtc.Qt.ScrollBarAlwaysOff)
+        #table.setVerticalScrollBarPolicy(qtc.Qt.ScrollBarAlwaysOff)
         table.setHorizontalScrollBarPolicy(qtc.Qt.ScrollBarAlwaysOff)
         rowCount = 0
+
         
         
         
 
-        self._delegate = HighlightDelegate(table)
+        
+        
         for item_key,item_value in data[key].items():
-            
-            table.setItemDelegate(self._delegate)
-            self._delegate.setWordWrap(True)
             item1 = qtw.QTableWidgetItem(item_value['Risk'])
 
             if(item_value["Risk"] == "Unacceptable"):
                 item1.setBackground(qtg.QColor(255,0,0))
-                item1.setForeground(qtg.QColor(0,0,0))
+                item1.setForeground(qtg.QColor(255,255,255))
             elif(item_value["Risk"] == "Tolerable"):
                 item1.setBackground(qtg.QColor(255,255,0))
             elif(item_value["Risk"] == "Acceptable"):
@@ -271,40 +235,58 @@ class ReportsWindow(QDialog, qtw.QWidget):
             else:
                  item1.setBackground(qtg.QColor(40,40,40))
 
-            table.setItem(rowCount, 0, qtw.QTableWidgetItem(f'{item_key}'))
+            if item_key == "Corrosion Rate due to the Pisigan and Shingley Correlation (mmpy)":
+                table.setItem(rowCount, 0, qtw.QTableWidgetItem("""Corrosion Rate due to the Pisigan\nand Shingley Correlation (mmpy)"""))
+            else:
+                table.setItem(rowCount, 0, qtw.QTableWidgetItem(f'{item_key}'))
             try:
                 table.setItem(rowCount, 1, qtw.QTableWidgetItem(f"{round(item_value['Index'],2)}"))
                 
             except TypeError as e:
                 table.setItem(rowCount, 1, qtw.QTableWidgetItem(f"{item_value['Index']}"))
+
+            descriptionCell =  qtw.QTableWidgetItem(f"{item_value['Description']}")
+            descriptionCell.setFont(qtg.QFont("Times",10))
+
+            treatmentCell =  qtw.QTableWidgetItem(f"{item_value['Treatment']}")
+            treatmentCell.setFont(qtg.QFont("Times",10))
+
             table.setItem(rowCount, 2, item1)
-            table.setItem(rowCount, 3, qtw.QTableWidgetItem(f"{item_value['Description']}"))
-            table.setItem(rowCount, 4, qtw.QTableWidgetItem(f"{item_value['Treatment']}"))
+            table.setItem(rowCount, 3, descriptionCell)
+            table.setItem(rowCount, 4,treatmentCell)
             delegateAlign = AlignDelegate(table)
+            leftDelegateAlign = AlignLeftDelegate(table)
+
+            table.setItemDelegateForColumn(0, delegateAlign)
             table.setItemDelegateForColumn(1, delegateAlign)
             table.setItemDelegateForColumn(2, delegateAlign)
+            table.setItemDelegateForColumn(3, leftDelegateAlign)
+            table.setItemDelegateForColumn(4, leftDelegateAlign)
+            rowCount = rowCount + 1
+            
            
             
-            table.setStyleSheet("font-size:13px;border:none")
-            rowCount = rowCount + 1
-
-            table.resizeRowsToContents()
-            table.setMinimumSize(self.getQTableWidgetSize(table))
+        table.setStyleSheet("font-size:13px;border:none")
+        table.resizeRowsToContents()
         
+        table.setMaximumHeight(self.getQTableHeight(table))
+        table.setMinimumSize(self.getQTableWidgetSize(table))
         
-        
+       
+        table.resizeRowsToContents()
         
         
         
         
 
         layout.addWidget(table,0)
-        layout.addStretch(1)
+        layout.setAlignment(table, qtc.Qt.AlignTop)
+        layout.addSpacerItem(qtw.QSpacerItem(20, 10, qtw.QSizePolicy.Fixed,qtw.QSizePolicy.Expanding))
+        layout.addStretch()
         self.resultTab.setTabText(tabNumber,f"{key}")
         self.tab1.setLayout(layout)  
 
     def showBack(self):
-        print("Back pressed")
         self.inputs_window = self.ctx.input_window()
         self.inputs_window.show()
         self.close()    
@@ -314,8 +296,15 @@ class ReportsWindow(QDialog, qtw.QWidget):
             w += table.columnWidth(i)  # seems to include gridline (on my machine)
         h = table.horizontalHeader().height() + 4
         for i in range(table.rowCount()):
+            h += math.floor(table.rowHeight(i) * 0.5)
+        return QtCore.QSize(h, w)
+
+    def getQTableHeight(self,table):
+        
+        h = table.horizontalHeader().height() + 5
+        for i in range(table.rowCount()):
             h += table.rowHeight(i)
-        return QtCore.QSize(w, h)
+        return h
 
     def parseTable(self):
         analysis = self.analysis
@@ -326,6 +315,7 @@ class ReportsWindow(QDialog, qtw.QWidget):
         self.material == "Stainless steel Alloy 20" or self.material == "Stainless steel 904L" or self.material == "Duplex Stainless Steel" ):
             for assessment in self.assessments:
                 if(assessment == "Corrosion"):
+                    _data = self.assessment_ss["corrosion"] 
                     Corrosion = {}
                     RyznerRes = {}
                     FlourideRes = {}
@@ -334,74 +324,94 @@ class ReportsWindow(QDialog, qtw.QWidget):
                     chlorideRes = {}
 
                     #------------------------------------------------------Corrosion Ryzner-------------------------------------
-                    if(analysis['ryzner'] >= 8.5):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Severe Corrosion due to lack of CaCO3 formation"
+                    if(analysis['ryznar'] >= 8.5):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Severe Corrosion due to lack of CaCO\u2083 formation"
                         RyznerRes["Risk"] = "Unacceptable"
-                        RyznerRes["Treatment"] = """Chemical Treatment Recommended - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality
-                        """
-                    elif(analysis['ryzner'] < 8.5 and analysis['ryzner'] >= 7.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO3 formation"
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["unacceptable"]
+                    elif(analysis['ryznar'] < 8.5 and analysis['ryznar'] >= 7.8):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO\u2083 formation"
                         RyznerRes["Risk"] = "Tolerable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
-                    elif(analysis['ryzner'] < 7.8 and analysis['ryzner'] >= 6.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO3 formation"
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["tolerable"]
+                    elif(analysis['ryznar'] < 7.8 and analysis['ryznar'] >= 6.8):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO\u2083 formation"
                         RyznerRes["Risk"] = "Acceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["acceptable"]
                     else:
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
                         RyznerRes["Description"] = "Minimal to no corrosion "
                         RyznerRes["Risk"] = "Ideal"
-                        RyznerRes["Treatment"] = "No Treatment Required"
-                    Corrosion["Ryzner Index"] = RyznerRes
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["ideal"]
+                    Corrosion["Ryznar Index"] = RyznerRes
                     #--------------------------------------------------Corrosion Flouride-------------------------------------------
                     try:
                         if(analysis["Flouride"] > 10):
                             FlourideRes["Index"] = round(analysis['Flouride'], 2)
                             FlourideRes["Description"] = "Severe pitting corrosion due to Flouride"
                             FlourideRes["Risk"] = "Unacceptable"
-                            FlourideRes["Treatment"] = """
-                                Consider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                            FlourideRes["Treatment"] = _data["Flouride"]["unacceptable"]
                         elif(analysis["Flouride"] <= 10 and analysis["Flouride"] > 5):
                             FlourideRes["Index"] = round(analysis['Flouride'], 2)
                             FlourideRes["Description"] = "Moderate pitting corrosion due to Flouride"
                             FlourideRes["Risk"] = "Tolerable"
-                            FlourideRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                            FlourideRes["Treatment"] = _data["Flouride"]["tolerable"]
                         elif(analysis["Flouride"] <= 5 and analysis["Flouride"] >= 1):
                             FlourideRes["Index"] = round(analysis['Flouride'], 2)
                             FlourideRes["Description"] = "Mild pitting corrosion due to Flouride"
                             FlourideRes["Risk"] = "Acceptable"
-                            FlourideRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                            FlourideRes["Treatment"] = _data["Flouride"]["acceptable"]
                         else:
                             FlourideRes["Index"] = round(analysis['Flouride'], 2)
                             FlourideRes["Description"] = "No pitting corrosion due to Flouride"
                             FlourideRes["Risk"] = "Ideal"
-                            FlourideRes["Treatment"] = "No Treatment"
+                            FlourideRes["Treatment"] = _data["Flouride"]["ideal"]
                         Corrosion["Pitting Corrosion due to Flouride (mg/l) "] = FlourideRes
                     except Exception as e:
                         print(f"Flouride Concentration Error- Report: {e}")
                         
+                    #-------------------------------------------Langlier------------------------------------------------------------
+                    langlierRes = {}
+                    try:
+                        if(analysis["Langlier"] >= 5):
+                            langlierRes["Description"] = "Severe Corrosion due to CaCO\u2083"
+                            langlierRes["Risk"] = "Unacceptable"
+                            langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        elif(analysis["Langlier"] < 5 and analysis["Langlier"] >= 2):
+                            langlierRes["Description"] = "Mild Corrosion due to CaCO\u2083"
+                            langlierRes["Risk"] = "Tolerable"
+                            langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+
+                        elif(analysis["Langlier"] < 2 and analysis["Langlier"] >= 0.5):
+                            langlierRes["Description"] = "Mild Corrosion due to CaCO\u2083"
+                            langlierRes["Risk"] = "Acceptable"
+                            langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        else:
+                            langlierRes["Description"] = "Minimal to no risk of corrosion"
+                            langlierRes["Risk"] = "Ideal"
+                            langlierRes["Treatment"] = "No Treatment"
+                        langlierRes["Index"] = round(analysis["Langlier"],2)
+                        Corrosion["Langelier Saturation Index"] = langlierRes
+                    except Exception as e :
+                        print(f"Error Lanlier: {e}")
                     #-------------------------------------------Pitting Corrosion----------------------------------------------------
                     try:
                         if(self.material == "Stainless steel 304/304L"):
                             prenRes["Index"] = 20
                             prenRes["Description"] = "Low sea water resistance"
                             prenRes["Risk"] = "Unacceptable"
-                            prenRes["Treatment"] = """Treatment recommended - 
-                                Consider a higher PREN alloy for use\nOR\nAddition of chemical corrosion inhibitors"""
-                            
+                            prenRes["Treatment"] = _data["Pitting Corrosion"]["unacceptable"]
                             #Chloride Concentration
                             try:
                                 limit = 50 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 200
                                 if(analysis["Chloride"] < limit):
                                     chlorideRes["Risk"] = "Acceptable"
-                                    chlorideRes["Treatment"] = "No Treatment"
+                                    chlorideRes["Treatment"] = _data["Pitting Corrosion"]["acceptable"]
                                 else:
                                     
                                     chlorideRes["Risk"] = "Unacceptable"
-                                    chlorideRes["Treatment"] = "Water treatment for chloride removal such as reverse osmosis"
+                                    chlorideRes["Treatment"] = """1. Prevent corrosion through adjusting the index by reducing the concentration of Cl\n2. Change construction material.\nCl can be reduced through Ion Exchange or Reverse Osmosis - partial stream of full stream."""
                                 chlorideRes['Index'] = round(analysis["Chloride"], 2)
                                 chlorideRes["Description"] = "-"
                                 
@@ -410,7 +420,7 @@ class ReportsWindow(QDialog, qtw.QWidget):
                                 print(f"Error Chloride Corrosion 304 {e}")
                                 
                             
-                            #Pitting Temperature
+                            #Critical Pitting Temperature
                             try:
                                 if(analysis["Temperature"] < 18):
                                     PittingRes["Index"] = analysis["Temperature"]
@@ -422,17 +432,15 @@ class ReportsWindow(QDialog, qtw.QWidget):
                                     PittingRes["Description"] = "Risk of pitting corrosion"
                                     PittingRes["Risk"] = "Tolerable"  
                                     PittingRes["Treatment"] = """Reduce the temperature of the water\nOR\nConsider an alternative Material of Construction"""
-                                Corrosion["Pitting Temperature"] = PittingRes  
+                                Corrosion["Critical Pitting Temperature"] = PittingRes  
                             except Exception as e:
-                                print(f'Error Pitting Temperature 304 {e}')
+                                print(f'Error Critical Pitting Temperature 304 {e}')
                                 
                         elif(self.material == "Stainless steel 316/316L" ):
                             prenRes["Index"] = 25
                             prenRes["Description"] = "Low sea water resistance"
                             prenRes["Risk"] = "Unacceptable"
-                            prenRes["Treatment"] = """ Treatment recommended - 
-                                Consider a higher PREN alloy for use\nOR\nAddition of chemical corrosion inhibitors"""
-
+                            prenRes["Treatment"] = _data["Pitting Corrosion"]["unacceptable"]
                             #Chloride Concentration
                             try:
                                 limit = 100 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 300
@@ -442,14 +450,14 @@ class ReportsWindow(QDialog, qtw.QWidget):
                                 else:
                                     
                                     chlorideRes["Risk"] = "Unacceptable"
-                                    chlorideRes["Treatment"] = "Water treatment for chloride removal such as reverse osmosis"
+                                    chlorideRes["Treatment"] = """1. Prevent corrosion through adjusting the index by reducing the concentration of Cl\n2. Change construction material.\nCl can be reduced through Ion Exchange or Reverse Osmosis - partial stream of full stream."""
                                 chlorideRes['Index'] = round(analysis["Chloride"], 2)
                                 chlorideRes["Description"] = "-"
                                 Corrosion["Chloride Concentration (mg/l)"] = chlorideRes
                             except Exception as e:
                                 print(f"Error Chloride Corrosion 316 {e}")
                                 
-                            #Pitting Temperature
+                            #Critical Pitting Temperature
                             try:
                                 if(analysis["Temperature"] < 20):
                                     PittingRes["Index"] = analysis["Temperature"]
@@ -461,17 +469,15 @@ class ReportsWindow(QDialog, qtw.QWidget):
                                     PittingRes["Description"] = "Risk of pitting corrosion"
                                     PittingRes["Risk"] = "Tolerable"  
                                     PittingRes["Treatment"] = """Reduce the temperature of the water\nOR\nConsider an alternative Material of Construction"""
-                                Corrosion["Pitting Temperature"] = PittingRes  
+                                Corrosion["Critical Pitting Temperature"] = PittingRes  
                             except Exception as e:
-                                print(f'Error Pitting Temperature 304 {e}')
+                                print(f'Error Critical Pitting Temperature 304 {e}')
                                 
                         elif(self.material == "Stainless steel Alloy 20"):
                             prenRes["Index"] = 30
                             prenRes["Description"] = "Low sea water resistance"
                             prenRes["Risk"] = "Unacceptable"
-                            prenRes["Treatment"] = """Treatment recommended - 
-                                Consider a higher PREN alloy for use\nOR\nAddition of chemical corrosion inhibitors"""
-
+                            prenRes["Treatment"] = _data["Pitting Corrosion"]["unacceptable"]
                             #Chloride Concentration
                             try:
                                 limit = 150 if(analysis['pH'] < 7 and analysis['Temperature'] > 35) else 400
@@ -481,7 +487,7 @@ class ReportsWindow(QDialog, qtw.QWidget):
                                 else:
                                     
                                     chlorideRes["Risk"] = "Unacceptable"
-                                    chlorideRes["Treatment"] = "Water treatment for chloride removal such as reverse osmosis"
+                                    chlorideRes["Treatment"] = """1. Prevent corrosion through adjusting the index by reducing the concentration of Cl\n2. Change construction material.\nCl can be reduced through Ion Exchange or Reverse Osmosis - partial stream of full stream."""
                                 chlorideRes['Index'] = round(analysis["Chloride"], 2)
                                 chlorideRes["Description"] = "-"
                                 
@@ -489,7 +495,7 @@ class ReportsWindow(QDialog, qtw.QWidget):
                             except Exception as e:
                                 print(f"Error Chloride Corrosion Aloy 20 {e}")
                                 
-                            #Pitting Temperature
+                            #Critical Pitting Temperature
                             try:
                                 if(analysis["Temperature"] < 90):
                                     PittingRes["Index"] = analysis["Temperature"]
@@ -501,15 +507,15 @@ class ReportsWindow(QDialog, qtw.QWidget):
                                     PittingRes["Description"] = "Risk of pitting corrosion"
                                     PittingRes["Risk"] = "Tolerable"  
                                     PittingRes["Treatment"] = """Reduce the temperature of the water\nOR\nConsider an alternative Material of Construction"""
-                                Corrosion["Pitting Temperature"] = PittingRes  
+                                Corrosion["Critical Pitting Temperature"] = PittingRes  
                             except Exception as e:
-                                print(f'Error Pitting Temperature 304 {e}')
+                                print(f'Error Critical Pitting Temperature 304 {e}')
                                 
                         elif(self.material == "Stainless steel 904L"):
                             prenRes["Index"] = 36
                             prenRes["Description"] = "Sea water resistance"
                             prenRes["Risk"] = "Acceptable"
-                            prenRes["Treatment"] = "No Treatment"
+                            prenRes["Treatment"] = _data["Pitting Corrosion"]["acceptable"]
 
                             #Chloride Concentration
                             try:
@@ -520,7 +526,7 @@ class ReportsWindow(QDialog, qtw.QWidget):
                                 else:
                                     
                                     chlorideRes["Risk"] = "Unacceptable"
-                                    chlorideRes["Treatment"] = "Water treatment for chloride removal such as reverse osmosis"
+                                    chlorideRes["Treatment"] = """1. Prevent corrosion through adjusting the index by reducing the concentration of Cl\n2. Change construction material.\nCl can be reduced through Ion Exchange or Reverse Osmosis - partial stream of full stream."""
                                 chlorideRes['Index'] = round(analysis["Chloride"], 2)
                                 chlorideRes["Description"] = "-"
                                 
@@ -528,7 +534,7 @@ class ReportsWindow(QDialog, qtw.QWidget):
                             except Exception as e:
                                 print(f"Error Chloride Corrosion 904 {e}")
                                 
-                            #Pitting Temperature
+                            #Critical Pitting Temperature
                             try:
                                 if(analysis["Temperature"] < 40):
                                     PittingRes["Index"] = analysis["Temperature"]
@@ -540,15 +546,15 @@ class ReportsWindow(QDialog, qtw.QWidget):
                                     PittingRes["Description"] = "Risk of pitting corrosion"
                                     PittingRes["Risk"] = "Tolerable" 
                                     PittingRes["Treatment"] = """Reduce the temperature of the water\nOR\nConsider an alternative Material of Construction"""
-                                Corrosion["Pitting Temperature"] = PittingRes  
+                                Corrosion["Critical Pitting Temperature"] = PittingRes  
                             except Exception as e:
-                                print(f'Error Pitting Temperature 304 {e}')
+                                print(f'Error Critical Pitting Temperature 304 {e}')
                                 
                         elif(self.material == "Duplex Stainless Steel"):
                             prenRes["Index"] = 46
                             prenRes["Description"] = "Sea water resistance with temp > 30°C"
                             prenRes["Risk"] = "Acceptable"
-                            prenRes["Treatment"] = "No Treatment"
+                            prenRes["Treatment"] = _data["Pitting Corrosion"]["acceptable"]
 
                             #Chloride Concentration
                             try:
@@ -559,14 +565,14 @@ class ReportsWindow(QDialog, qtw.QWidget):
                                 else:
                                     
                                     chlorideRes["Risk"] = "Unacceptable"
-                                    chlorideRes["Treatment"] = "Water treatment for chloride removal such as reverse osmosis"
+                                    chlorideRes["Treatment"] = """1. Prevent corrosion through adjusting the index by reducing the concentration of Cl\n2. Change construction material.\nCl can be reduced through Ion Exchange or Reverse Osmosis - partial stream of full stream."""
                                 chlorideRes['Index'] = round(analysis["Chloride"], 2)
                                 chlorideRes["Description"] = "-"
                                 Corrosion["Chloride Concentration (mg/l)"] = chlorideRes
                             except Exception as e:
                                 print(f"Error Chloride Corrosion duplex {e}")
                                 
-                            #Pitting Temperature
+                            #Critical Pitting Temperature
                             try:
                                 if(analysis["Temperature"] < 65):
                                     PittingRes["Index"] = analysis["Temperature"]
@@ -578,9 +584,9 @@ class ReportsWindow(QDialog, qtw.QWidget):
                                     PittingRes["Description"] = "Risk of pitting corrosion"
                                     PittingRes["Risk"] = "Tolerable" 
                                     PittingRes["Treatment"] = """Reduce the temperature of the water\nOR\nConsider an alternative Material of Construction"""
-                                Corrosion["Pitting Temperature (°C)"] = PittingRes  
+                                Corrosion["Critical Pitting Temperature (°C)"] = PittingRes  
                             except Exception as e:
-                                print(f'Error Pitting Temperature 304 {e}')
+                                print(f'Error Critical Pitting Temperature 304 {e}')
                                  
                     except Exception as e:
                         print("Error Pitting Corrosion: {e}")
@@ -589,47 +595,74 @@ class ReportsWindow(QDialog, qtw.QWidget):
                     #-------------------------------End of Corrosion-------------------------------------------------------------------------------------------------------------------
                     results["Corrosion"] = Corrosion
                 elif(assessment == "Scaling"):
+                    _data = self.assessment_ss["scaling"] 
                     Scaling = {}
                     RyznerRes = {}
                     silicaSteamRes = {}
                     magnesiumSilicaRes = {}
                     calciumSulphateRes = {}
-
-
+                   
                     #------------------------------------------------------Ryzner for Scaling---------------------------
-                    if(analysis['ryzner'] >= 6.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "No scale formation due to CaCO3"
+                    if(analysis['ryznar'] >= 6.8):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "No scale formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Ideal"
-                        RyznerRes["Treatment"] = "No Treatment"
-                    elif(analysis['ryzner'] < 6.8 and analysis['ryzner'] >= 6.2):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Moderate Scale Formation due to CaCO3"
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["ideal"]
+                    elif(analysis['ryznar'] < 6.8 and analysis['ryznar'] >= 6.2):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Moderate Scale Formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Acceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
-                    elif(analysis['ryzner'] < 6.2 and analysis['ryzner'] >= 5.5):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Mild Scale Formation due to CaCO3"
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["acceptable"]
+                    elif(analysis['ryznar'] < 6.2 and analysis['ryznar'] >= 5.5):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Mild Scale Formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Tolerable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["tolerable"]
                     else:
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Severe Scale Formation due to CaCO3"
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Severe Scale Formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Unacceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
-                    Scaling["Ryzner Index"] = RyznerRes
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["unacceptable"]
+                    Scaling["Ryznar Index"] = RyznerRes
+
+                    #Langlier-------------------------------------------------------------------------------------------------
+                    langlierResScaling = {}
+                    try:
+                        if(analysis["Langlier"] > 3.5):
+                            langlierResScaling["Description"] = "Severe Scale Formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Unacceptable"
+                            langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+
+                        elif(analysis["Langlier"] <= 3.5 and analysis["Langlier"] > 2):
+                            langlierResScaling["Description"] = "Mild Scale Formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Tolerable"
+                            langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+
+                        elif(analysis["Langlier"] <= 2 and analysis["Langlier"] > 0):
+                            langlierResScaling["Description"] = "Moderate Scale Formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Acceptable"
+                            langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+                        else:
+                            langlierResScaling["Description"] = "No scale formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Ideal"
+                            langlierResScaling["Treatment"] = "No Treatment"
+                        langlierResScaling["Index"] = round(analysis["Langlier"],2)
+                        Scaling["Langelier Saturation Index"] = langlierResScaling
+                    except Exception as e:
+                        print("Error Langlier: {e}")
+                
                     #-----------------------------------------------------Silica Concentration in Steam-----------------------
                     try:
                         if(analysis["Silica Concentration in steam"] <= 0.02):
                             silicaSteamRes["Index"] = round(analysis["Silica Concentration in steam"],2)
                             silicaSteamRes["Description"] = "Minimal silica film formation"
                             silicaSteamRes["Risk"] = "Ideal"
-                            silicaSteamRes["Treatment"] = "No Treatment"
+                            silicaSteamRes["Treatment"] = _data["Silica Concentration in steam"]["ideal"]
                         else:
                             silicaSteamRes["Index"] = round(analysis["Silica Concentration in steam"],2)
                             silicaSteamRes["Description"] = "High silica film formation"
                             silicaSteamRes["Risk"] = "Tolerable"
-                            silicaSteamRes["Treatment"] = """Treatment Recommended - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for silica removal"""
+                            silicaSteamRes["Treatment"] = _data["Silica Concentration in steam"]["tolerable"]
                         Scaling["Scaling due to Silica in Steam (mg/l)"] = silicaSteamRes
                    
                     except Exception as e:
@@ -651,9 +684,8 @@ class ReportsWindow(QDialog, qtw.QWidget):
                         else:
                             magnesiumSilicaRes['Description'] = "Unacceptable Magnesium Silicate Scaling"
                             magnesiumSilicaRes['Risk'] = "Unacceptable"
-                            magnesiumSilicaRes['Treatment'] = """ Treatment recommended - Chemical treatment through addition of Antisca\nOR\nWater treatment for softening and/or silica removal required"""
-
-                        magnesiumSilicaRes["Index"] = None
+                            magnesiumSilicaRes['Treatment'] = f"""If this value decreases to below {mgLimit}, then it will be acceptable"""
+                        magnesiumSilicaRes["Index"] = analysis['SilicaMagnesium']
                         Scaling["Magnesium Silicate Scale Formation"] = magnesiumSilicaRes
                     except Exception as e:
                         print(f'Error magnesium * silica SS : {e}')
@@ -667,19 +699,37 @@ class ReportsWindow(QDialog, qtw.QWidget):
                         else:
                             calciumSulphateRes["Description"] = "Unacceptable Calcium Sulphate Scaling"
                             calciumSulphateRes["Risk"] = "Unacceptable"
-                            calciumSulphateRes["Treatment"] = "-"
-                        calciumSulphateRes["Index"] = None
+                            calciumSulphateRes["Treatment"] = f"""If this value decreases to below {calSulLimit},\nthen it will be acceptable"""
+                        calciumSulphateRes["Index"] = analysis["SilicaMagnesium"]
                         Scaling["Calcium Sulphate Scale Formation"] = calciumSulphateRes
                     except Exception as e:
-                        print(f"Error Calcium Sulphate SS: {e}")    
+                        print(f"Error Calcium Sulphate SS: {e}") 
+                    #-----------------------------------------------------Phosphate Scaling------------------------------------------   
+                    calciumPhosphateRes = {}
+                    try:
+                        if(analysis["CalciumPhosphate"] <= 0):
+                            calciumPhosphateRes["Index"] = round(analysis["CalciumPhosphate"],2)
+                            calciumPhosphateRes["Description"] = "Balance – Low potential for scale formation"
+                            calciumPhosphateRes["Risk"] = "Ideal"
+                            calciumPhosphateRes["Treatment"] = "No Treatment"
+                        else:
+                            calciumPhosphateRes["Index"] = round(analysis["CalciumPhosphate"],2)
+                            calciumPhosphateRes["Description"] = "Potential of Scale Formation"
+                            calciumPhosphateRes["Risk"] = "Tolerable"
+                            calciumPhosphateRes["Treatment"] = "Treatment Recommended"
+                        Scaling["Calcium phosphate scaling"] = calciumPhosphateRes
+                   
+                    except Exception as e:
+                        print(f"Error Phosphate Assemnent Parse Table: {e}")
                     results["Scaling"] = Scaling
                 elif(assessment == "Fouling"):
+                    _data = self.assessment_ss["fouling"] 
                     Fouling = {}
                     ssFoulRes = {}
                     if(analysis['Suspended Solids'] >= 30):
                         ssFoulRes["Description"] = "High Chance of Fouling"
                         ssFoulRes["Risk"] = "Unacceptable"
-                        ssFoulRes["Treatment"] = "Treatment Recommended - Upfront filtration pre-treatment "
+                        ssFoulRes["Treatment"] = _data["suspended solids"]['unacceptable']
                     elif(analysis['Suspended Solids'] < 30 and analysis['Suspended Solids'] >= 15):
                         ssFoulRes["Description"] = "Moderate Fouling"
                         ssFoulRes["Risk"] = "Tolerable"
@@ -687,7 +737,7 @@ class ReportsWindow(QDialog, qtw.QWidget):
                     elif(analysis['Suspended Solids'] < 15 and analysis['Suspended Solids'] >= 5):
                         ssFoulRes["Description"] = "Mild of Fouling"
                         ssFoulRes["Risk"] = "Acceptable"
-                        ssFoulRes["Treatment"] = """Treatment May Be Needed - Upfront filtration pre-treatment\nOR\nChemical treatment by addition of dispersants"""
+                        ssFoulRes["Treatment"] = _data["suspended solids"]['acceptable']
                     else:
                         ssFoulRes["Description"] = "No Fouling predicted"
                         ssFoulRes["Risk"] = "Ideal"
@@ -699,52 +749,78 @@ class ReportsWindow(QDialog, qtw.QWidget):
         elif(self.material == "Carbon Steel"):
             for assessment in self.assessments:
                 if(assessment == "Corrosion"):
+                    _data = self.assessment_carbon["corrosion"] 
                     Corrosion = {}
                     RyznerRes = {}
                     LarsonRes = {}
                     PisiganRes = {}
                     #------------------------------------------------------Corrosion Ryzner-------------------------------------
-                    if(analysis['ryzner'] >= 8.5):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Severe Corrosion due to lack of CaCO3 formation"
+                    if(analysis['ryznar'] >= 8.5):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Severe Corrosion due to lack of CaCO\u2083 formation"
                         RyznerRes["Risk"] = "Unacceptable"
-                        RyznerRes["Treatment"] = """Chemical Treatment Recommended - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
-                    elif(analysis['ryzner'] < 8.5 and analysis['ryzner'] >= 7.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO3 formation "
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["unacceptable"]
+                    elif(analysis['ryznar'] < 8.5 and analysis['ryznar'] >= 7.8):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO\u2083 formation "
                         RyznerRes["Risk"] = "Tolerable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
-                    elif(analysis['ryzner'] < 7.8 and analysis['ryzner'] >= 6.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO3 formation "
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["tolerable"]
+                    elif(analysis['ryznar'] < 7.8 and analysis['ryznar'] >= 6.8):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO\u2083 formation "
                         RyznerRes["Risk"] = "Acceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["acceptable"]
                     else:
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
                         RyznerRes["Description"] = "Minimal to no corrosion "
                         RyznerRes["Risk"] = "Ideal"
-                        RyznerRes["Treatment"] = "No Treatment"
-                    Corrosion["Ryzner Index"] = RyznerRes
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["ideal"]
+                    Corrosion["Ryznar Index"] = RyznerRes
 
+                    #-------------------------------------------Langlier------------------------------------------------------------
+                    langlierRes = {}
+                    try:
+                        if(analysis["Langlier"] >= 5):
+                            langlierRes["Description"] = "Severe Corrosion due to CaCO\u2083"
+                            langlierRes["Risk"] = "Unacceptable"
+                            langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        elif(analysis["Langlier"] < 5 and analysis["Langlier"] >= 2):
+                            langlierRes["Description"] = "Mild Corrosion due to CaCO\u2083"
+                            langlierRes["Risk"] = "Tolerable"
+                            langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+
+                        elif(analysis["Langlier"] < 2 and analysis["Langlier"] >= 0.5):
+                            langlierRes["Description"] = "Mild Corrosion due to CaCO\u2083"
+                            langlierRes["Risk"] = "Acceptable"
+                            langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        else:
+                            langlierRes["Description"] = "Minimal to no risk of corrosion"
+                            langlierRes["Risk"] = "Ideal"
+                            langlierRes["Treatment"] = "No Treatment"
+                        langlierRes["Index"] = round(analysis["Langlier"],2)
+                        Corrosion["Langelier Saturation Index"] = langlierRes
+                    except Exception as e :
+                        print(f"Error Lanlier: {e}")
                     #------------------------------------------------------Corrosion Larson--------------------------------------
+                    
                     if(analysis['larson'] >= 1.2):
                         LarsonRes["Description"] = "Severe pitting corrosion"
                         LarsonRes["Risk"] = "Unacceptable"
-                        LarsonRes["Treatment"] = """Treatment Recommended - Water treatment to reduce the sulphate or chloride concentration\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        LarsonRes["Treatment"] = _data["Pitting Corrosion"]["unacceptable"]
                     elif(analysis['larson'] < 1.2 and analysis['larson'] >= 1):
                         LarsonRes["Description"] = "Significant pitting corrosion"
                         LarsonRes["Risk"] = "Tolerable"
-                        LarsonRes["Treatment"] = """Treatment May Be Needed - Water treatment to reduce the sulphate or chloride concentration\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        LarsonRes["Treatment"] = _data["Pitting Corrosion"]["tolerable"]
                     elif(analysis['larson'] < 1 and analysis['larson'] >= 0.8):
                         LarsonRes["Description"] = "Mild pitting corrosion"
                         LarsonRes["Risk"] = "Acceptable"
-                        LarsonRes["Treatment"] = """Treatment May Be Needed - Water treatment to reduce the sulphate or chloride concentration\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        LarsonRes["Treatment"] = _data["Pitting Corrosion"]["acceptable"]
                     else:
                         LarsonRes["Description"] = "Minimal risk of pitting corrosion"
                         LarsonRes["Risk"] = "Ideal"
-                        LarsonRes["Treatment"] = "No Treatment"
+                        LarsonRes["Treatment"] = _data["Pitting Corrosion"]["ideal"]
                     LarsonRes["Index"] = round(analysis["larson"],2)
-                    Corrosion['Larson Index'] = LarsonRes
+                    Corrosion[' Larson-Skold Index'] = LarsonRes
 
                     #---------------------------------------------------------Corrosion Pisigan----------------------------------------
                     try:
@@ -752,36 +828,36 @@ class ReportsWindow(QDialog, qtw.QWidget):
                             if(analysis['pisigan corrosion'] > 10):
                                 PisiganRes["Description"] = "High corrosion rate - Severe corrosion will be experienced"
                                 PisiganRes["Risk"] = "Unacceptable"
-                                PisiganRes["Treatment"] = """Treatment Recommended - Treatment through addition of corrosion inhibitors\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                                PisiganRes["Treatment"] = _data["Pisigan Corrosion"]["unacceptable"]
                             elif(analysis['pisigan corrosion'] <= 10 and analysis['pisigan corrosion'] > 5):
                                 PisiganRes["Description"] = "Intermediate corrosion rate - Moderate corrosion may be experienced"
                                 PisiganRes["Risk"] = "Tolerable"
-                                PisiganRes["Treatment"] = """Treatment may be needed - Treatment through addition of corrosion inhibitors\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                                PisiganRes["Treatment"] = _data["Pisigan Corrosion"]["tolerable"]
                             elif(analysis['pisigan corrosion'] <= 5 and analysis['pisigan corrosion'] >= 1):
                                 PisiganRes["Description"] = "Intermediate corrosion rate - Mild corrosion may be experienced"
                                 PisiganRes["Risk"] = "Acceptable"
-                                PisiganRes["Treatment"] = """Treatment may be needed - Treatment through addition of corrosion inhibitors\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                                PisiganRes["Treatment"] = _data["Pisigan Corrosion"]["acceptable"]
                             else:
                                 PisiganRes["Description"] = "Low corrosion rate - Minimal corrosion experienced"
                                 PisiganRes["Risk"] = "Ideal"
-                                PisiganRes["Treatment"] = "No Treatment"
+                                PisiganRes["Treatment"] = _data["Pisigan Corrosion"]["ideal"]
                         else:
                             if(analysis['pisigan corrosion'] > 1):
                                 PisiganRes["Description"] = "High corrosion rate - Severe corrosion will be experienced"
                                 PisiganRes["Risk"] = "Unacceptable"
-                                PisiganRes["Treatment"] = """Treatment Recommended - Treatment through addition of corrosion inhibitors\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                                PisiganRes["Treatment"] = _data["Pisigan Corrosion"]["unacceptable"]
                             elif(analysis['pisigan corrosion'] <= 1 and analysis['pisigan corrosion'] >= 0.5):
                                 PisiganRes["Description"] = "Intermediate corrosion rate - Moderate corrosion may be experienced"
                                 PisiganRes["Risk"] = "Tolerable"
-                                PisiganRes["Treatment"] = """Treatment may be needed - Treatment through addition of corrosion inhibitors\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                                PisiganRes["Treatment"] = _data["Pisigan Corrosion"]["tolerable"]
                             elif(analysis['pisigan corrosion'] < 0.5 and analysis['pisigan corrosion'] >= 0.2):
                                 PisiganRes["Description"] = "Intermediate corrosion rate - Mild corrosion may be experienced"
                                 PisiganRes["Risk"] = "Acceptable"
-                                PisiganRes["Treatment"] = """Treatment may be needed - Treatment through addition of corrosion inhibitors\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                                PisiganRes["Treatment"] = _data["Pisigan Corrosion"]["acceptable"]
                             else:
                                 PisiganRes["Description"] = "Low corrosion rate - Minimal corrosion experienced"
                                 PisiganRes["Risk"] = "Ideal"
-                                PisiganRes["Treatment"] = "No treatment"
+                                PisiganRes["Treatment"] = _data["Pisigan Corrosion"]["ideal"]
                         PisiganRes["Index"] = round(analysis['pisigan corrosion'], 2)
                         Corrosion["Corrosion Rate due to the Pisigan and Shingley Correlation (mmpy)"] = PisiganRes
                     except KeyError as e:
@@ -790,6 +866,7 @@ class ReportsWindow(QDialog, qtw.QWidget):
                     #-------------------------------End of Corrosion-------------------------------------------------------------------------------------------------------------------
                     results["Corrosion"] = Corrosion
                 elif(assessment == "Scaling"):
+                    _data = self.assessment_carbon["scaling"] 
                     Scaling = {}
                     RyznerRes = {}
                     silicaSteamRes = {}
@@ -798,39 +875,66 @@ class ReportsWindow(QDialog, qtw.QWidget):
 
 
                     #------------------------------------------------------Ryzner for Scaling---------------------------
-                    if(analysis['ryzner'] >= 6.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "No scale formation due to CaCO3"
+                    if(analysis['ryznar'] >= 6.8):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "No scale formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Ideal"
-                        RyznerRes["Treatment"] = "No Treatment"
-                    elif(analysis['ryzner'] < 6.8 and analysis['ryzner'] >= 6.2):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Moderate Scale Formation due to CaCO3"
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["ideal"]
+                    elif(analysis['ryznar'] < 6.8 and analysis['ryznar'] >= 6.2):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Moderate Scale Formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Acceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
-                    elif(analysis['ryzner'] < 6.2 and analysis['ryzner'] >= 5.5):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Mild Scale Formation due to CaCO3"
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["acceptable"]
+                    elif(analysis['ryznar'] < 6.2 and analysis['ryznar'] >= 5.5):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Mild Scale Formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Tolerable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["tolerable"]
                     else:
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Severe Scale Formation due to CaCO3"
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Severe Scale Formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Unacceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
-                    Scaling["Ryzner Index"] = RyznerRes
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["unacceptable"]
+                    Scaling["Ryznar Index"] = RyznerRes
+                    
+                    #Langlier-------------------------------------------------------------------------------------------------
+                    langlierResScaling = {}
+                    try:
+                        if(analysis["Langlier"] > 3.5):
+                            langlierResScaling["Description"] = "Severe Scale Formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Unacceptable"
+                            langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+
+                        elif(analysis["Langlier"] <= 3.5 and analysis["Langlier"] > 2):
+                            langlierResScaling["Description"] = "Mild Scale Formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Tolerable"
+                            langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+
+                        elif(analysis["Langlier"] <= 2 and analysis["Langlier"] > 0):
+                            langlierResScaling["Description"] = "Moderate Scale Formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Acceptable"
+                            langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+                        else:
+                            langlierResScaling["Description"] = "No scale formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Ideal"
+                            langlierResScaling["Treatment"] = "No Treatment"
+                        langlierResScaling["Index"] = round(analysis["Langlier"],2)
+                        Scaling["Langelier Saturation Index"] = langlierResScaling
+                    except Exception as e:
+                        print("Error Langlier: {e}")
+                    
                     #-----------------------------------------------------Silica Concentration in Steam-----------------------
                     try:
                         if(analysis["Silica Concentration in steam"] <= 0.02):
                             silicaSteamRes["Index"] = analysis["Silica Concentration in steam"]
                             silicaSteamRes["Description"] = "Minimal silica film formation"
                             silicaSteamRes["Risk"] = "Ideal"
-                            silicaSteamRes["Treatment"] = "No Treatment"
+                            silicaSteamRes["Treatment"] = _data["Silica Concentration in steam"]["ideal"]
                         else:
                             silicaSteamRes["Index"] = analysis["Silica Concentration in steam"]
                             silicaSteamRes["Description"] = "High silica film formation"
                             silicaSteamRes["Risk"] = "Tolerable"
-                            silicaSteamRes["Treatment"] = """Treatment Recommended - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for silica removal"""
+                            silicaSteamRes["Treatment"] = _data["Silica Concentration in steam"]["tolerable"]
                         Scaling["Scaling due to Silica in Steam"] = silicaSteamRes
                    
                     except Exception as e:
@@ -848,14 +952,12 @@ class ReportsWindow(QDialog, qtw.QWidget):
                         if(analysis['SilicaMagnesium'] < mgLimit):
                             magnesiumSilicaRes['Description'] = "Acceptable Magnesium Silicate Scaling"
                             magnesiumSilicaRes['Risk'] = "Acceptable"
-                            magnesiumSilicaRes['Treatment'] = "No Treatment"
+                            magnesiumSilicaRes['Treatment'] = _data["Silica and Magnesium"]["acceptable"]
                         else:
                             magnesiumSilicaRes['Description'] = "Unacceptable Magnesium Silicate Scaling"
                             magnesiumSilicaRes['Risk'] = "Unacceptable"
-                            magnesiumSilicaRes['Treatment'] = """Chemical treatment through addition of Antiscalants
-                   \nOR\nWater treatment for softening and/or silica removal required"""
-
-                        magnesiumSilicaRes["Index"] = None
+                            magnesiumSilicaRes['Treatment'] = _data["Silica and Magnesium"]["unacceptable"]
+                        magnesiumSilicaRes["Index"] = analysis['SilicaMagnesium']
                         Scaling["Magnesium Silicate Scale Formation"] = magnesiumSilicaRes
                     except Exception as e:
                         print(f'Error magnesium * silica SS : {e}')
@@ -865,35 +967,53 @@ class ReportsWindow(QDialog, qtw.QWidget):
                         if(analysis["CalciumSulphate"] < calSulLimit):
                             calciumSulphateRes["Description"] = "Acceptable Calcium Sulphate Scaling"
                             calciumSulphateRes["Risk"] = "Acceptable"
-                            calciumSulphateRes["Treatment"] = "No Treatment"
+                            calciumSulphateRes["Treatment"] = _data["Calcium Sulphate"]["acceptable"]
                         else:
                             calciumSulphateRes["Description"] = "Unacceptable Calcium Sulphate Scaling"
                             calciumSulphateRes["Risk"] = "Unacceptable"
-                            calciumSulphateRes["Treatment"] = """Treatment recommended - Chemical treatment through addition of Antiscal\nOR\nWater treatment for softenining required"""
-                        calciumSulphateRes["Index"] = None
+                            calciumSulphateRes["Treatment"] = _data["Calcium Sulphate"]["unacceptable"]
+                        calciumSulphateRes["Index"] = analysis["SilicaMagnesium"]
                         Scaling["Calcium Sulphate Scale Formation"] = calciumSulphateRes
                     except Exception as e:
-                        print(f"Error Calcium Sulphate SS: {e}")    
+                        print(f"Error Calcium Sulphate SS: {e}")   
+                    #-----------------------------------------------------Phosphate Scaling------------------------------------------   
+                    calciumPhosphateRes = {}
+                    try:
+                        if(analysis["CalciumPhosphate"] <= 0):
+                            calciumPhosphateRes["Index"] = round(analysis["CalciumPhosphate"],2)
+                            calciumPhosphateRes["Description"] = "Balance – Low potential for scale formation"
+                            calciumPhosphateRes["Risk"] = "Ideal"
+                            calciumPhosphateRes["Treatment"] = "No Treatment"
+                        else:
+                            calciumPhosphateRes["Index"] = round(analysis["CalciumPhosphate"],2)
+                            calciumPhosphateRes["Description"] = "Potential of Scale Formation"
+                            calciumPhosphateRes["Risk"] = "Tolerable"
+                            calciumPhosphateRes["Treatment"] = "Treatment Recommended"
+                        Scaling["Calcium phosphate scaling"] = calciumPhosphateRes
+                   
+                    except Exception as e:
+                        print(f"Error Phosphate Assemnent Parse Table carbon: {e}") 
                     results["Scaling"] = Scaling
                 elif(assessment == "Fouling"):
+                    _data = self.assessment_carbon["fouling"] 
                     Fouling = {}
                     ssFoulRes = {}
                     if(analysis['Suspended Solids'] >= 30):
                         ssFoulRes["Description"] = "High Chance of Fouling"
                         ssFoulRes["Risk"] = "Unacceptable"
-                        ssFoulRes["Treatment"] = "Treatment Recommended - Upfront filtration pre-treatment"
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["unacceptable"]
                     elif(analysis['Suspended Solids'] < 30 and analysis['Suspended Solids'] >= 15):
                         ssFoulRes["Description"] = "Moderate Fouling"
                         ssFoulRes["Risk"] = "Tolerable"
-                        ssFoulRes["Treatment"] = """Treatment May Be Needed - Upfront filtration pre-treatment\nOR\nChemical treatment by addition of dispersants"""
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["tolerable"]
                     elif(analysis['Suspended Solids'] < 15 and analysis['Suspended Solids'] >= 5):
                         ssFoulRes["Description"] = "Mild of Fouling"
                         ssFoulRes["Risk"] = "Acceptable"
-                        ssFoulRes["Treatment"] = """Treatment May Be Needed - Upfront filtration pre-treatment\nOR\nChemical treatment by addition of dispersants"""
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["acceptable"]
                     else:
                         ssFoulRes["Description"] = "No Fouling predicted"
                         ssFoulRes["Risk"] = "Ideal"
-                        ssFoulRes["Treatment"] = "No treatment"
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["ideal"]
                     
                     ssFoulRes['Index'] = analysis["Suspended Solids"]
                     Fouling["Suspended Solids Fouling (mg/l)"] = ssFoulRes
@@ -901,51 +1021,75 @@ class ReportsWindow(QDialog, qtw.QWidget):
         elif(self.material == "Concrete"):
             for assessment in self.assessments:
                 if(assessment == "Corrosion"):
+                    _data = self.assessment_concrete["corrosion"] 
                     Corrosion = {}
                     RyznerRes = {}
                     AggressiveRes = {}
                     #------------------------------------------------------Corrosion Ryzner-------------------------------------
-                    if(analysis['ryzner'] >= 8.5):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
+                    if(analysis['ryznar'] >= 8.5):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
                         RyznerRes["Description"] = "Severe Corrosion"
                         RyznerRes["Risk"] = "Unacceptable"
-                        RyznerRes["Treatment"] = """Chemical Treatment Recommended - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
-                    elif(analysis['ryzner'] < 8.5 and analysis['ryzner'] >= 7.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["unacceptable"]
+                    elif(analysis['ryznar'] < 8.5 and analysis['ryznar'] >= 7.8):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
                         RyznerRes["Description"] = "Mild Corrosion"
                         RyznerRes["Risk"] = "Tolerable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
-                    elif(analysis['ryzner'] < 7.8 and analysis['ryzner'] >= 6.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["tolerable"]
+                    elif(analysis['ryznar'] < 7.8 and analysis['ryznar'] >= 6.8):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
                         RyznerRes["Description"] = "Mild Corrosion"
                         RyznerRes["Risk"] = "Acceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["acceptable"]
                     else:
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
                         RyznerRes["Description"] = "Balanced No Corrosion"
                         RyznerRes["Risk"] = "Ideal"
-                        RyznerRes["Treatment"] = "No Treatment"
-                    Corrosion["Ryzner Index"] = RyznerRes
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["ideal"]
+                    Corrosion["Ryznar Index"] = RyznerRes
+                    #-------------------------------------------Langlier------------------------------------------------------------
+                    langlierRes = {}
+                    try:
+                        if(analysis["Langlier"] >= 5):
+                            langlierRes["Description"] = "Severe Corrosion due to CaCO\u2083"
+                            langlierRes["Risk"] = "Unacceptable"
+                            langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        elif(analysis["Langlier"] < 5 and analysis["Langlier"] >= 2):
+                            langlierRes["Description"] = "Mild Corrosion due to CaCO\u2083"
+                            langlierRes["Risk"] = "Tolerable"
+                            langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
 
+                        elif(analysis["Langlier"] < 2 and analysis["Langlier"] >= 0.5):
+                            langlierRes["Description"] = "Mild Corrosion due to CaCO\u2083"
+                            langlierRes["Risk"] = "Acceptable"
+                            langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        else:
+                            langlierRes["Description"] = "Minimal to no risk of corrosion"
+                            langlierRes["Risk"] = "Ideal"
+                            langlierRes["Treatment"] = "No Treatment"
+                        langlierRes["Index"] = round(analysis["Langlier"],2)
+                        Corrosion["Langelier Saturation Index"] = langlierRes
+                    except Exception as e :
+                        print(f"Error Lanlier: {e}")
                     #----------------------------------------------------------Corrosion Aggressive-------------------------------------
                     try:
                         if(analysis["Concrete Reinforced"]):
                             if(analysis["Aggressive"] >= 12):
                                 AggressiveRes["Description"] = "Non aggressive, Lack of pitting corrosion of the concrete reinforced bars"
                                 AggressiveRes["Risk"] = "Ideal"
-                                AggressiveRes["Treatment"] = "No Treatment"
+                                AggressiveRes["Treatment"] = _data["Aggressive Index"]["ideal"]
                             elif(analysis["Aggressive"] < 12 and analysis["Aggressive"] >= 11):
                                 AggressiveRes["Description"] = "Moderately aggressive, Moderate pitting corrosion of the concrete reinforced bars"
                                 AggressiveRes["Risk"] = "Acceptable"
-                                AggressiveRes["Treatment"] = """"Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softening"""
+                                AggressiveRes["Treatment"] = _data["Aggressive Index"]["acceptable"]
                             elif(analysis["Aggressive"] < 11 and analysis["Aggressive"] >= 10):
                                 AggressiveRes["Description"] = "Mildly aggressive, Mild pitting corrosion of the concrete reinforced bars"
                                 AggressiveRes["Risk"] = "Ideal"
-                                AggressiveRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softening"""
+                                AggressiveRes["Treatment"] = _data["Aggressive Index"]["ideal"]
                             else:
                                 AggressiveRes["Description"] = "Very aggressive, Severe pitting corrosion of the concrete reinforced bars"
                                 AggressiveRes["Risk"] = "Unacceptable"
-                                AggressiveRes["Treatment"] = """Treatment Recommended - Treatment recommended - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softening"""
+                                AggressiveRes["Treatment"] = _data["Aggressive Index"]["unacceptable"]
                             AggressiveRes["Index"] = round(analysis["Aggressive"],2)
                             Corrosion["Aggressive Index"] = AggressiveRes
                     except Exception as e:
@@ -954,72 +1098,117 @@ class ReportsWindow(QDialog, qtw.QWidget):
                     #-------------------------------End of Corrosion-------------------------------------------------------------------------------------------------------------------
                     results["Corrosion"] = Corrosion
                 elif(assessment == "Scaling"):
+                    _data = self.assessment_concrete["scaling"] 
                     Scaling = {}
                     RyznerRes = {}
                     sulphateAttackRez = {}
 
                     #--------------------------------------------------------------------Ryzner for scaling------------------------------------------
-                    if(analysis['ryzner'] >= 6.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "No scale formation due to CaCO3"
+                    if(analysis['ryznar'] >= 6.8):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "No scale formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Ideal"
-                        RyznerRes["Treatment"] = "No Treatment"
-                    elif(analysis['ryzner'] < 6.8 and analysis['ryzner'] >= 6.2):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Moderate Scale Formation due to CaCO3"
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["ideal"]
+                    elif(analysis['ryznar'] < 6.8 and analysis['ryznar'] >= 6.2):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Moderate Scale Formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Acceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required """
-                    elif(analysis['ryzner'] < 6.2 and analysis['ryzner'] >= 5.5):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Mild Scale Formation due to CaCO3"
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["acceptable"]
+                    elif(analysis['ryznar'] < 6.2 and analysis['ryznar'] >= 5.5):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Mild Scale Formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Tolerable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required """
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["tolerable"]
                     else:
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Severe Scale Formation due to CaCO3"
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Severe Scale Formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Unacceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required """
-                    Scaling["Ryzner Index"] = RyznerRes
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["unacceptable"]
+                    Scaling["Ryznar Index"] = RyznerRes
+                    #Langlier-------------------------------------------------------------------------------------------------
+                    langlierResScaling = {}
+                    try:
+                        if(analysis["Langlier"] > 3.5):
+                            langlierResScaling["Description"] = "Severe Scale Formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Unacceptable"
+                            langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
 
+                        elif(analysis["Langlier"] <= 3.5 and analysis["Langlier"] > 2):
+                            langlierResScaling["Description"] = "Mild Scale Formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Tolerable"
+                            langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+
+                        elif(analysis["Langlier"] <= 2 and analysis["Langlier"] > 0):
+                            langlierResScaling["Description"] = "Moderate Scale Formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Acceptable"
+                            langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+                        else:
+                            langlierResScaling["Description"] = "No scale formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Ideal"
+                            langlierResScaling["Treatment"] = "No Treatment"
+                        langlierResScaling["Index"] = round(analysis["Langlier"],2)
+                        Scaling["Langelier Saturation Index"] = langlierResScaling
+                    except Exception as e:
+                        print("Error Langlier: {e}")
                     #-------------------------------------------------------------------Sulpahate attack Scaling--------------------------------------------
                     if(analysis['Sulphate'] >= 10000):
                         sulphateAttackRez["Description"] = "Very severe risk of sulphate attack"
                         sulphateAttackRez["Risk"] = "Unacceptable"
-                        sulphateAttackRez["Treatment"] = "Treatment Recommended - Water treatment for sulphate removal "
+                        sulphateAttackRez["Treatment"] = _data['Sulphate Concentration']['unacceptable']
                     elif(analysis["Sulphate"] < 10000 and analysis["Sulphate"] >= 1500 ):
                         sulphateAttackRez["Description"] = "Severe risk of sulphate attack"
-                        sulphateAttackRez["Risk"] = "Unacceptable"
-                        sulphateAttackRez["Treatment"] = "Treatment Recommended - Water treatment for sulphate removal "
+                        sulphateAttackRez["Risk"] = "Tolerable"
+                        sulphateAttackRez["Treatment"] = _data['Sulphate Concentration']['tolerable']
                     elif(analysis["Sulphate"] < 1500 and analysis["Sulphate"] >= 150):
                         sulphateAttackRez["Description"] = "Moderate risk of sulphate attack"
-                        sulphateAttackRez["Risk"] = "Tolerable"
-                        sulphateAttackRez["Treatment"] = "Treatment May Be Needed - Water treatment for sulphate removal "
+                        sulphateAttackRez["Risk"] = "Acceptable"
+                        sulphateAttackRez["Treatment"] = _data['Sulphate Concentration']['acceptable']
                     else:
                         sulphateAttackRez["Description"] = "Low risk of sulphate attack"
                         sulphateAttackRez["Risk"] = "Ideal"
-                        sulphateAttackRez["Treatment"] = "No Treatment" 
+                        sulphateAttackRez["Treatment"] = _data['Sulphate Concentration']['ideal'] 
                     sulphateAttackRez["Index"] = analysis["Sulphate"]
                     Scaling["Sulphate attack"] = sulphateAttackRez
+                    #-----------------------------------------------------Phosphate Scaling------------------------------------------   
+                    calciumPhosphateRes = {}
+                    try:
+                        if(analysis["CalciumPhosphate"] <= 0):
+                            calciumPhosphateRes["Index"] = round(analysis["CalciumPhosphate"],2)
+                            calciumPhosphateRes["Description"] = "Balance – Low potential for scale formation"
+                            calciumPhosphateRes["Risk"] = "Ideal"
+                            calciumPhosphateRes["Treatment"] = "No Treatment"
+                        else:
+                            calciumPhosphateRes["Index"] = round(analysis["CalciumPhosphate"],2)
+                            calciumPhosphateRes["Description"] = "Potential of Scale Formation"
+                            calciumPhosphateRes["Risk"] = "Tolerable"
+                            calciumPhosphateRes["Treatment"] = "Treatment Recommended"
+                        Scaling["Calcium phosphate scaling"] = calciumPhosphateRes
+                   
+                    except Exception as e:
+                        print(f"Error Phosphate Assemnent Parse Table concrete: {e}")
+
+
                     results["Scaling"] = Scaling
                 elif(assessment == "Fouling"):
+                    _data = self.assessment_concrete["fouling"]
                     Fouling = {}
                     ssFoulRes = {}
                     if(analysis['Suspended Solids'] >= 30):
                         ssFoulRes["Description"] = "High Chance of Fouling"
                         ssFoulRes["Risk"] = "Unacceptable"
-                        ssFoulRes["Treatment"] = "Treatment Recommended - Upfront filtration pre-treatment "
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["unacceptable"]
                     elif(analysis['Suspended Solids'] < 30 and analysis['Suspended Solids'] >= 15):
                         ssFoulRes["Description"] = "Moderate Fouling"
                         ssFoulRes["Risk"] = "Tolerable"
-                        ssFoulRes["Treatment"] = """Treatment May Be Needed - Upfront filtration pre-treatment\nOR\nChemical treatment by addition of dispersants"""
+                        ssFoulRes["Treatment"] =_data["suspended solids"]["tolerable"]
                     elif(analysis['Suspended Solids'] < 15 and analysis['Suspended Solids'] >= 5):
                         ssFoulRes["Description"] = "Mild of Fouling"
                         ssFoulRes["Risk"] = "Acceptable"
-                        ssFoulRes["Treatment"] = """Treatment May Be Needed - Upfront filtration pre-treatment\nOR\nChemical treatment by addition of dispersants"""
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["acceptable"]
                     else:
                         ssFoulRes["Description"] = "No Fouling predicted"
                         ssFoulRes["Risk"] = "Ideal"
-                        ssFoulRes["Treatment"] = "No treatment"
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["ideal"]
                     
                     ssFoulRes['Index'] = analysis["Suspended Solids"]
                     Fouling["Suspended Solids Fouling (mg/l)"] = ssFoulRes
@@ -1027,6 +1216,7 @@ class ReportsWindow(QDialog, qtw.QWidget):
         elif(self.material == "Monel-Lead/Copper Alloys"):
             for assessment in self.assessments:
                 if(assessment == "Corrosion"):
+                    _data = self.assessment_alloy["corrosion"]
                     Corrosion = {}
                     RyznerRes = {}
                     LarsonRes = {}
@@ -1034,28 +1224,50 @@ class ReportsWindow(QDialog, qtw.QWidget):
                     csmr = {}
                     prenRes = {}
                     #------------------------------------------------------Corrosion Ryzner-------------------------------------
-                    if(analysis['ryzner'] >= 8.5):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Severe Corrosion due to lack of CaCO3 formation "
+                    if(analysis['ryznar'] >= 8.5):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Severe Corrosion due to lack of CaCO\u2083 formation "
                         RyznerRes["Risk"] = "Unacceptable"
-                        RyznerRes["Treatment"] =  """Chemical Treatment Recommended - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
-                    elif(analysis['ryzner'] < 8.5 and analysis['ryzner'] >= 7.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO3 formation "
+                        RyznerRes["Treatment"] =  _data["General Corrosion"]["unacceptable"]
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO\u2083 formation "
                         RyznerRes["Risk"] = "Tolerable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
-                    elif(analysis['ryzner'] < 7.8 and analysis['ryzner'] >= 6.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO3 formation "
+                        RyznerRes["Treatment"] =_data["General Corrosion"]["tolerable"]
+                    elif(analysis['ryznar'] < 7.8 and analysis['ryznar'] >= 6.8):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO\u2083 formation "
                         RyznerRes["Risk"] = "Acceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["acceptable"]
                     else:
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
                         RyznerRes["Description"] = "Minimal to no corrosion"
                         RyznerRes["Risk"] = "Ideal"
-                        RyznerRes["Treatment"] = "No Treatment"
-                    Corrosion["Ryzner Index"] = RyznerRes
-                    
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["ideal"]
+                    Corrosion["Ryznar Index"] = RyznerRes
+                    #-------------------------------------------Langlier------------------------------------------------------------
+                    langlierRes = {}
+                    try:
+                        if(analysis["Langlier"] >= 5):
+                            langlierRes["Description"] = "Severe Corrosion due to CaCO\u2083"
+                            langlierRes["Risk"] = "Unacceptable"
+                            langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        elif(analysis["Langlier"] < 5 and analysis["Langlier"] >= 2):
+                            langlierRes["Description"] = "Mild Corrosion due to CaCO\u2083"
+                            langlierRes["Risk"] = "Tolerable"
+                            langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+
+                        elif(analysis["Langlier"] < 2 and analysis["Langlier"] >= 0.5):
+                            langlierRes["Description"] = "Mild Corrosion due to CaCO\u2083"
+                            langlierRes["Risk"] = "Acceptable"
+                            langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        else:
+                            langlierRes["Description"] = "Minimal to no risk of corrosion"
+                            langlierRes["Risk"] = "Ideal"
+                            langlierRes["Treatment"] = "No Treatment"
+                        langlierRes["Index"] = round(analysis["Langlier"],2)
+                        Corrosion["Langelier Saturation Index"] = langlierRes
+                    except Exception as e :
+                        print(f"Error Lanlier: {e}")
                     #--------------------------------------------------------Chloride to Sulphate MAss Ratio-----------------------------
                     try:
                         if(analysis["Lead or Copper"]):
@@ -1063,12 +1275,12 @@ class ReportsWindow(QDialog, qtw.QWidget):
                                 csmr["Index"] = round(analysis["csmr"],2)
                                 csmr["Description"] = "Significant corrosion risk and lead exposure"
                                 csmr["Risk"] = "Unacceptable"
-                                csmr['Treatment'] = "Treatment recommended - Water treatment to remove the chloride and sulphate concentration "
+                                csmr['Treatment'] = _data["Chloride to sulphate"]["unacceptable"]
                             else:
                                 csmr["Index"] = round(analysis["csmr"],2)
                                 csmr["Description"] = "Minimal corrosion risk"
                                 csmr["Risk"] = "Ideal"
-                                csmr['Treatment'] = "No Treatment"
+                                csmr['Treatment'] = _data["Chloride to sulphate"]["ideal"]
                             Corrosion["Chloride to Sulphate Mass Ratio "] = csmr
                     except Exception as e:
                         print(f"Error CSMR :{e}")
@@ -1077,41 +1289,40 @@ class ReportsWindow(QDialog, qtw.QWidget):
                     if(analysis['larson'] >= 1.2):
                         LarsonRes["Description"] = "Severe corrosion"
                         LarsonRes["Risk"] = "Unacceptable"
-                        LarsonRes["Treatment"] = """Treatment Recommended - Water treatment to reduce the sulphate or chloride concentration\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        LarsonRes["Treatment"] = _data["Pitting Corrosion"]["unacceptable"]
                     elif(analysis['larson'] < 1.2 and analysis['larson'] >= 1):
                         LarsonRes["Description"] = "Significant corrosion"
                         LarsonRes["Risk"] = "Tolerable"
-                        LarsonRes["Treatment"] = """Treatment May Be Needed - Water treatment to reduce the sulphate or chloride concentration\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        LarsonRes["Treatment"] = _data["Pitting Corrosion"]["tolerable"]
                     elif(analysis['larson'] < 1 and analysis['larson'] >= 0.8):
                         LarsonRes["Description"] = "Mild corrosion"
                         LarsonRes["Risk"] = "Acceptable"
-                        LarsonRes["Treatment"] = """Treatment May Be Needed - Water treatment to reduce the sulphate or chloride concentration\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        LarsonRes["Treatment"] = _data["Pitting Corrosion"]["acceptable"]
                     else:
                         LarsonRes["Description"] = "Non corrosive water"
                         LarsonRes["Risk"] = "Ideal"
-                        LarsonRes["Treatment"] = "No Treatment"
+                        LarsonRes["Treatment"] = _data["Pitting Corrosion"]["ideal"]
                     LarsonRes["Index"] = round(analysis["larson"],2)
-                    Corrosion['Larson Index'] = LarsonRes
+                    Corrosion[' Larson-Skold Index'] = LarsonRes
 
                     #--------------------------------------------------------------Add PREN ALLOYS---------------------------------
                     try:
                         if(analysis['PREN'] <= 35):
                             prenRes["Description"] = "-"
                             prenRes["Risk"] = "Unacceptable"
-                            prenRes["Treatment"] = """Treatment recommended - 
-                                Consider a higher PREN alloy for use\nOR\nAddition of chemical corrosion inhibitors"""
+                            prenRes["Treatment"] = _data["PREN"]["unacceptable"]
                         elif(analysis['PREN'] > 35 and analysis["PREN"] <= 40):
                             prenRes["Description"] = "Sea water resistance"
                             prenRes["Risk"] = "Acceptable"
-                            prenRes["Treatment"] = """No Treatment"""
+                            prenRes["Treatment"] = _data["PREN"]["acceptable"]
                         elif(analysis["PREN"] > 40 and analysis["PREN"] <= 45):
                             prenRes["Description"] = "Sea water resistance with temperature >30°C"
                             prenRes["Risk"] = "Acceptable"
-                            prenRes["Treatment"] = """No Treatment"""
+                            prenRes["Treatment"] = _data["PREN"]["acceptable"]
                         else:
                             prenRes["Description"] = "Crevice corrosion resistance"
                             prenRes["Risk"] = "Acceptable"
-                            prenRes["Treatment"] = """No Treatment"""
+                            prenRes["Treatment"] = _data["PREN"]["acceptable"]
                         
                         prenRes["Index"] = round(analysis['PREN'],2)
                         Corrosion["PREN of Alloy"] = prenRes
@@ -1120,6 +1331,7 @@ class ReportsWindow(QDialog, qtw.QWidget):
                     #End Corosion-------------------------------------------------------------------------
                     results["Corrosion"] = Corrosion
                 elif(assessment == "Scaling"):
+                    _data = self.assessment_alloy["scaling"]
                     Scaling = {}
                     RyznerRes = {}
                     silicaSteamRes = {}
@@ -1128,39 +1340,64 @@ class ReportsWindow(QDialog, qtw.QWidget):
 
 
                     #------------------------------------------------------Ryzner for Scaling---------------------------
-                    if(analysis['ryzner'] >= 6.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "No scale formation due to CaCO3"
+                    if(analysis['ryznar'] >= 6.8):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "No scale formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Ideal"
-                        RyznerRes["Treatment"] = "No Treatment"
-                    elif(analysis['ryzner'] < 6.8 and analysis['ryzner'] >= 6.2):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Moderate Scale Formation due to CaCO3"
+                        RyznerRes["Treatment"] = _data['General Corrosion']["ideal"]
+                    elif(analysis['ryznar'] < 6.8 and analysis['ryznar'] >= 6.2):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Moderate Scale Formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Acceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
-                    elif(analysis['ryzner'] < 6.2 and analysis['ryzner'] >= 5.5):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Mild Scale Formation due to CaCO3"
+                        RyznerRes["Treatment"] = _data['General Corrosion']["acceptable"]
+                    elif(analysis['ryznar'] < 6.2 and analysis['ryznar'] >= 5.5):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Mild Scale Formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Tolerable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+                        RyznerRes["Treatment"] = _data['General Corrosion']["tolerable"]
                     else:
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Severe Scale Formation due to CaCO3"
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Severe Scale Formation due to CaCO\u2083"
                         RyznerRes["Risk"] = "Unacceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
-                    Scaling["Ryzner Index"] = RyznerRes
+                        RyznerRes["Treatment"] = _data['General Corrosion']["unacceptable"]
+                    Scaling["Ryznar Index"] = RyznerRes
+                    #Langlier-------------------------------------------------------------------------------------------------
+                    langlierResScaling = {}
+                    try:
+                        if(analysis["Langlier"] > 3.5):
+                            langlierResScaling["Description"] = "Severe Scale Formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Unacceptable"
+                            langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+
+                        elif(analysis["Langlier"] <= 3.5 and analysis["Langlier"] > 2):
+                            langlierResScaling["Description"] = "Mild Scale Formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Tolerable"
+                            langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+
+                        elif(analysis["Langlier"] <= 2 and analysis["Langlier"] > 0):
+                            langlierResScaling["Description"] = "Moderate Scale Formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Acceptable"
+                            langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+                        else:
+                            langlierResScaling["Description"] = "No scale formation due to CaCO\u2083"
+                            langlierResScaling["Risk"] = "Ideal"
+                            langlierResScaling["Treatment"] = "No Treatment"
+                        langlierResScaling["Index"] = round(analysis["Langlier"],2)
+                        Scaling["Langelier Saturation Index"] = langlierResScaling
+                    except Exception as e:
+                        print("Error Langlier: {e}")
                     #-----------------------------------------------------Silica Concentration in Steam-----------------------
                     try:
                         if(analysis["Silica Concentration in steam"] <= 0.02):
                             silicaSteamRes["Index"] = round(analysis["Silica Concentration in steam"],2)
                             silicaSteamRes["Description"] = "Minimal silica film formation"
                             silicaSteamRes["Risk"] = "Ideal"
-                            silicaSteamRes["Treatment"] = "No Treatment"
+                            silicaSteamRes["Treatment"] = _data["Silica Concentration in steam"]["ideal"]
                         else:
                             silicaSteamRes["Index"] = round(analysis["Silica Concentration in steam"],2)
                             silicaSteamRes["Description"] = "High silica film formation"
                             silicaSteamRes["Risk"] = "Tolerable"
-                            silicaSteamRes["Treatment"] =  """Treatment Recommended - Chemical treatment through addition of Antiscalant\nOR\nWater treatment for silica removal"""
+                            silicaSteamRes["Treatment"] =  _data["Silica Concentration in steam"]["tolerable"]
                         Scaling["Scaling due to Silica in Steam"] = silicaSteamRes
                    
                     except Exception as e:
@@ -1178,13 +1415,12 @@ class ReportsWindow(QDialog, qtw.QWidget):
                         if(analysis['SilicaMagnesium'] < mgLimit):
                             magnesiumSilicaRes['Description'] = "Acceptable Magnesium Silicate Scaling"
                             magnesiumSilicaRes['Risk'] = "Acceptable"
-                            magnesiumSilicaRes['Treatment'] = "No Treatment"
+                            magnesiumSilicaRes['Treatment'] = _data["Silica and Magnesium"]["acceptable"]
                         else:
                             magnesiumSilicaRes['Description'] = "Unacceptable Magnesium Silicate Scaling"
                             magnesiumSilicaRes['Risk'] = "Unacceptable"
-                            magnesiumSilicaRes['Treatment'] = """Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softening and/or silica removal required"""
-
-                        magnesiumSilicaRes["Index"] = None
+                            magnesiumSilicaRes['Treatment'] = _data["Silica and Magnesium"]["unacceptable"]
+                        magnesiumSilicaRes["Index"] = analysis['SilicaMagnesium']
                         Scaling["Magnesium Silicate Scale Formation"] = magnesiumSilicaRes
                     except Exception as e:
                         print(f'Error magnesium * silica SS : {e}')
@@ -1195,35 +1431,54 @@ class ReportsWindow(QDialog, qtw.QWidget):
                         if(analysis["CalciumSulphate"] < calSulLimit):
                             calciumSulphateRes["Description"] = "Acceptable Calcium Sulphate Scaling"
                             calciumSulphateRes["Risk"] = "Acceptable"
-                            calciumSulphateRes["Treatment"] = "No Treatment"
+                            calciumSulphateRes["Treatment"] = _data["Calcium Sulphate"]["acceptable"]
                         else:
                             calciumSulphateRes["Description"] = "Unacceptable Calcium Sulphate Scaling"
                             calciumSulphateRes["Risk"] = "Unacceptable"
-                            calciumSulphateRes["Treatment"] = """Treatment recommended - Chemical treatment through addition of Antiscal\nOR\nWater treatment for softenining required"""
-                        calciumSulphateRes["Index"] = None
+                            calciumSulphateRes["Treatment"] = _data["Calcium Sulphate"]["unacceptable"]
+                        calciumSulphateRes["Index"] = analysis["SilicaMagnesium"]
                         Scaling["Calcium Sulphate Scale Formation"] = calciumSulphateRes
                     except Exception as e:
-                        print(f"Error Calcium Sulphate SS: {e}")    
+                        print(f"Error Calcium Sulphate SS: {e}") 
+                    #-----------------------------------------------------Phosphate Scaling------------------------------------------   
+                    calciumPhosphateRes = {}
+                    try:
+                        if(analysis["CalciumPhosphate"] <= 0):
+                            calciumPhosphateRes["Index"] = round(analysis["CalciumPhosphate"],2)
+                            calciumPhosphateRes["Description"] = "Balance – Low potential for scale formation"
+                            calciumPhosphateRes["Risk"] = "Ideal"
+                            calciumPhosphateRes["Treatment"] = "No Treatment"
+                        else:
+                            calciumPhosphateRes["Index"] = round(analysis["CalciumPhosphate"],2)
+                            calciumPhosphateRes["Description"] = "Potential of Scale Formation"
+                            calciumPhosphateRes["Risk"] = "Tolerable"
+                            calciumPhosphateRes["Treatment"] = "Treatment Recommended"
+                        Scaling["Calcium phosphate scaling"] = calciumPhosphateRes
+                   
+                    except Exception as e:
+                        print(f"Error Phosphate Assemnent Parse Table monel: {e}")
+                       
                     results["Scaling"] = Scaling
                 elif(assessment == "Fouling"):
+                    _data = self.assessment_alloy["fouling"]
                     Fouling = {}
                     ssFoulRes = {}
                     if(analysis['Suspended Solids'] >= 30):
                         ssFoulRes["Description"] = "High Chance of Fouling"
                         ssFoulRes["Risk"] = "Unacceptable"
-                        ssFoulRes["Treatment"] = "Treatment Recommended - Upfront filtration pre-treatment "
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["unacceptable"]
                     elif(analysis['Suspended Solids'] < 30 and analysis['Suspended Solids'] >= 15):
                         ssFoulRes["Description"] = "Moderate Fouling"
                         ssFoulRes["Risk"] = "Tolerable"
-                        ssFoulRes["Treatment"] = """Treatment May Be Needed - Upfront filtration pre-treatment\nOR\nChemical treatment by addition of dispersants"""
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["tolerable"]
                     elif(analysis['Suspended Solids'] < 15 and analysis['Suspended Solids'] >= 5):
                         ssFoulRes["Description"] = "Mild of Fouling"
                         ssFoulRes["Risk"] = "Acceptable"
-                        ssFoulRes["Treatment"] = """Treatment May Be Needed - Upfront filtration pre-treatment\nOR\nChemical treatment by addition of dispersants"""
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["acceptable"]
                     else:
                         ssFoulRes["Description"] = "No Fouling predicted"
                         ssFoulRes["Risk"] = "Ideal"
-                        ssFoulRes["Treatment"] = "No treatment"
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["ideal"]
                     
                     ssFoulRes['Index'] = analysis["Suspended Solids"]
                     Fouling["Suspended Solids Fouling (mg/l)"] = ssFoulRes
@@ -1231,50 +1486,70 @@ class ReportsWindow(QDialog, qtw.QWidget):
         elif(self.material == "Plastic"):
             for assessment in self.assessments:
                 if(assessment == "Scaling"):
+                    _data = self.assessment_plastic["scaling"]
                     Scaling = {}
                     RyznerRes = {}
                     #------------------------------------------------------Ryzner for Scaling---------------------------
-                    if(analysis['ryzner'] >= 6.8):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
+                    if(analysis['ryznar'] >= 6.8):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
                         RyznerRes["Description"] = "Minimal to no corrosion"
                         RyznerRes["Risk"] = "Ideal"
-                        RyznerRes["Treatment"] = "No Treatment"
-                    elif(analysis['ryzner'] < 6.8 and analysis['ryzner'] >= 6.2):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO3 formation "
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["ideal"]
+                    elif(analysis['ryznar'] < 6.8 and analysis['ryznar'] >= 6.2):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO\u2083 formation "
                         RyznerRes["Risk"] = "Acceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
-                    elif(analysis['ryzner'] < 6.2 and analysis['ryzner'] >= 5.5):
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO3 formation "
+                        RyznerRes["Treatment"] = _data["General Corrosion"]["acceptable"]
+                    elif(analysis['ryznar'] < 6.2 and analysis['ryznar'] >= 5.5):
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Mild Corrosion due to lack of CaCO\u2083 formation "
                         RyznerRes["Risk"] = "Tolerable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+                        RyznerRes["Treatment"] =_data["General Corrosion"]["tolerable"]
                     else:
-                        RyznerRes["Index"] = round(analysis['ryzner'], 2)
-                        RyznerRes["Description"] = "Severe Corrosion due to lack of CaCO3 formation "
+                        RyznerRes["Index"] = round(analysis['ryznar'], 2)
+                        RyznerRes["Description"] = "Severe Corrosion due to lack of CaCO\u2083 formation "
                         RyznerRes["Risk"] = "Unacceptable"
-                        RyznerRes["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
-                    Scaling["Ryzner Index"] = RyznerRes
+                        RyznerRes["Treatment"] =_data["General Corrosion"]["unacceptable"]
+                    Scaling["Ryznar Index"] = RyznerRes
+                    
+                    #-----------------------------------------------------Phosphate Scaling------------------------------------------   
+                    calciumPhosphateRes = {}
+                    try:
+                        if(analysis["CalciumPhosphate"] <= 0):
+                            calciumPhosphateRes["Index"] = round(analysis["CalciumPhosphate"],2)
+                            calciumPhosphateRes["Description"] = "Balance – Low potential for scale formation"
+                            calciumPhosphateRes["Risk"] = "Ideal"
+                            calciumPhosphateRes["Treatment"] = "No Treatment"
+                        else:
+                            calciumPhosphateRes["Index"] = round(analysis["CalciumPhosphate"],2)
+                            calciumPhosphateRes["Description"] = "Potential of Scale Formation"
+                            calciumPhosphateRes["Risk"] = "Tolerable"
+                            calciumPhosphateRes["Treatment"] = "Treatment Recommended"
+                        Scaling["Calcium phosphate scaling"] = calciumPhosphateRes
+                   
+                    except Exception as e:
+                        print(f"Error Phosphate Assemnent Parse Table Plastic: {e}")
                     results["Scaling"] = Scaling
                 elif(assessment == "Fouling"):
+                    _data = self.assessment_plastic["fouling"]
                     Fouling = {}
                     ssFoulRes = {}
                     if(analysis['Suspended Solids'] >= 30):
                         ssFoulRes["Description"] = "High Chance of Fouling"
                         ssFoulRes["Risk"] = "Unacceptable"
-                        ssFoulRes["Treatment"] = "Treatment Recommended - Upfront filtration pre-treatment"
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["unacceptable"]
                     elif(analysis['Suspended Solids'] < 30 and analysis['Suspended Solids'] >= 15):
                         ssFoulRes["Description"] = "Moderate Fouling"
                         ssFoulRes["Risk"] = "Tolerable"
-                        ssFoulRes["Treatment"] = """Treatment May Be Needed - Upfront filtration pre-treatment\nOR\nChemical treatment by addition of dispersants"""
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["tolerable"]
                     elif(analysis['Suspended Solids'] < 15 and analysis['Suspended Solids'] >= 5):
                         ssFoulRes["Description"] = "Mild of Fouling"
                         ssFoulRes["Risk"] = "Acceptable"
-                        ssFoulRes["Treatment"] = """Treatment May Be Needed - Upfront filtration pre-treatment\nOR\nChemical treatment by addition of dispersants"""
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["acceptable"]
                     else:
                         ssFoulRes["Description"] = "No Fouling predicted"
                         ssFoulRes["Risk"] = "Ideal"
-                        ssFoulRes["Treatment"] = "No treatment"
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["ideal"]
                     
                     ssFoulRes['Index'] = analysis["Suspended Solids"]
                     Fouling["Suspended Solids Fouling (mg/l)"] = ssFoulRes
@@ -1282,53 +1557,74 @@ class ReportsWindow(QDialog, qtw.QWidget):
         elif(self.material == "Membranes"):
             for assessment in self.assessments:
                 if(assessment == "Corrosion"):
+                    _data = self.assessment_membrane["corrosion"]
                     Corrosion = {}
                     langlierRes = {}
                     if(analysis["Langlier"] >= 5):
-                        langlierRes["Description"] = "Severe Corrosion due to CaCO3"
+                        langlierRes["Description"] = "Severe Corrosion due to CaCO\u2083"
                         langlierRes["Risk"] = "Unacceptable"
-                        langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        langlierRes["Treatment"] = _data["Langlier"]["unacceptable"]
                     elif(analysis["Langlier"] < 5 and analysis["Langlier"] >= 2):
-                        langlierRes["Description"] = "Mild Corrosion due to CaCO3"
+                        langlierRes["Description"] = "Mild Corrosion due to CaCO\u2083"
                         langlierRes["Risk"] = "Tolerable"
-                        langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        langlierRes["Treatment"] = _data["Langlier"]["tolerable"]
 
                     elif(analysis["Langlier"] < 2 and analysis["Langlier"] >= 0.5):
-                        langlierRes["Description"] = "Mild Corrosion due to CaCO3"
+                        langlierRes["Description"] = "Mild Corrosion due to CaCO\u2083"
                         langlierRes["Risk"] = "Acceptable"
-                        langlierRes["Treatment"] = """Treatment May Be Needed - Treatment through addition of corrosion inhibitors\nOR\nConsider an alternative Material of Construction\nOR\nConsider additional treatment of the water to more suitable feed quality"""
+                        langlierRes["Treatment"] = _data["Langlier"]["acceptable"]
                     else:
                         langlierRes["Description"] = "Minimal to no risk of corrosion"
                         langlierRes["Risk"] = "Ideal"
-                        langlierRes["Treatment"] = "No Treatment"
+                        langlierRes["Treatment"] = _data["Langlier"]["ideal"]
                     langlierRes["Index"] = round(analysis["Langlier"],2)
                     Corrosion["Langelier Saturation Index"] = langlierRes
                     results["Corrosion"] = Corrosion
                 elif(assessment == "Scaling"):
+                    _data = self.assessment_membrane["scaling"]
                     Scaling = {}
                     langlierResScaling = {}
                     if(analysis["Langlier"] > 3.5):
-                        langlierResScaling["Description"] = "Severe Scale Formation due to CaCO3"
+                        langlierResScaling["Description"] = "Severe Scale Formation due to CaCO\u2083"
                         langlierResScaling["Risk"] = "Unacceptable"
-                        langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+                        langlierResScaling["Treatment"] = _data["Langlier"]["unacceptable"]
 
                     elif(analysis["Langlier"] <= 3.5 and analysis["Langlier"] > 2):
-                        langlierResScaling["Description"] = "Mild Scale Formation due to CaCO3"
+                        langlierResScaling["Description"] = "Mild Scale Formation due to CaCO\u2083"
                         langlierResScaling["Risk"] = "Tolerable"
-                        langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+                        langlierResScaling["Treatment"] = _data["Langlier"]["tolerable"]
 
                     elif(analysis["Langlier"] <= 2 and analysis["Langlier"] > 0):
-                        langlierResScaling["Description"] = "Moderate Scale Formation due to CaCO3"
+                        langlierResScaling["Description"] = "Moderate Scale Formation due to CaCO\u2083"
                         langlierResScaling["Risk"] = "Acceptable"
-                        langlierResScaling["Treatment"] = """Treatment May Be Needed - Chemical treatment through addition of Antiscalants\nOR\nWater treatment for softenining required"""
+                        langlierResScaling["Treatment"] = _data["Langlier"]["acceptable"]
                     else:
-                        langlierResScaling["Description"] = "No scale formation due to CaCO3"
+                        langlierResScaling["Description"] = "No scale formation due to CaCO\u2083"
                         langlierResScaling["Risk"] = "Ideal"
-                        langlierResScaling["Treatment"] = "No Treatment"
+                        langlierResScaling["Treatment"] = _data["Langlier"]["ideal"]
                     langlierResScaling["Index"] = round(analysis["Langlier"],2)
                     Scaling["Langelier Saturation Index"] = langlierResScaling
+                    
+                    #-----------------------------------------------------Phosphate Scaling------------------------------------------   
+                    calciumPhosphateRes = {}
+                    try:
+                        if(analysis["CalciumPhosphate"] <= 0):
+                            calciumPhosphateRes["Index"] = round(analysis["CalciumPhosphate"],2)
+                            calciumPhosphateRes["Description"] = "Balance – Low potential for scale formation"
+                            calciumPhosphateRes["Risk"] = "Ideal"
+                            calciumPhosphateRes["Treatment"] = "No Treatment"
+                        else:
+                            calciumPhosphateRes["Index"] = round(analysis["CalciumPhosphate"],2)
+                            calciumPhosphateRes["Description"] = "Potential of Scale Formation"
+                            calciumPhosphateRes["Risk"] = "Tolerable"
+                            calciumPhosphateRes["Treatment"] = "Treatment Recommended"
+                        Scaling["Calcium phosphate scaling"] = calciumPhosphateRes
+                   
+                    except Exception as e:
+                        print(f"Error Phosphate Assemnent Parse Table membrane: {e}")
                     results["Scaling"] = Scaling
                 elif(assessment == "Fouling"):
+                    _data = self.assessment_membrane["fouling"]
                     Fouling = {}
                     ssFoulRes = {}
                     psRes = {}
@@ -1336,19 +1632,19 @@ class ReportsWindow(QDialog, qtw.QWidget):
                     if(analysis['Suspended Solids'] >= 30):
                         ssFoulRes["Description"] = "High Chance of Fouling"
                         ssFoulRes["Risk"] = "Unacceptable"
-                        ssFoulRes["Treatment"] = "Treatment Recommended - Upfront filtration pre-treatment"
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["unacceptable"]
                     elif(analysis['Suspended Solids'] < 30 and analysis['Suspended Solids'] >= 15):
                         ssFoulRes["Description"] = "Moderate Fouling"
                         ssFoulRes["Risk"] = "Tolerable"
-                        ssFoulRes["Treatment"] = """Treatment May Be Needed - Upfront filtration pre-treatment\nOR\nChemical treatment by addition of dispersants"""
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["tolerable"]
                     elif(analysis['Suspended Solids'] < 15 and analysis['Suspended Solids'] >= 5):
                         ssFoulRes["Description"] = "Mild of Fouling"
                         ssFoulRes["Risk"] = "Acceptable"
-                        ssFoulRes["Treatment"] = """Treatment May Be Needed - Upfront filtration pre-treatment\nOR\nChemical treatment by addition of dispersants"""
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["acceptable"]
                     else:
                         ssFoulRes["Description"] = "No Fouling predicted"
                         ssFoulRes["Risk"] = "Ideal"
-                        ssFoulRes["Treatment"] = "No treatment"
+                        ssFoulRes["Treatment"] = _data["suspended solids"]["ideal"]
                     ssFoulRes['Index'] = analysis["Suspended Solids"]
 
                     #--------------------------------------------------------------------------Fouling Silt Density----------------------
@@ -1356,19 +1652,19 @@ class ReportsWindow(QDialog, qtw.QWidget):
                         if(analysis["Silt Density Index"] >= 5):
                             psRes["Description"] = "Several years without collodial fouling"
                             psRes['Risk'] = "Ideal"
-                            psRes["Treatment"] = "Treatment not recommended"
+                            psRes["Treatment"] = _data["silt index"]["ideal"]
                         if(analysis["Silt Density Index"] < 5 and analysis["Silt Density Index"] >= 3):
                             psRes["Description"] = "Several months between cleaning"
                             psRes['Risk'] = "Acceptable"
-                            psRes["Treatment"] = "Treatment Recommended - Regular cleaning required"
+                            psRes["Treatment"] = _data["silt index"]["acceptable"]
                         elif(analysis["Silt Density Index"] > 3 and analysis["Silt Density Index"] <= 1):
                             psRes["Description"] = "Particular fouling likely a problem, frequent cleaning"
                             psRes['Risk'] = "Tolerable"
-                            psRes["Treatment"] = "Treatment Recommended - Regular cleaning required"
+                            psRes["Treatment"] = _data["silt index"]["tolerable"]
                         else:
                             psRes["Description"] = "Unacceptable, additional pre-treatment is needed"
                             psRes['Risk'] = "Unacceptable"
-                            psRes["Treatment"] = "Treatment Required - Additional upfront pre-treatment required"
+                            psRes["Treatment"] = _data["silt index"]["unacceptable"]
                         psRes["Index"] = round(analysis["Silt Density Index"],2)
                         Fouling["Silt Density Index"] = psRes
                     except Exception as e:
@@ -1408,5 +1704,5 @@ class ReportsWindow(QDialog, qtw.QWidget):
                         print(f"Error Paricle Size ;{e}")
                     Fouling["Suspended Solids Fouling (mg/l)"] = ssFoulRes
                     results["Fouling"] = Fouling      
-        print(results)
+        
         return results  

@@ -1,0 +1,18 @@
+{
+  "scaling": {
+    "General Corrosion": {
+      "unacceptable": "1. Prevent scaling through adjusting the index by \r\na. Increasing the saturation pH (e.g. by reducing alkalinity) or \r\nb. By decreasing the pH (through acid addition), or \r\nc. By decreasing CaCO3 concentration by diluting the stream  (through reducing concentration cycles, if applicable) and adjusting pH, or by removing calcium (softening - chemical, ion exchange or nano-filtration) or alkalinity (de-alkalation through acidification, chemical porecipitation, nono-filtration) or both.\r\n2. Combat scaling by employing scale inhibitors.",
+      "acceptable": "Maintain monitoring, and be ready to take action should index increase.",
+      "tolerable": "1. Prevent scaling through adjusting the index by \r\na. Increasing the saturation pH (e.g. by reducing alkalinity) or \r\nb. Decreasing the pH (through acid addition), or \r\nc. Decreasing CaCO3 concentration by diluting the stream  (through reducing concentration cycles, if applicable) and adjusting pH, or by removing calcium (softening - chemical, ion exchange or nano-filtration) or alkalinity (de-alkalation through acidification, chemical porecipitation, nono-filtration) or both.\r\n2. Combat scaling by employing scale inhibitors.",
+      "ideal": "Maintain status quo"
+    }
+  },
+  "fouling": {
+    "suspended solids": {
+      "unacceptable": "Prevent fouling by removing suspended solids (through gravity settling, hydrocloning, media filtration or membrane filtration).",
+      "tolerable": "a. Prevent fouling by removing suspended solids (through media filtration or membrane filtration).\nb. Combat foling by addition of dispersant",
+      "acceptable": "a. Prevent fouling by removing suspended solids (through media filtration or membrane filtration).\nb. Combat foling by addition of dispersant",
+      "ideal": "Maintain status quo"
+    }
+  }
+}

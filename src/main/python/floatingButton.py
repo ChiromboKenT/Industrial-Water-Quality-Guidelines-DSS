@@ -1,12 +1,15 @@
 
 
+
 from PyQt5 import QtWidgets as qtw
 from PyQt5.QtGui import QCursor
 from PyQt5.QtCore import Qt
 class FloatingButtonWidget(qtw.QPushButton):
 
     def __init__(self, parent):
-        super().__init__(parent)
+        super().__init__(parent.label)
+        
+        self.window =parent
         self.paddingLeft = 228
         self.paddingTop = 103
         self.setText("Background Information")
@@ -20,7 +23,8 @@ class FloatingButtonWidget(qtw.QPushButton):
                 padding:10px 10px;border:1px solid rgba(12, 75, 85,0.8);color:#fff;background:#127281;border-radius:8px;font-size:12px;font-weight:900
             }
         """)
-
+    
+    
     def update_position(self):
         try:
             if hasattr(self.parent(), 'viewport'):
@@ -42,5 +46,5 @@ class FloatingButtonWidget(qtw.QPushButton):
         self.update_position()
 
     def mousePressEvent(self, event):
-        print(event)
+        self.window._background_window.emit("Done")
 

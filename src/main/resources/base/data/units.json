@@ -1,182 +1,180 @@
 {
-    "pH":{
-        "unit" : "n/a",
-        "label" : "input_ph",
-        "rangeLow" : 1,
-        "rangeHigh" :14,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Electrical Conductivity":{
-        "unit" : ["\u00B5S/cm @ 25\u2103"],
-        "label" : "input_ec",
-        "rangeLow" :0,
-        "rangeHigh" :10000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Calcium":{
-        "unit" : ["mg/L"],
-        "label" : "input_calcium",
-        "rangeLow" :0,
-        "rangeHigh" :2000000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Alkalinity":{
-        "unit" : ["mg/L CaCO\u2083"],
-        "label" : "input_alkalinity",
-        "rangeLow" : 0,
-        "rangeHigh" :2000000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "P Alkalinity":{
-        "unit" : ["mg/L CaCO\u2083"],
-        "label" : "input_palkalinity",
-        "rangeLow" : 0,
-        "rangeHigh" :2000000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Total Dissolved Solids":{
-        "unit" : ["mg/L"],
-        "rangeLow" :0,
-        "label" : "input_tds",
-        "rangeHigh" :1000000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Temperature":{
-        "unit" : ["\u2103"],
-        "label" : "input_temperature",
-        "rangeLow" : -65535,
-        "rangeHigh" :65535,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Flouride":{
-        "unit" : ["mg/L"],
-        "label" : "input_flouride",
-        "rangeLow" :0,
-        "rangeHigh" :2000000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Chloride":{
-        "unit" : ["mg/L"],
-        "label" : "input_chloride",
-        "rangeLow" :0,
-        "rangeHigh" :2000000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Silica in steam":{
-        "unit" : ["mg/L"],
-        "label" : "input_silica_concentration",
-        "rangeLow" :1,
-        "rangeHigh" :100,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Magnesium":{
-        "unit" : ["mg/L"],
-        "label" : "input_magnesium",
-        "rangeLow" :0,
-        "rangeHigh" :2000000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Silica":{
-        "unit" : ["mg/L"],
-        "label" : "input_silica",
-        "rangeLow" :0,
-        "rangeHigh" :1000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Sulphate" :{
-        "unit" : ["mg/L"],
-        "label" : "input_sulphate",
-        "rangeLow" :0,
-        "rangeHigh" :2000000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Suspended Solids":{
-        "unit" : ["mg/L"],
-        "label" : "input_suspended",
-        "rangeLow" : 0,
-        "rangeHigh" : 2000000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Dissolved Oxygen":{
-        "unit" : ["mg/L"],
-        "rangeLow" :0,
-        "label" : "input_oxygen",
-        "rangeHigh" :10000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Days of Exposure":{
-        "unit" : "n/a",
-        "label" : "input_days",
-        "rangeLow" :0,
-        "rangeHigh" :65535,
-        "decimals":0,
-        "input_type": "number"
-    },
-    "Silt Density Index":{
-        "unit" : "n/a",
-        "label" : "input_silt",
-        "rangeLow" :0,
-        "rangeHigh" :1000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Particle Size":{
-        "unit" : ["\u00B5m"],
-        "label" : "input_particle",
-        "rangeLow" :0,
-        "rangeHigh" :100000,
-        "decimals":2,
-        "input_type": "number"
-    },
-    "Is the concrete reinforced?":{
-        "unit" : "n/a",
-        "label" : "input_conc_reinforced",
-        "options": ["No, Not Reinforced","Yes, Reinforced"],
-        "input_type": "checkbox"
-    },
-    "Does Material contain Lead?":{
-        "unit" : "n/a",
-        "label" : "input_cont_lead",
-        "options": ["No,does not contain Lead","Yes, contains Lead"],
-        "input_type": "checkbox"
-    },
-    "Open reticulation system?":{
-        "unit" : "n/a",
-        "label" : "input_reticulation",
-        "options": ["Closed","Open"],
-        "input_type": "checkbox"
-    },
-    "Does Material contain Copper?":{
-        "unit" : "n/a",
-        "label" : "input_cont_copper",
-        "options": ["No,does not contain Copper","Yes, contains Copper"],
-        "input_type": "checkbox"
-    },
-    "Contains Antiscalants?":{
-        "unit" : "n/a",
-        "label" : "input_water_treat",
-        "options": ["No water treatment required","Water treatment required"],
-        "input_type": "checkbox"
-    },
-    "Technology Type":{
-        "unit" : "n/a",
-        "label" : "input_tech_type",
-        "options": ["Grit Removal", "Microfiltration", "Ultrafiltration","Nanofiltration","Reverse Osmosis"],
-        "input_type": "list"
-    }
+  "pH": {
+    "unit": "n/a",
+    "label": "input_ph",
+    "rangeLow": 1,
+    "rangeHigh": 14,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Calcium": {
+    "unit": ["mg/L"],
+    "label": "input_calcium",
+    "rangeLow": -1,
+    "rangeHigh": 2000000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Alkalinity": {
+    "unit": ["mg/L CaCO\u2083"],
+    "label": "input_alkalinity",
+    "rangeLow": -1,
+    "rangeHigh": 2000000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "P Alkalinity": {
+    "unit": ["mg/L CaCO\u2083"],
+    "label": "input_palkalinity",
+    "rangeLow": -1,
+    "rangeHigh": 2000000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Total Dissolved Solids": {
+    "unit": ["mg/L"],
+    "rangeLow": -1,
+    "label": "input_tds",
+    "rangeHigh": 1000000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Temperature": {
+    "unit": ["\u2103"],
+    "label": "input_temperature",
+    "rangeLow": -65535,
+    "rangeHigh": 65535,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Flouride": {
+    "unit": ["mg/L"],
+    "label": "input_flouride",
+    "rangeLow": -1,
+    "rangeHigh": 2000000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Chloride": {
+    "unit": ["mg/L"],
+    "label": "input_chloride",
+    "rangeLow": -1,
+    "rangeHigh": 2000000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Magnesium": {
+    "unit": ["mg/L"],
+    "label": "input_magnesium",
+    "rangeLow": -1,
+    "rangeHigh": 2000000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Phosphate": {
+    "unit": ["mg/L"],
+    "label": "input_phosphate",
+    "rangeLow": -1,
+    "rangeHigh": 2000000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Silica": {
+    "unit": ["mg/L"],
+    "label": "input_silica",
+    "rangeLow": -1,
+    "rangeHigh": 1000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Sulphate": {
+    "unit": ["mg/L"],
+    "label": "input_sulphate",
+    "rangeLow": -1,
+    "rangeHigh": 2000000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Suspended Solids": {
+    "unit": ["mg/L"],
+    "label": "input_suspended",
+    "rangeLow": -1,
+    "rangeHigh": 2000000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Dissolved Oxygen": {
+    "unit": ["mg/L"],
+    "rangeLow": -1,
+    "label": "input_oxygen",
+    "rangeHigh": 10000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Days of Exposure": {
+    "unit": ["day(s)"],
+    "label": "input_days",
+    "rangeLow": -1,
+    "rangeHigh": 65535,
+    "decimals": 1,
+    "input_type": "number"
+  },
+  "Silt Density Index": {
+    "unit": "n/a",
+    "label": "input_silt",
+    "rangeLow": -1,
+    "rangeHigh": 1000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Particle Size": {
+    "unit": ["\u00B5m"],
+    "label": "input_particle",
+    "rangeLow": -1,
+    "rangeHigh": 100000,
+    "decimals": 2,
+    "input_type": "number"
+  },
+  "Is the concrete reinforced?": {
+    "unit": "n/a",
+    "label": "input_conc_reinforced",
+    "options": ["No, Not Reinforced", "Yes, Reinforced"],
+    "input_type": "checkbox"
+  },
+  "Does Material contain Lead?": {
+    "unit": "n/a",
+    "label": "input_cont_lead",
+    "options": ["No,does not contain Lead", "Yes, contains Lead"],
+    "input_type": "checkbox"
+  },
+  "Open reticulation system?": {
+    "unit": "n/a",
+    "label": "input_reticulation",
+    "options": ["Closed", "Open"],
+    "input_type": "checkbox"
+  },
+  "Does Material contain Copper?": {
+    "unit": "n/a",
+    "label": "input_cont_copper",
+    "options": ["No,does not contain Copper", "Yes, contains Copper"],
+    "input_type": "checkbox"
+  },
+  "Contains Antiscalants?": {
+    "unit": "n/a",
+    "label": "input_water_treat",
+    "options": ["No water treatment required", "Water treatment required"],
+    "input_type": "checkbox"
+  },
+  "Technology Type": {
+    "unit": "n/a",
+    "label": "input_tech_type",
+    "options": [
+      "Grit Removal",
+      "Microfiltration",
+      "Ultrafiltration",
+      "Nanofiltration",
+      "Reverse Osmosis"
+    ],
+    "input_type": "list"
+  }
 }

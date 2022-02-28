@@ -1,3 +1,4 @@
+from pdfViewer import PDFWindow
 from PyQt5.QtWebEngineWidgets import QWebEnginePage
 
 from PyQt5 import QtWidgets as qtw
@@ -28,6 +29,12 @@ class AppWindow(qtw.QMainWindow):
         uic.loadUi(self.ctx.get_appWindow, self)
         self.setWindowFlags(qtc.Qt.FramelessWindowHint)
         self.center()
+
+        #Frame
+        self.frame_fitness.mousePressEvent = self.PressEvent
+        self.frame_fitness.mouseMoveEvent = self.MoveEvent
+        self.frame_fitness.mouseReleaseEvent = self.PressRelease
+
         self.sector_data = self.ctx.import_data
         self.sector_keys = self.sector_data.iloc[:,0]
         self.level = "Advanced"
@@ -60,17 +67,23 @@ class AppWindow(qtw.QMainWindow):
         #Radio Buttons
         self.radioButton.hide()
         self.radioButton_2.hide()
+        self.liningFrame.hide()
         self.label_14.setText("The processing unit refers to the component or unit to be assessed.")
 
         #Buttons
         self.buttonProceed.clicked.connect(self.SectorValidate)
+        self.buttonHelp.clicked.connect(self.showManual)
+        self.pushButton.clicked.connect(self.showBackGround)
     
         self.buttonBack.clicked.connect(self.showBack)
         self.buttonUserInfoEdit.clicked.connect(self.editUserInfo)
         self.buttonAbout.clicked.connect(self.showAbout)
         self.buttonSelectAll.clicked.connect(self.selectAll)
-        
+        self.buttonSelectNone.clicked.connect(self.selectNone)
+        self.buttonCurrentPage1.clicked.connect(lambda: self.navigateToPage(0))
+        self.buttonCurrentPage2.clicked.connect(lambda: self.navigateToPage(1))
         self.pb_minimize_2.clicked.connect(self.maximizeWindow)
+        self.buttonSelectNone.hide()
         self.buttonProceed.setStyleSheet(
                 """ 
                     QPushButton{
@@ -131,6 +144,16 @@ class AppWindow(qtw.QMainWindow):
                     }
                 """
             )
+        self.buttonSelectNone.setStyleSheet(
+                """ 
+                    QPushButton{
+                        padding:4px 10px;border:2px solid rgb(12, 75, 85);color:#fff;background:rgb(12, 75, 85);border-radius:8px;
+                    }                   
+                    QPushButton:hover{
+                        padding:4px 10px;border:2px solid rgb(12, 75, 85);color:#fff;background:#127281;border-radius:8px;
+                    }
+                """
+            )
         self.buttonUserInfoEdit.setStyleSheet(
                 """ 
                     QPushButton{
@@ -146,6 +169,10 @@ class AppWindow(qtw.QMainWindow):
         self.sectorComboBox.setStyleSheet("selection-background-color:#127281")
         self.exportToPdf.clicked.connect(self.ExportToPdf)
         self.oldPos = self.pos()
+
+    def showBackGround(self):
+        self.background_window = self.ctx.background_window
+        self.background_window.show()
         
     def maximizeWindow(self):
         if(self.isMaximized()):
@@ -158,9 +185,12 @@ class AppWindow(qtw.QMainWindow):
         self.doc = QWebEnginePage()
         self.doc.setHtml(html)
         self.printPDF()
+    def showManual(self):
+        self.infoWindow = PDFWindow(self,"manual")
+        self.infoWindow.show()
            
     def printPDF(self):
-            fn, _ = qtw.QFileDialog.getSaveFileName(self, 'Export PDF', None, 'PDF files (.pdf);;All Files()')
+            fn, _ = qtw.QFileDialog.getSaveFileName(self, 'Export PDF',"Industrial Water Quality Guidelines Report.pdf", 'PDF files (.pdf);;All Files()')
             if fn != '':
                 try:
                     self.doc.printToPdf(fn)
@@ -169,14 +199,20 @@ class AppWindow(qtw.QMainWindow):
                     self.updateStatusBar_2("red", f"Failed to save PDF Report")
                     print(e)
 
-    def mousePressEvent(self, event):
-        self.oldPos = event.globalPos()
-
-    def mouseMoveEvent(self, event):
+    def PressEvent(self, event):
+        
+        if event.button() == qtc.Qt.LeftButton:
+            self.oldPos = event.globalPos()
+            self.frame_fitness.setCursor(qtg.QCursor(qtc.Qt.ClosedHandCursor))
+            super().mousePressEvent(event)
+    def PressRelease(self,event):
+        if event.button() == qtc.Qt.LeftButton:
+            self.frame_fitness.setCursor(qtg.QCursor(qtc.Qt.OpenHandCursor))
+            super().mouseReleaseEvent(event)
+    def MoveEvent(self, event):
         delta = qtc.QPoint(event.globalPos() - self.oldPos)
         self.move(self.x() + delta.x(), self.y() + delta.y())
         self.oldPos = event.globalPos()
-
     @qtc.pyqtSlot()
     def levelDisplay(self):
         self.exportToPdf.hide()
@@ -230,9 +266,11 @@ class AppWindow(qtw.QMainWindow):
             self.buttonCurrentPage1.setStyleSheet("background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)")
             self.buttonCurrentPage2.setStyleSheet("background:#fff;border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:12px solid rgb(12, 75, 85);padding:5px;color:rgb(12, 75, 85)")
             self.buttonCurrentPage3.setStyleSheet("background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)")
-            self.buttonCurrentPage1.setEnabled(False)
+            self.buttonCurrentPage1.setEnabled(True)
             self.buttonCurrentPage2.setEnabled(True)
             self.buttonCurrentPage3.setEnabled(False)
+
+            
         
         else:
             self.exportToPdf.show()
@@ -259,9 +297,12 @@ class AppWindow(qtw.QMainWindow):
             self.buttonCurrentPage2.setStyleSheet("background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)")
             self.buttonCurrentPage3.setStyleSheet("background:#fff;border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:12px solid rgb(12, 75, 85);padding:5px;color:rgb(12, 75, 85)")
 
-            self.buttonCurrentPage1.setEnabled(False)
-            self.buttonCurrentPage2.setEnabled(False)
+            self.buttonCurrentPage1.setEnabled(True)
+            self.buttonCurrentPage2.setEnabled(True)
             self.buttonCurrentPage3.setEnabled(True)
+
+        
+
     def selectAll(self):
         if(self.checkBoxCorrosion_2.isEnabled() == True):
             self.checkBoxCorrosion_2.setChecked(True)
@@ -269,6 +310,15 @@ class AppWindow(qtw.QMainWindow):
             self.checkBoxFouling_2.setChecked(True)
         if(self.checkBoxScaling_2.isEnabled() == True):
             self.checkBoxScaling_2.setChecked(True)
+
+    def selectNone(self):
+        if(self.checkBoxCorrosion_2.isEnabled() == True):
+            self.checkBoxCorrosion_2.setChecked(False)
+        if(self.checkBoxFouling_2.isEnabled() == True):
+            self.checkBoxFouling_2.setChecked(False)
+        if(self.checkBoxScaling_2.isEnabled() == True):
+            self.checkBoxScaling_2.setChecked(False)
+
     def editUserInfo(self):
         data = {
             "fullName" : self.fullName.text(),
@@ -363,12 +413,14 @@ class AppWindow(qtw.QMainWindow):
         if(text == "Dams" or text == "Reactor" or text == "Tanks"):
             self.radioButton.show()
             self.radioButton_2.show()
+            self.liningFrame.show()
             self.label_14.setText("The processing unit refers to the component or unit to be assessed.\nNot Lined - Applies to storage units without lining considerations. \nLined - Applies to storage unit that has any lining considerations.")
             
         else:
             
             self.radioButton.hide()
             self.radioButton_2.hide()
+            self.liningFrame.hide()
             self.label_14.setText("The processing unit refers to the component or unit to be assessed.")
         self.materialComboBox.setStyleSheet("selection-background-color:#127281")
         self.sectorComboBox.setStyleSheet("selection-background-color:#127281")
@@ -519,6 +571,12 @@ class AppWindow(qtw.QMainWindow):
         self.buttonProceed.hide()
         self.setMinimumWidth(1024)
         self.showMaximized()
+    def navigateToPage(self, indx):
+        self.showNormal()
+        self.stackedWidget.setCurrentIndex(indx)
+        self.buttonProceed.show()
+        self.updateVisual.emit()
+
     def showBack(self):
         if(self.stackedWidget.currentIndex() > 0):
             self.stackedWidget.setCurrentIndex(self.stackedWidget.currentIndex() - 1)

@@ -731,6 +731,13 @@ Lined - Applies to storage unit that has any lining considerations.</string>
               </widget>
              </item>
              <item>
+              <widget class="QPushButton" name="buttonSelectNone">
+               <property name="text">
+                <string>Select None</string>
+               </property>
+              </widget>
+             </item>
+             <item>
               <spacer name="horizontalSpacer_5">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>

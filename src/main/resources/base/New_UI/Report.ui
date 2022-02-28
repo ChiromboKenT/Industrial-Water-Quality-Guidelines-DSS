@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1032</width>
-    <height>298</height>
+    <width>1157</width>
+    <height>467</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,7 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
       <property name="leftMargin">
        <number>5</number>
       </property>
@@ -841,7 +841,7 @@
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0,0">
          <property name="spacing">
           <number>5</number>
          </property>
@@ -972,6 +972,67 @@
             <number>-1</number>
            </property>
           </widget>
+         </item>
+         <item>
+          <widget class="QFrame" name="linkToToolFrame">
+           <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,1">
+            <property name="spacing">
+             <number>2</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="maximumSize">
+               <size>
+                <width>32</width>
+                <height>32</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="pixmap">
+               <pixmap>../Images/info-a.png</pixmap>
+              </property>
+              <property name="scaledContents">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="iconTextLabel">
+              <property name="text">
+               <string>In cases whereby scaling is a risk, the dosing requirements of lime and/or soda ash for softening can be determined using StaSoft (Download here: </string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="linkToTool">
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">background:transparent;border:none;text-align:left; padding:0;margin:0; color:blue; text-decoration:underline;</string>
+              </property>
+              <property name="text">
+               <string>StaSoft Install – Water Research Commission (wrcwebsite.azurewebsites.net</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>

@@ -346,7 +346,7 @@ class GeneratePDF():
                         <th align="left" valign=bottom bgcolor="#404040"><b><font color="#FFFFFF">Value</font></b></td>
                         <th align="left" valign=bottom bgcolor="#404040"><b><font color="#FFFFFF">Risk category</font></b></td>
                         <th colspan=2 align="left" valign=bottom bgcolor="#404040"><b><font color="#FFFFFF"><span>Description</span></font></b></td>
-                        <th colspan=2 align="left" valign=bottom bgcolor="#404040"><b><font color="#FFFFFF"><span>Treatment Recommendations</span></font></b></td>
+                        <th colspan=2 align="left" valign=bottom bgcolor="#404040"><b><font color="#FFFFFF"><span>Options for Consideration</span></font></b></td>
                     </thead>
                     {self.results()}
                 <!-- ***********************************************************************************************************Results************************************************************* -->

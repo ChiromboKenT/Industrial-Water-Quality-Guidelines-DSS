@@ -99,6 +99,7 @@ class InputsWindow(QDialog, qtw.QWidget):
                         except Exception as e:
                             spin_input.setDecimals(1)
                             print(f'Decimal error: {e}')
+                    spin_input.setValue(self.units_data[input]['rangeLow'])
                     spin_input.clear()
                     spin_input.setButtonSymbols(qtw.QAbstractSpinBox.NoButtons)
                     spin_input.setLocale(qtc.QLocale())
@@ -122,7 +123,7 @@ class InputsWindow(QDialog, qtw.QWidget):
                 if(self.units_data[input]['unit'] == "n/a"):
                     unit_box = qtw.QLabel()
                     unit_box.setEnabled(False)
-                    unit_box.setText(self.units_data[input]['unit'])
+                    unit_box.setText("")
                     unit_box.setMinimumWidth(60)
                     unit_box.setStyleSheet("font-size:11px;border:none;color:rgb(48,48,48);")
                 elif(len(self.units_data[input]['unit']) <= 1):
@@ -170,6 +171,7 @@ class InputsWindow(QDialog, qtw.QWidget):
                         except Exception as e:
                             spin_input.setDecimals(1)
                             print(f'Decimal error: {e}')
+                    spin_input.setValue(self.units_data[input]['rangeLow'])
                     spin_input.clear()
                     spin_input.setButtonSymbols(qtw.QAbstractSpinBox.NoButtons)
                     spin_input.setLocale(qtc.QLocale())
@@ -189,7 +191,7 @@ class InputsWindow(QDialog, qtw.QWidget):
                 spin_input.setStyleSheet("color:rgb(48,48,48);")
                 if(self.units_data[input]['unit'] == "n/a"):
                     unit_box = qtw.QLabel()
-                    unit_box.setText(self.units_data[input]['unit'])
+                    unit_box.setText("")
                     unit_box.setStyleSheet("font-size:11px;border:none;color:rgb(48,48,48);")
                 elif(len(self.units_data[input]['unit']) <= 1):
                     unit_box = qtw.QLabel()
@@ -249,7 +251,10 @@ class InputsWindow(QDialog, qtw.QWidget):
                     inputToChange = self.findChild(qtw.QSpinBox, param_key) or self.findChild(qtw.QDoubleSpinBox, param_key)
                     if(inputToChange):
                         increment = increment + 1
-                        inputToChange.setValue(param_value)
+                        try:
+                            inputToChange.setValue(param_value)
+                        except KeyError as k:
+                            continue
                         self.emitStatusBar("green",str(f'Loaded default values for {loadText} successfully!'))
                         
             if(increment == 0):
@@ -285,6 +290,7 @@ class InputsWindow(QDialog, qtw.QWidget):
             "input_flouride" :0,
             "input_alkalinity": 0,
             "input_temperature": 0,
+            "input_phosphate":0,
             "input_ph": 0,
             "input_tds": 0,
             "input_ec": 0,
@@ -365,33 +371,39 @@ class InputsWindow(QDialog, qtw.QWidget):
         self.showNext(analysis,self.material,self.assesments,inputs)
     def valueChanged(self):
         sender = self.sender()
+
+        if(sender.value() < 0):
+            inputW = (self.findChild(qtw.QSpinBox,sender.objectName()) or self.findChild(qtw.QDoubleSpinBox, sender.objectName()) 
+                    or self.findChild(qtw.QCheckBox, sender.objectName()) or self.findChild(qtw.QComboBox,sender.objectName())
+                    )
+            inputW.clear()
+            inputW.setValue(0)
+            print(f"Input Name = : {inputW}")
+    
         for field_key, field_item in self.units_data.items():
             if(field_item['label'] == sender.objectName()):
-                if(sender.value() == 0):
-                    self.errors[field_key] = "Not Entered"
-                else:
-                    self.errors[field_key] = ""    
+                self.errors[field_key] = ""    
+                
     def Validate(self):
         errorSheet = {
             "Required" : [],
             "Optional" : []
         }
-        requiredListRyzner = ["pH", "Alkalinity","Calcium",
-                              "Electrical Conductivity","Total Dissolved Solids",
+        requiredListRyzner = ["pH", "Alkalinity","Calcium","Total Dissolved Solids",
                               "Temperature"]
         if(self.material == "Stainless steel 304/304L" or self.material == "Stainless steel 316/316L" or 
         self.material == "Stainless steel Alloy 20" or self.material == "Stainless steel 904L" or self.material == "Duplex Stainless Steel" ):
             for assement in self.assesments:
                 if(assement == "Corrosion" or assement == "Scaling"):
-                    ryzner = []
+                    ryznar = []
                     for r_input in requiredListRyzner:
                         try:
                             if(self.errors[r_input] == "Not Entered"):
-                                ryzner.append(r_input)
+                                ryznar.append(r_input)
                         except Exception as e:
-                            print(f'Error validation ryzner: {e}')
+                            print(f'Error validation ryznar: {e}')
                             continue
-                    if(len(ryzner) > 0) : errorSheet["Required"].append({"Ryzner":ryzner})
+                    if(len(ryznar) > 0) : errorSheet["Required"].append({"Ryznar":ryznar})
                 if(assement == "Corrosion"):
                     try:
                         if(self.errors["Flouride"] == "Not Entered"):
@@ -427,27 +439,42 @@ class InputsWindow(QDialog, qtw.QWidget):
                             print(f'Error validation calcium: {e}')
                             continue
                     if(len(casu) > 0): errorSheet["Optional"].append({"Calcium Sulphate Scaling":casu})
+
+                    #-------------------------------Calcium Phospahate Concentration -------------------------
+                    optional_calPhos = ["Calcium", "Phosphate"]
+                    capho = []
+                    for p_input in optional_calPhos:
+                        try:
+                            if(self.errors[p_input] == "Not Entered"):
+                                capho.append(p_input)
+                        except Exception as e:
+                            print(f'Error validation Calcium Phoshate: {e}')
+                            continue
+                    if(len(capho) > 0): errorSheet["Optional"].append({"Calcium Phosphate Scaling":capho})
+
                 elif(assement == "Fouling"):
                     try:
                         if(self.errors["Suspended Solids"] == "Not Entered"):
                             errorSheet["Optional"].append({"Fouling":["Suspended Solids"]})
                     except Exception as e:
                         print(f'Error validation Suspended solids: {e}')
+
+                    
         elif(self.material == "Carbon Steel"):
             for assement in self.assesments:
                 if(assement == "Corrosion" or assement == "Scaling"):
-                    ryzner = []
+                    ryznar = []
                     for r_input in requiredListRyzner:
                         try:
                             if(self.errors[r_input] == "Not Entered"):
-                                ryzner.append(r_input)
+                                ryznar.append(r_input)
                         except Exception as e:
-                            print(f'Error validation ryzner: {e}')
+                            print(f'Error validation ryznar: {e}')
                             continue
-                    if(len(ryzner) > 0) : errorSheet["Required"].append({"Ryzner":ryzner})
+                    if(len(ryznar) > 0) : errorSheet["Required"].append({"Ryznar":ryznar})
                 if(assement == "Corrosion"):
                     corrRateReq = ["pH", "Alkalinity","Calcium","Chloride",
-                              "Electrical Conductivity","Sulphate","Dissolved Oxygen","Total Dissolved Solids",
+                              "Sulphate","Dissolved Oxygen","Total Dissolved Solids",
                               "Temperature","Days of Exposure","Magnesium"]
                     corrRate = []
                     for corr_input in corrRateReq:
@@ -488,6 +515,18 @@ class InputsWindow(QDialog, qtw.QWidget):
                             continue
                     if(len(casu) > 0): errorSheet["Optional"].append({"Calcium Sulphate Scaling":casu})
 
+                    #-------------------------------Calcium Phospahate Concentration -------------------------
+                    optional_calPhos = ["Calcium", "Phosphate"]
+                    capho = []
+                    for p_input in optional_calPhos:
+                        try:
+                            if(self.errors[p_input] == "Not Entered"):
+                                capho.append(p_input)
+                        except Exception as e:
+                            print(f'Error validation Calcium Phoshate: {e}')
+                            continue
+                    if(len(capho) > 0): errorSheet["Optional"].append({"Calcium Phosphate Scaling":capho})
+
                 elif(assement == "Fouling"):
                     try:
                         if(self.errors["Suspended Solids"] == "Not Entered"):
@@ -497,15 +536,15 @@ class InputsWindow(QDialog, qtw.QWidget):
         elif(self.material == "Concrete"):
             for assement in self.assesments:
                 if(assement == "Corrosion" or assement == "Scaling"):
-                    ryzner = []
+                    ryznar = []
                     for r_input in requiredListRyzner:
                         try:
                             if(self.errors[r_input] == "Not Entered"):
-                                ryzner.append(r_input)
+                                ryznar.append(r_input)
                         except Exception as e:
                             print(f'Error validation concrete: {e}')
                             continue
-                    if(len(ryzner) > 0) : errorSheet["Required"].append({"Ryzner":ryzner})
+                    if(len(ryznar) > 0) : errorSheet["Required"].append({"Ryznar":ryznar})
                 if(assement == "Corrosion"):
                     aggReq = ["pH","Magnesium","Alkalinity", "P Alkalinity","Calcium"]
                     agg = []
@@ -523,6 +562,17 @@ class InputsWindow(QDialog, qtw.QWidget):
                             errorSheet["Optional"].append({"Sulphate Attack":["Sulphate"]})
                     except Exception as e:
                         print(f'Error validation suspended solids: {e}')
+                    #-------------------------------Calcium Phospahate Concentration -------------------------
+                    optional_calPhos = ["Calcium", "Phosphate"]
+                    capho = []
+                    for p_input in optional_calPhos:
+                        try:
+                            if(self.errors[p_input] == "Not Entered"):
+                                capho.append(p_input)
+                        except Exception as e:
+                            print(f'Error validation Calcium Phoshate: {e}')
+                            continue
+                    if(len(capho) > 0): errorSheet["Optional"].append({"Calcium Phosphate Scaling":capho})
                 elif(assement == "Fouling"):
                     try:
                         if(self.errors["Suspended Solids"] == "Not Entered"):
@@ -532,15 +582,15 @@ class InputsWindow(QDialog, qtw.QWidget):
         elif(self.material == "Monel-Lead/Copper Alloys"):
             for assement in self.assesments:
                 if(assement == "Corrosion" or assement == "Scaling"):
-                    ryzner = []
+                    ryznar = []
                     for r_input in requiredListRyzner:
                         try:
                             if(self.errors[r_input] == "Not Entered"):
-                                ryzner.append(r_input)
+                                ryznar.append(r_input)
                         except Exception as e:
-                            print(f'Error validation required ryzner: {e}')
+                            print(f'Error validation required ryznar: {e}')
                             continue
-                    if(len(ryzner) > 0) : errorSheet["Required"].append({"Ryzner":ryzner})
+                    if(len(ryznar) > 0) : errorSheet["Required"].append({"Ryznar":ryznar})
                 if(assement == "Corrosion"):
                     csmrReq = ["Chloride", "Sulphate"]
                     larsReq = ["Chloride", "Sulphate","P Alkalinity","Alkalinity"]
@@ -593,6 +643,18 @@ class InputsWindow(QDialog, qtw.QWidget):
                             continue
                     if(len(casu) > 0): errorSheet["Optional"].append({"Calcium Sulphate Scaling":casu})
 
+                    #-------------------------------Calcium Phospahate Concentration -------------------------
+                    optional_calPhos = ["Calcium", "Phosphate"]
+                    capho = []
+                    for p_input in optional_calPhos:
+                        try:
+                            if(self.errors[p_input] == "Not Entered"):
+                                capho.append(p_input)
+                        except Exception as e:
+                            print(f'Error validation Calcium Phoshate: {e}')
+                            continue
+                    if(len(capho) > 0): errorSheet["Optional"].append({"Calcium Phosphate Scaling":capho})
+
                 elif(assement == "Fouling"):
                     try:
                         if(self.errors["Suspended Solids"] == "Not Entered"):
@@ -602,15 +664,26 @@ class InputsWindow(QDialog, qtw.QWidget):
         elif(self.material == "Plastic"):
             for assement in self.assesments:
                 if(assement == "Scaling"):
-                    ryzner = []
+                    ryznar = []
                     for r_input in requiredListRyzner:
                         try:
                             if(self.errors[r_input] == "Not Entered"):
-                                ryzner.append(r_input)
+                                ryznar.append(r_input)
                         except Exception as e:
-                            print(f'Error Validation Ryzner: {e}')
+                            print(f'Error Validation Ryznar: {e}')
                             continue
-                    if(len(ryzner) > 0) : errorSheet["Required"].append({"Ryzner":ryzner})
+                    if(len(ryznar) > 0) : errorSheet["Required"].append({"Ryznar":ryznar})
+                    #-------------------------------Calcium Phospahate Concentration -------------------------
+                    optional_calPhos = ["Calcium", "Phosphate"]
+                    capho = []
+                    for p_input in optional_calPhos:
+                        try:
+                            if(self.errors[p_input] == "Not Entered"):
+                                capho.append(p_input)
+                        except Exception as e:
+                            print(f'Error validation Calcium Phoshate: {e}')
+                            continue
+                    if(len(capho) > 0): errorSheet["Optional"].append({"Calcium Phosphate Scaling":capho})
                 elif(assement == "Fouling"):
                     try:
                         if(self.errors["Suspended Solids"] == "Not Entered"):
@@ -630,6 +703,18 @@ class InputsWindow(QDialog, qtw.QWidget):
                             print(f'Error validation Langleier Index: {e}')
                             continue
                     if(len(langRate)>0):errorSheet["Required"].append({"Langlier Index":langRate})
+                if(assement == "Scaling"):
+                    #-------------------------------Calcium Phospahate Concentration -------------------------
+                    optional_calPhos = ["Calcium", "Phosphate"]
+                    capho = []
+                    for p_input in optional_calPhos:
+                        try:
+                            if(self.errors[p_input] == "Not Entered"):
+                                capho.append(p_input)
+                        except Exception as e:
+                            print(f'Error validation Calcium Phoshate: {e}')
+                            continue
+                    if(len(capho) > 0): errorSheet["Optional"].append({"Calcium Phosphate Scaling":capho})
                 elif(assement == "Fouling"):
                     try:
                         if(self.errors["Suspended Solids"] == "Not Entered"):

@@ -136,7 +136,7 @@ def Larson(inputs):
     larson = (chloride_ + sulphate_ )/(bicarbonate + carbonate)
 
     return larson
-def Ryzner(inputs):
+def Ryznar(inputs):
     tempCalcium = (inputs["Calcium"] * 10) / 4.01
     print("Temp Calcium:{}".format(tempCalcium))
     A = (math.log((inputs['Total Dissolved Solids']),10)-1) / 10
@@ -149,9 +149,22 @@ def Ryzner(inputs):
     print("D:{}".format(D))
     phs = (9.3 + A + B) - (C + D)
     print("phs:{}".format(phs))
-    ryzner = 2 * phs - inputs["pH"] 
+    ryznar = 2 * phs - inputs["pH"] 
 
-    return ryzner
+    return ryznar
+def calciumPhospahate(inputs):
+    try:
+        ph_a = inputs["pH"]
+        CalciumHardness = inputs['Calcium'] / 0.401
+        phosphateConcentration = inputs["Phosphate"]
+        temp = inputs["Temperature"]
+        ph_c = (11.755 - math.log(CalciumHardness,10) - math.log(phosphateConcentration,10) - (2 * math.log(temp,10)))  / 0.65
+        SI = ph_a - ph_c
+        return SI
+    except Exception as e:
+        print(f'Calcium Phosphate Calculation Error: {e}') 
+
+
 def Analyze(material,assesments,inputs):
     data = {}
     print(f"Inputs : {inputs}")
@@ -162,9 +175,10 @@ def Analyze(material,assesments,inputs):
         for assessment in assesments:
             try:
                 if(assessment == "Corrosion" or assessment == "Scaling"):
-                #calculate Ryzner
-                    data['ryzner'] = Ryzner(inputs)
-                    print("Ryzner Index: {}".format(data['ryzner']))
+                #calculate Ryznar
+                    data['ryznar'] = Ryznar(inputs)
+                    print("General Corrosion: {}".format(data['ryznar']))
+                    data["Langlier"] = Langelier(inputs)
                 if(assessment == "Corrosion"):
                     #Calclulate Flouride
                     data["Flouride"] = inputs["Flouride"]
@@ -202,6 +216,7 @@ def Analyze(material,assesments,inputs):
                     data['WaterTreatment'] = inputs["Contains Antiscalants?"]
                     
                     data["CalciumSulphate"] = inputs["Calcium"] * inputs["Sulphate"]
+                    data["CalciumPhosphate"] = calciumPhospahate(inputs)
                 elif(assessment == "Fouling"):
                     #Calculate Suspended solids
                     data["Suspended Solids"] = inputs["Suspended Solids"]
@@ -213,9 +228,10 @@ def Analyze(material,assesments,inputs):
         for assessment in assesments:
             try:
                 if(assessment == "Corrosion" or assessment == "Scaling"):
-                    #calculate Ryzner
-                    data['ryzner'] = Ryzner(inputs)
-                    print("Ryzner Index: {}".format(data['ryzner']))
+                    #calculate Ryznar
+                    data['ryznar'] = Ryznar(inputs)
+                    print("General Corrosion: {}".format(data['ryznar']))
+                    data["Langlier"] = Langelier(inputs)
                 if(assessment == "Corrosion"):
                     #Larson Scold Index
                     data['larson'] = Larson(inputs)
@@ -237,6 +253,7 @@ def Analyze(material,assesments,inputs):
                     #data["WaterTreatment"] = inputs["WaterTreatment"]
                     data['WaterTreatment'] = inputs["Contains Antiscalants?"]
                     data["CalciumSulphate"] = inputs["Calcium"] * inputs["Sulphate"]
+                    data["CalciumPhosphate"] = calciumPhospahate(inputs)
 
                     print(" Calcium Sulpahate: {}...".format(data["CalciumSulphate"]))
                 elif(assessment == "Fouling"):
@@ -245,14 +262,15 @@ def Analyze(material,assesments,inputs):
                     print( data["Suspended Solids"])
             except Exception as e:
                 print(f'Carbon Steel Calculation error: {e}')
-                continue
+                
     elif(material == "Concrete"):
         for assessment in assesments:
             try:
                 if(assessment == "Corrosion" or assessment == "Scaling"):
-                    #calculate Ryzner
-                    data['ryzner'] = Ryzner(inputs)
-                    print("Ryzner Index: {}".format(data['ryzner']))
+                    #calculate Ryznar
+                    data['ryznar'] = Ryznar(inputs)
+                    print("General Corrosion: {}".format(data['ryznar']))
+                    data["Langlier"] = Langelier(inputs)
                 if(assessment == "Corrosion"):
                     #Calculate Aggressive Index
                     data["Aggressive"] = Aggressive(inputs)
@@ -275,9 +293,13 @@ def Analyze(material,assesments,inputs):
         for assessment in assesments:
             try:
                 if(assessment == "Corrosion" or assessment == "Scaling"):
-                    #calculate Ryzner
-                    data['ryzner'] = Ryzner(inputs)
-                    print("Ryzner Index: {}".format(data['ryzner']))
+                    #calculate Ryznar
+                    data['ryznar'] = Ryznar(inputs)
+                    print("General Corrosion: {}".format(data['ryznar']))
+                    try:
+                        data["Langlier"] = Langelier(inputs)
+                    except Exception as e:
+                        print(f"Langlier Calculation Error: {e}")
                 if(assessment == "Corrosion"):
                     #Larson Skold Index
                     data['larson'] = Larson(inputs)
@@ -303,6 +325,7 @@ def Analyze(material,assesments,inputs):
                     #Water Treatment, Ca * S0$
                     #data["WaterTreatment"] = inputs["WaterTreatment"]
                     data['WaterTreatment'] = inputs["Contains Antiscalants?"]
+                    data["CalciumPhosphate"] = calciumPhospahate(inputs)
                     try:
                         
                         data["CalciumSulphate"] = inputs["Calcium"] * inputs["Sulphate"]
@@ -319,9 +342,10 @@ def Analyze(material,assesments,inputs):
         for assessment in assesments:
             try:
                 if(assessment == "Scaling"):
-                    #Calculate Ryzner Index
-                    data['ryzner'] = Ryzner(inputs)
-                    print("Ryzner Index: {}".format(data['ryzner']))
+                    #Calculate General Corrosion
+                    data['ryznar'] = Ryznar(inputs)
+                    data["CalciumPhosphate"] = calciumPhospahate(inputs)
+                    print("General Corrosion: {}".format(data['ryznar']))
                 elif(assessment == "Fouling"):
                     #Suspended Solids
                     data["Suspended Solids"] = inputs["Suspended Solids"]
@@ -337,6 +361,8 @@ def Analyze(material,assesments,inputs):
                         data["Langlier"] = Langelier(inputs)
                     except Exception as e:
                         print(f"Langlier Calculation Error: {e}")
+                if(assessment == "Scaling"):
+                    data["CalciumPhosphate"] = calciumPhospahate(inputs)
                 elif(assessment == "Fouling"):
                     #Silt Index Sensity
                     try:

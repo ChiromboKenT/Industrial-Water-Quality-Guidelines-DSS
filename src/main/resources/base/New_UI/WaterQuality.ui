@@ -16,10 +16,16 @@
     <height>700</height>
    </size>
   </property>
+  <property name="cursor">
+   <cursorShape>ArrowCursor</cursorShape>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="cursor">
+    <cursorShape>ArrowCursor</cursorShape>
+   </property>
    <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
     <property name="spacing">
      <number>0</number>
@@ -49,6 +55,9 @@
         <width>16777215</width>
         <height>65</height>
        </size>
+      </property>
+      <property name="cursor">
+       <cursorShape>OpenHandCursor</cursorShape>
       </property>
       <property name="styleSheet">
        <string notr="true">background:rgb(12, 75, 85)
@@ -477,7 +486,7 @@ border:none;padding:20px 10px;</string>
                 <string notr="true">color:rgb(12, 75, 85)</string>
                </property>
                <property name="text">
-                <string>Risk-Based Water Quality Guidelines for Industrial use</string>
+                <string>Risk-Based Water Quality Guidelines for Industrial Use</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignCenter</set>
@@ -486,7 +495,7 @@ border:none;padding:20px 10px;</string>
                 <bool>true</bool>
                </property>
                <property name="margin">
-                <number>10</number>
+                <number>15</number>
                </property>
                <property name="indent">
                 <number>0</number>
@@ -947,7 +956,7 @@ border:2px solid rgb(245, 245, 245);color:#fff;padding:5px 0</string>
                     <string notr="true">background-color:transparent;color:rgb(50, 50, 50)</string>
                    </property>
                    <property name="text">
-                    <string>The water qaulity requirements allows the user to view the ranges for the various indices based on the material that is being used. This basic assessment will not provide the user with specific results. Should more detail be available, it is advised that the user uses the fitness-for-use assessment.</string>
+                    <string>The water quality requirements assessment is intended for a basic assessment which do not consider site-specific inputs. The results provided are generic. To conduct a more detailed assessment, please use the fitness-for-use assessment on the home page.</string>
                    </property>
                    <property name="wordWrap">
                     <bool>true</bool>

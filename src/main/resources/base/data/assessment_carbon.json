@@ -1,0 +1,50 @@
+{
+  "corrosion": {
+    "General Corrosion": {
+      "unacceptable": "1. Prevent corrosion through adjusting the index by \r\na. Reducing the saturation pH (e.g. by increasing alkalinity) or \r\nb. By increasing the pH (through alkali addition), or \r\nc. By increasing CaCO3 concentration by concentrating the stream  (through evaporation or reverse osmosis) and adjusting pH, or by adding calcium or alkalinity or both.\r\n2. Combat corrosion by employing corrosion inhibitors.\r\n3. Tolerate corrosive conditions by changing construction material.",
+      "acceptable": "Maintain monitoring, and be ready to take action should index increase.",
+      "tolerable": "1. Prevent corrosion through adjusting the index by \r\na. Reducing the saturation pH (e.g. by increasing alkalinity) or \r\nb. By increasing the pH (through alkali addition), or \r\nc. By increasing CaCO3 concentration by concentrating the stream  (through evaporation or reverse osmosis) and adjusting pH, or by adding calcium or alkalinity or both.\r\n2. Combat corrosion by employing corrosion inhibitors.\r\n3. Tolerate corrosive conditions by changing construction material.",
+      "ideal": "Maintain status quo."
+    },
+    "Pitting Corrosion": {
+      "unacceptable": "1. Prevent corrosion through adjusting the index by reducing \r\na. The concentrations of SO4 or \r\nb. By reducing the concentration of Cl (or both) \r\nc. By increasing the concentration of alkalinity. Increasing alkalinity should be done in due cognisance of the Ryznar Index (see below), as well as the tolerance of increased TDS on the application.\r\n2.   Change construction material.\r\nSO4 can be reduced through Chemical Precipitation (e.g. as SrSO4, BaSO4, CaSO4), Nanofiltration, Ion Exchange, Reverse Osmosis - partial stream or full stream.\r\nCl can be reduced through Ion Exchange or Reverse Osmosis - partial stream of full stream.\r\nAlkalinity can be increased by adding bicarbonates or carbonates or hydroxides.",
+      "acceptable": "Maintain monitoring, and be ready to take action should index increase.",
+      "tolerable": "1. Prevent corrosion through adjusting the index by reducing \r\na. The concentrations of SO4 or \r\nb. The concentration of Cl (or both) \r\nc. By increasing the concentration of alkalinity. Increasing alkalinity should be done in due cognisance of the Ryznar Index (see below), as well as the tolerance of increased TDS on the application.\r\n2. Change construction material.\r\nSO4 can be reduced through Chemical Precipitation (e.g. as SrSO4, BaSO4, CaSO4), Nanofiltration, Ion Exchange, Reverse Osmosis - partial stream or full stream.\r\nCl can be reduced through Ion Exchange or Reverse Osmosis - partial stream of full stream.\r\nAlkalinity can be increased by adding bicarbonates or carbonates or hydroxides.",
+      "ideal": "Maintain status quo."
+    },
+    "Pisigan Corrosion": {
+      "unacceptable": "1. Prevent corrosion through adjusting the index by \r\na. Reducing the saturation pH (e.g. by increasing alkalinity) or \r\nb. By increasing the pH (through alkali addition), or \r\nc. By increasing CaCO3 concentration by concentrating the stream  (through evaporation or reverse osmosis) and adjusting pH, or by adding calcium or alkalinity or both.\r\n2. Combat corrosion by employing corrosion inhibitors.",
+      "acceptable": "Maintain monitoring, and be ready to take action should index increase.",
+      "tolerable": "1. Prevent corrosion through adjusting the index by \r\na. Reducing the saturation pH (e.g. by increasing alkalinity) or \r\nb. By increasing the pH (through alkali addition), or \r\nc. By increasing CaCO3 concentration by concentrating the stream  (through evaporation or reverse osmosis) and adjusting pH, or by adding calcium or alkalinity or both.\r\n2. Combat corrosion by employing corrosion inhibitors.",
+      "ideal": "Maintain status quo."
+    }
+  },
+  "scaling": {
+    "General Corrosion": {
+      "unacceptable": "1. Prevent scaling through adjusting the index by \r\na. Iincreasing the saturation pH (e.g. by reducing alkalinity) or \r\nb. By decreasing the pH (through acid addition), or \r\nc. By decreasing CaCO3 concentration by diluting the stream  (through reducing concentration cycles, if applicable) and adjusting pH, or by removing calcium (softening - chemical, ion exchange or nano-filtration) or alkalinity (de-alkalation through acidification, chemical porecipitation, nono-filtration) or both.\r\n2. Combat scaling by employing scale inhibitors.",
+      "acceptable": "Maintain monitoring, and be ready to take action should index increase.",
+      "tolerable": "1. Prevent scaling through adjusting the index by \r\na. Increasing the saturation pH (e.g. by reducing alkalinity) or \r\nb. By decreasing the pH (through acid addition), or \r\nc. By decreasing CaCO3 concentration by diluting the stream  (through reducing concentration cycles, if applicable) and adjusting pH, or by removing calcium (softening - chemical, ion exchange or nano-filtration) or alkalinity (de-alkalation through acidification, chemical porecipitation, nono-filtration) or both.\r\n2. Combat scaling by employing scale inhibitors.",
+      "ideal": "Maintain status quo."
+    },
+    "Silica Concentration in steam": {
+      "tolerable": "1.  Prevent scale formation by treating feedwater to remove silica (Anion Exchange, Electrodeionisation)\r\n2.  Use scale inhibitors to combate scale formation",
+      "ideal": "Maintain status quo."
+    },
+    "Silica and Magnesium": {
+      "unacceptable": "If unacceptable: \r\n1.  Prevent scale formation by \r\na.  Reducing Magnesium concentration (through  chemical precipitation, ion exchange, nano-filtration) \r\nb.  Reducing silica concentration (through chemical precipitation, eg with Alum) or ion exchange.\r\nc.  Dilution (normally not the preferred way) OR\r\n2.   Combat scaling through addition of scale inhibitor",
+      "acceptable": ""
+    },
+    "Calcium Sulphate": {
+      "unacceptable": "If unacceptable: \r\n1. Prevent scale formation by \r\na. Reducing Calcium concentration (through  chemical precipitation, ion exchange, nano-filtration) \r\nb. Reducing sulphate concentration (through chemical precipitation, eg with Lime or ion exchange or nano-filtration).\r\nc. Dilution (normally not the preferred way) or\r\n2. Combat scaling through addition of scale inhibitor\r\n",
+      "acceptable": ""
+    }
+  },
+  "fouling": {
+    "suspended solids": {
+      "unacceptable": "Prevent fouling by removing suspended solids (through gravity settling, hydrocloning, media filtration or membrane filtration).",
+      "tolerable": "a. Prevent fouling by removing suspended solids (through media filtration or membrane filtration).\nb. Combat foling by addition of dispersant",
+      "acceptable": "a. Prevent fouling by removing suspended solids (through media filtration or membrane filtration).\nb. Combat foling by addition of dispersant",
+      "ideal": "Maintain status quo"
+    }
+  }
+}

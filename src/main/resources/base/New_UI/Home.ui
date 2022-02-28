@@ -67,6 +67,9 @@
         <family>Yu Gothic UI Semibold</family>
        </font>
       </property>
+      <property name="cursor">
+       <cursorShape>OpenHandCursor</cursorShape>
+      </property>
       <property name="styleSheet">
        <string notr="true">background:rgb(12, 75, 85)
 </string>
@@ -230,7 +233,7 @@ border:none;padding:20px 10px;</string>
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap>../Images/homePage.png</pixmap>
+          <pixmap>../Images/home_alt2.png</pixmap>
          </property>
          <property name="scaledContents">
           <bool>true</bool>
@@ -736,7 +739,7 @@ border:none;padding:20px 10px;</string>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton">
+             <widget class="QPushButton" name="buttonHelp">
               <property name="minimumSize">
                <size>
                 <width>120</width>

@@ -1,5 +1,6 @@
 from PyQt5.QtWebEngineWidgets import QWebEnginePage
 from PyQt5.QtWidgets import  QMainWindow,QFileDialog
+from pdfViewer import PDFWindow
 
 from PyQt5 import  QtWidgets as qtw
 from PyQt5 import QtCore as qtc
@@ -8,6 +9,8 @@ from PyQt5 import uic
 
 
 from Proxy import ProxyModel
+
+
 class WaterQualityWindow(QMainWindow, qtw.QWidget):
     updateVisual = qtc.pyqtSignal()
     def __init__(self, *args, **kwargs):
@@ -16,12 +19,15 @@ class WaterQualityWindow(QMainWindow, qtw.QWidget):
         uic.loadUi(self.ctx.get_waterQuality, self)
         self.setWindowFlags(qtc.Qt.FramelessWindowHint)
         self.center()
-
-        water_materials = ['Carbon Steel','Concrete'
+        self.setCursor(qtg.QCursor(qtc.Qt.ArrowCursor))
+        water_materials = ['All','Carbon Steel','Concrete'
         ,'Monel-Lead/Copper Alloys','Plastic','Stainless steel 304/304L'
         ,'Stainless steel 316/316L','Stainless steel Alloy 20','Stainless steel 904L'
         ,'Duplex Stainless Steel','Membranes']
 
+        self.frame.mousePressEvent = self.PressEvent
+        self.frame.mouseMoveEvent = self.MoveEvent
+        self.frame.mouseReleaseEvent = self.PressRelease
         #Comboboxes
         model_material = qtg.QStandardItemModel()
         for material in water_materials:
@@ -38,6 +44,9 @@ class WaterQualityWindow(QMainWindow, qtw.QWidget):
         self.buttonAbout_2.clicked.connect(self.showAbout)
         self.buttonProceed.clicked.connect(self.materialValidate)
         self.pb_minimize_2.clicked.connect(self.maximizeWindow)
+        self.buttonHelp_2.clicked.connect(self.showManual)
+        self.pushButton_2.clicked.connect(self.showBackGround)
+
         self.buttonProceed.setStyleSheet(
                 """ 
                     QPushButton{
@@ -100,10 +109,17 @@ class WaterQualityWindow(QMainWindow, qtw.QWidget):
         else:
             self.showMaximized()
 
-    def mousePressEvent(self, event):
-        self.oldPos = event.globalPos()
-
-    def mouseMoveEvent(self, event):
+    def PressEvent(self, event):
+        
+        if event.button() == qtc.Qt.LeftButton:
+            self.oldPos = event.globalPos()
+            self.frame.setCursor(qtg.QCursor(qtc.Qt.ClosedHandCursor))
+            super().mousePressEvent(event)
+    def PressRelease(self,event):
+        if event.button() == qtc.Qt.LeftButton:
+            self.frame.setCursor(qtg.QCursor(qtc.Qt.OpenHandCursor))
+            super().mouseReleaseEvent(event)
+    def MoveEvent(self, event):
         delta = qtc.QPoint(event.globalPos() - self.oldPos)
         self.move(self.x() + delta.x(), self.y() + delta.y())
         self.oldPos = event.globalPos()
@@ -122,12 +138,18 @@ class WaterQualityWindow(QMainWindow, qtw.QWidget):
             self.showNext()
     def materialSelectionChanged(self):
         self.materialComboBox.setStyleSheet("border-color:#303030; background-color:#f7f7f7")
-
+    def showBackGround(self):
+        self.background_window = self.ctx.background_window
+        self.background_window.show()
+    def showManual(self):
+        self.infoWindow = PDFWindow(self,"manual")
+        self.infoWindow.show()
     def showNext(self):
         material = self.materialComboBox.currentText()
         #Calculate the next Report
-        
+    
         fileNames = {
+            'All': 'All',
             'Carbon Steel' : "CarbonSteel",
             'Concrete' : "Concrete",
             'Monel-Lead/Copper Alloys' : "Alloy",
@@ -141,7 +163,7 @@ class WaterQualityWindow(QMainWindow, qtw.QWidget):
         }
         self.label_25.setText(f'Results: {material}')
 
-        self.webEnginePage = QWebEnginePage()
+        self.webEnginePage = QWebEnginePage(self)
         self.webEnginePage.setHtml(self.ctx.retrieve_html(fileNames[material]))
         self.webEngineView.setPage(self.webEnginePage)
         self.webEngineView.setContextMenuPolicy(qtc.Qt.NoContextMenu)
@@ -156,6 +178,7 @@ class WaterQualityWindow(QMainWindow, qtw.QWidget):
         if(self.stackedWidget.currentIndex() > 0):
             self.showNormal()
             self.stackedWidget.setCurrentIndex(self.stackedWidget.currentIndex() - 1)
+            self.buttonCurrentPage1_2.setEnabled(False)
         else:
             self.ui_main = self.ctx.main_window
             self.ui_main.show()
@@ -164,10 +187,17 @@ class WaterQualityWindow(QMainWindow, qtw.QWidget):
         
             
         self.updateVisual.emit()
-          
+
+    def ButtonBack(self,page):
+        self.showNormal()
+        self.stackedWidget.setCurrentIndex(self.stackedWidget.currentIndex() - 1)
+        self.buttonCurrentPage1_2.setEnabled(False)
+        self.buttonProceed.show()
+        self.updateVisual.emit()
+
         
     def printPDF(self):
-            fn, _ = QFileDialog.getSaveFileName(self, 'Export PDF', None, 'PDF files (.pdf);;All Files()')
+            fn, _ = QFileDialog.getSaveFileName(self, 'Export PDF', "Industrial Water Quality Requirements.pdf", 'PDF files (.pdf);;All Files()')
             if fn != '':
                 if qtc.QFileInfo(fn).suffix() == "" : fn += '.pdf'
                 try:
@@ -239,8 +269,9 @@ class WaterQualityWindow(QMainWindow, qtw.QWidget):
             self.buttonCurrentPage1_2.setStyleSheet("background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)")
             self.buttonCurrentPage2_2.setStyleSheet("background:#fff;border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:12px solid rgb(12, 75, 85);padding:5px;color:rgb(12, 75, 85)")
 
-            self.buttonCurrentPage1_2.setEnabled(False)
+            
             self.buttonCurrentPage2_2.setEnabled(True)
+            self.buttonCurrentPage1_2.clicked.connect(self.ButtonBack)
         else:
             
             self.step_4.setStyleSheet("background-color:rgb(223, 223, 223);border:none;border-radius:7px")
@@ -256,8 +287,6 @@ class WaterQualityWindow(QMainWindow, qtw.QWidget):
             self.step_5.setMinimumHeight(15)
             self.step_5.setMaximumHeight(15)
 
-            self.buttonCurrentPage1_2.setEnabled(True)
-            self.buttonCurrentPage2_2.setEnabled(False)
             
             self.buttonCurrentPage1_2.setStyleSheet("background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)")
             self.buttonCurrentPage2_2.setStyleSheet("background:rgb(223, 223, 223);border-top:1px solid rgb(12, 75, 85);border-bottom:1px solid rgb(12, 75, 85);border-right:none;padding:5px;color:rgb(12, 75, 85)")
